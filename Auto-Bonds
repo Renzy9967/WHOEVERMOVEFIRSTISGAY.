@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "1.74"
+local ScVer = "1.745"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -21,6 +21,13 @@ local plr = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
 if not hum or hum.Health <= 0 then return end
+
+local Trains = {
+	"armor",
+	"cattle",
+	"default",
+	"golden",
+}
 
 sg.Name = "sg"
 local success = pcall(function()
@@ -200,6 +207,24 @@ local function toggleNoclip(enabled)
 	end
 end
 
+local train = nil
+local trainSeat = train.RequiredComponents.Controls:FindFirstChildWhichIsA("VehicleSeat")
+
+for _, v in pairs(Trains) do
+	if workspace:FindFirstChild(v) then
+		train = workspace:FindFirstChild(v)
+	end
+end
+
+local function teleportToTrain()
+	if trainSeat.Occupant == nil then
+		trainSeat:Sit(hum)
+		return true
+	else
+		return false
+	end
+end
+
 local function stopIfNeeded()
 	if not startFlag then
 		toggleAntiVoid(false)
@@ -256,33 +281,38 @@ local function searchItem(itemname)
 	local newpos = start
 
 	if hasChair and not workspace.RuntimeItems:FindFirstChild(itemname) then
-		local maxWait = 2
-		local timer = 0
-		task.spawn(function()
-			while not hum.Sit and timer < maxWait do
-				if stopIfNeeded() then break end
-				root.CFrame = CFrame.new(start)
-				task.wait(0.1)
-				timer += 0.1
+		local canSit = teleportToTrain()
+		if canSit then
+			hum.Sit = false
+		else
+			local maxWait = 2
+			local timer = 0
+			task.spawn(function()
+				while not hum.Sit and timer < maxWait do
+					if stopIfNeeded() then break end
+					root.CFrame = CFrame.new(start)
+					task.wait(0.1)
+					timer += 0.1
+				end
+			end)
+			wait(.1)
+			Remotes:WaitForChild("DropItem"):FireServer()
+
+			local chair = getNearestItem("Chair")
+			if chair then
+				local chairSeat = chair:FindFirstChildWhichIsA("Seat")
+				if chairSeat then chairSeat:Sit(hum) end
 			end
-		end)
-		wait(.1)
-		Remotes:WaitForChild("DropItem"):FireServer()
+			task.wait(0.5)
+			if stopIfNeeded() then return end
+			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+				hum:EquipTool(plr.Backpack.Sack)
+				task.wait(0.2)
+			end
 
-		local chair = getNearestItem("Chair")
-		if chair then
-			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-			if chairSeat then chairSeat:Sit(hum) end
-		end
-		task.wait(0.2)
-		if stopIfNeeded() then return end
-		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-			hum:EquipTool(plr.Backpack.Sack)
-			task.wait(0.2)
-		end
-
-		if chair then
-			Remotes:WaitForChild("StoreItem"):FireServer(chair)
+			if chair then
+				Remotes:WaitForChild("StoreItem"):FireServer(chair)
+			end
 		end
 	end
 
