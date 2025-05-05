@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.749"
+local ScVer = "v1.75"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -372,11 +372,10 @@ local function autoBond()
 			
 			if not bond.PrimaryPart then break end
 
-			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			local chair = nil
 			local unstoredChair = false 
 
-			if distance > 8 then
+			if (bond.PrimaryPart.Position - root.Position).Magnitude > 8 then
 				if stopIfNeeded() then break end
 				unstoredChair = true
 				
