@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "1.72"
+local ScVer = "1.73"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -251,10 +251,7 @@ end
 local function searchItem(itemname)
 	local newpos = start
 
-	if hasChair then
-
-
-		-- Wait until player is really sitting
+	if hasChair and not workspace.RuntimeItems:FindFirstChild(itemname) then
 		local maxWait = 2
 		local timer = 0
 		task.spawn(function()
@@ -264,6 +261,10 @@ local function searchItem(itemname)
 				timer += 0.1
 			end
 		end)
+		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+			hum:EquipTool(plr.Backpack.Sack)
+			task.wait(0.2)
+		end
 		
 		Remotes:WaitForChild("DropItem"):FireServer()
 
@@ -272,7 +273,10 @@ local function searchItem(itemname)
 			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
 			if chairSeat then chairSeat:Sit(hum) end
 		end
-		task.wait(0.2)
+		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+			hum:EquipTool(plr.Backpack.Sack)
+			task.wait(0.2)
+		end
 
 		if chair then
 			Remotes:WaitForChild("StoreItem"):FireServer(chair)
