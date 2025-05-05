@@ -164,6 +164,7 @@ local collectedBond = 0
 
 local antivoidLoop = nil
 local noclipLoop = nil
+local hasChair = false
 
 local function toggleAntiVoid(enabled)
 	if enabled then
@@ -235,6 +236,18 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
+	if hasChair then
+		root.CFrame = CFrame.new(start)
+		Remotes:WaitForChild("DropItem"):FireServer()
+
+		local chair = getNearestItem("Chair")
+		if chair then
+			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
+			if chairSeat then chairSeat:Sit(hum) end
+		end
+		wait(0.1)
+		Remotes:WaitForChild("StoreItem"):FireServer(chair)
+	end
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		if stopIfNeeded() then return end
 		root.CFrame = CFrame.new(newpos, endpos)
@@ -269,6 +282,7 @@ local function handleChair()
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)
 	root.CFrame = CFrame.new(start)
+	hasChair = true
 end
 
 local function getNearestItem(itemName)
