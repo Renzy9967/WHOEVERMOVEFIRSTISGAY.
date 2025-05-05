@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "1.747"
+local ScVer = "v1.747"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -359,8 +359,11 @@ local function autoBond()
 		while startFlag do
 			if stopIfNeeded() then break end
 			print("searching bonds")
-			searchItem("Bond")
 			local bond = getNearestItem("Bond")
+			if not bond then
+				searchItem("Bond")
+				bond = getNearestItem("Bond")
+			end
 			if not bond then break end
 			
 			if not bond.PrimaryPart then break end
