@@ -226,7 +226,7 @@ local function collectBond(model)
 	CollectBondNetwork:FireServer(model)
 
 	task.delay(1.5, function()
-		if conn and conn.Connected then
+		if conn then
 			conn:Disconnect()
 		end
 	end)
@@ -293,17 +293,17 @@ local function autoBond()
 			searchItem("Bond")
 			local bond = getNearestItem("Bond")
 			if not bond then break end
-
-			bond.PrimaryPart = bond.PrimaryPart or bond:FindFirstChildWhichIsA("BasePart")
+			
 			if not bond.PrimaryPart then break end
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			local chair = nil
-			local far = distance > 8
+			local unstoredChair = false 
 
-			if far then
+			if distance > 8 then
 				if stopIfNeeded() then break end
-
+				unstoredChair = true
+				
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 				Remotes:WaitForChild("DropItem"):FireServer()
 
@@ -322,6 +322,10 @@ local function autoBond()
 			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 				hum:EquipTool(plr.Backpack.Sack)
 				task.wait(0.2)
+			end
+
+			if far then
+				Remotes:WaitForChild("StoreItem"):FireServer(chair)
 			end
 		end
 	end)
