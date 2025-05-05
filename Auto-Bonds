@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.751"
+local ScVer = "v1.752"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -177,7 +177,7 @@ local hasChair = false
 local function toggleAntiVoid(enabled)
 	if enabled then
 		antivoidLoop = RunService.Stepped:Connect(function()
-			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 25 then
+			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 100 then
 				root.Velocity = root.Velocity + Vector3.new(0, 250, 0)
 			end
 		end)
@@ -280,7 +280,7 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
-
+	root.CFrame = CFrame.new(start)
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		if stopIfNeeded() then return end
 		root.CFrame = CFrame.new(newpos, endpos)
@@ -361,11 +361,11 @@ local function autoBond()
 	local success, msg = pcall(function()
 		while startFlag do
 			if stopIfNeeded() then break end
-			print("searching bonds")
+			--[[print("searching bonds")
 			if not workspace.RuntimeItems:FindFirstChild("Bond") then
 				teleportAt(start)
 			end
-			wait(.25)
+			wait(.25)]]
 			searchItem("Bond")
 			local bond = getNearestItem("Bond")
 			if not bond then break end
@@ -375,7 +375,7 @@ local function autoBond()
 			local chair = nil
 			local unstoredChair = false 
 
-			if (bond.PrimaryPart.Position - root.Position).Magnitude > 8 then
+			if (bond.PrimaryPart.Position - root.Position).Magnitude > 7 then
 				if stopIfNeeded() then break end
 				unstoredChair = true
 				
@@ -387,16 +387,6 @@ local function autoBond()
 				if chair then
 					local chairSeat = chair:FindFirstChildWhichIsA("Seat")
 					if chairSeat then chairSeat:Sit(hum) end
-				else
-					handleChair()
-					chair = getNearestItem("Chair")
-					if chair then
-						local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-						if chairSeat then chairSeat:Sit(hum) end
-					else
-						warn("Chair still not found after handleChair. Stopping for safety.")
-						break
-					end
 				end
 			end
 
