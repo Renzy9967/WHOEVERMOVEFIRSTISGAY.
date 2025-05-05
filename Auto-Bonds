@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.754"
+local ScVer = "v1.76"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -284,7 +284,7 @@ end
 local function searchItem(itemname)
 	local newpos = start
 
-	if hasChair then
+	--[[if hasChair then
 		root.CFrame = CFrame.new(start)
 		Remotes:WaitForChild("DropItem"):FireServer()
 
@@ -295,7 +295,7 @@ local function searchItem(itemname)
 		end
 		wait(0.1)
 		Remotes:WaitForChild("StoreItem"):FireServer(chair)
-	end
+	end]]
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		if stopIfNeeded() then return end
 		root.CFrame = CFrame.new(newpos, endpos)
@@ -330,7 +330,6 @@ local function handleChair()
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)
 	root.CFrame = CFrame.new(start)
-	hasChair = true
 end
 
 local function autoBond()
@@ -341,7 +340,8 @@ local function autoBond()
 			searchItem("Bond")
 			local bond = getNearestItem("Bond")
 			if not bond then break end
-
+			
+			bond.PrimaryPart = bond.PrimaryPart or bond:FindFirstChildWhichIsA("BasePart")
 			if not bond.PrimaryPart then break end
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
@@ -352,7 +352,7 @@ local function autoBond()
 				if stopIfNeeded() then break end
 				unstoredChair = true
 
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position + Vector3.new(0, 1, 0))
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 				Remotes:WaitForChild("DropItem"):FireServer()
 
 				chair = getNearestItem("Chair")
