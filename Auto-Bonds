@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.748"
+local ScVer = "v1.749"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -281,37 +281,6 @@ end
 local function searchItem(itemname)
 	local newpos = start
 
-	if hasChair and not workspace.RuntimeItems:FindFirstChild(itemname) then
-			local maxWait = 5
-			local timer = 0
-			task.spawn(function()
-				while not hum.Sit and timer < maxWait do
-					if stopIfNeeded() then break end
-					root.CFrame = CFrame.new(start)
-					task.wait(0.1)
-					timer += 0.1
-				end
-			end)
-			wait(.1)
-			Remotes:WaitForChild("DropItem"):FireServer()
-
-			local chair = getNearestItem("Chair")
-			if chair then
-				local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-				if chairSeat then chairSeat:Sit(hum) end
-			end
-			task.wait(0.5)
-			if stopIfNeeded() then return end
-			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-				hum:EquipTool(plr.Backpack.Sack)
-				task.wait(0.2)
-			end
-
-			if chair then
-				Remotes:WaitForChild("StoreItem"):FireServer(chair)
-			end
-		end
-
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		if stopIfNeeded() then return end
 		root.CFrame = CFrame.new(newpos, endpos)
@@ -349,16 +318,56 @@ local function handleChair()
 	hasChair = true
 end
 
+local function teleportAt(TargetPos)
+	if hasChair then
+		local maxWait = 5
+		local timer = 0
+		task.spawn(function()
+			while not hum.Sit and timer < maxWait do
+				if stopIfNeeded() then break end
+				root.CFrame = CFrame.new(TargetPos)
+				task.wait(0.1)
+				timer += 0.1
+			end
+		end)
+		wait(.1)
+		Remotes:WaitForChild("DropItem"):FireServer()
+		hasChair = false
+
+		local chair = getNearestItem("Chair")
+		if chair then
+			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
+			if chairSeat then chairSeat:Sit(hum) end
+		end
+		task.wait(0.5)
+		if stopIfNeeded() then return end
+		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+			hum:EquipTool(plr.Backpack.Sack)
+			task.wait(0.2)
+		end
+
+		if chair then
+			Remotes:WaitForChild("StoreItem"):FireServer(chair)
+			hasChair = true
+		end
+	else
+		if not hasChair then
+			handleChair()
+		end
+	end
+end
+
 local function autoBond()
 	local success, msg = pcall(function()
 		while startFlag do
 			if stopIfNeeded() then break end
 			print("searching bonds")
-			local bond = getNearestItem("Bond")
-			if not bond then
-				searchItem("Bond")
-				bond = getNearestItem("Bond")
+			if not workspace.RuntimeItems:FindFirstChild("Bond") then
+				teleportAt(start)
 			end
+			wait(.25)
+			searchItem("Bond")
+			local bond = getNearestItem("Bond")
 			if not bond then break end
 			
 			if not bond.PrimaryPart then break end
@@ -373,6 +382,7 @@ local function autoBond()
 				
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 				Remotes:WaitForChild("DropItem"):FireServer()
+				hasChair = false
 
 				chair = getNearestItem("Chair")
 				if chair then
@@ -393,6 +403,7 @@ local function autoBond()
 
 			if unstoredChair and chair then
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
+				hasChair = true
 			end
 		end
 	end)
