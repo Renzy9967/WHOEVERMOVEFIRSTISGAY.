@@ -323,10 +323,6 @@ local function autoBond()
 				hum:EquipTool(plr.Backpack.Sack)
 				task.wait(0.2)
 			end
-
-			if far then
-				Remotes:WaitForChild("StoreItem"):FireServer(chair)
-			end
 		end
 	end)
 
