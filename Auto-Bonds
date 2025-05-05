@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "1.73"
+local ScVer = "1.735"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -256,16 +256,13 @@ local function searchItem(itemname)
 		local timer = 0
 		task.spawn(function()
 			while not hum.Sit and timer < maxWait do
+				if stopIfNeeded() then break end
 				root.CFrame = CFrame.new(start)
 				task.wait(0.1)
 				timer += 0.1
 			end
 		end)
-		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-			hum:EquipTool(plr.Backpack.Sack)
-			task.wait(0.2)
-		end
-		
+		wait(.1)
 		Remotes:WaitForChild("DropItem"):FireServer()
 
 		local chair = getNearestItem("Chair")
@@ -273,6 +270,8 @@ local function searchItem(itemname)
 			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
 			if chairSeat then chairSeat:Sit(hum) end
 		end
+		task.wait(0.2)
+		if stopIfNeeded() then return end
 		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 			hum:EquipTool(plr.Backpack.Sack)
 			task.wait(0.2)
