@@ -1,428 +1,105 @@
-local PlaceId = 70876832253163
-local ScVer = "v1.76"
-if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
-local TS = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-
-local sg = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local Credit = Instance.new("TextLabel")
-local Title = Instance.new("TextLabel")
-local Button = Instance.new("TextButton")
-local Toggle = Instance.new("TextLabel")
-local Collected = Instance.new("TextLabel")
-local Warn = Instance.new("TextLabel")
-local Reset = Instance.new("TextButton")
-local FrameConstraint = Instance.new("UIAspectRatioConstraint")
-local UiGrad = Instance.new("UIGradient")
-
 local plr = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
+
 local hum = char:WaitForChild("Humanoid")
 if not hum or hum.Health <= 0 then return end
 
-local Trains = {
-	"armor",
-	"cattle",
-	"default",
-	"golden",
-}
-
-sg.Name = "sg"
-local success = pcall(function()
-	sg.Parent = game.CoreGui
-end)
-if not success then
-	sg.Parent = plr.PlayerGui
-end
-sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-local function CreateUIStroke(Parent,Color,Thickness,Mode)
-	local uiStroke = Instance.new("UIStroke")
-	uiStroke.Parent = Parent
-	uiStroke.Color = Color
-	uiStroke.Thickness = Thickness
-	uiStroke.ApplyStrokeMode = Mode
-	return uiStroke
-end
-
-Frame.Parent = sg
-Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-Frame.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-Frame.Size = UDim2.new(0.310000002, 0, 0.321792275, 0)
-Instance.new("UIDragDetector", Frame)
-CreateUIStroke(Frame, Color3.fromRGB(20, 32, 50), 3, Enum.ApplyStrokeMode.Border)
-
-UICorner.Parent = Frame
-UICorner.CornerRadius = UDim.new(0.200000003, 0)
-
-FrameConstraint.Parent = Frame
-FrameConstraint.AspectRatio = 1.566
-
-UiGrad.Parent = Frame
-UiGrad.Rotation = 90
-UiGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(161, 255, 241)), ColorSequenceKeypoint.new(1, Color3.fromRGB(171, 172, 255))})
-
-Credit.Name = "Credit"
-Credit.Parent = Frame
-Credit.BackgroundTransparency = 1
-Credit.Position = UDim2.new(0.321680367, 0, 0.860759497, 0)
-Credit.Size = UDim2.new(0.356306285, 0, 0.13837488, 0)
-Credit.Font = Enum.Font.Highway
-Credit.Text = "Made by Renzy"
-Credit.TextColor3 = Color3.new(0.984314, 1, 0)
-Credit.TextScaled = true
-Credit.TextSize = 14
-CreateUIStroke(Credit, Color3.fromRGB(0, 0, 0), 2, Enum.ApplyStrokeMode.Contextual)
-
-Title.Name = "Title"
-Title.Parent = Frame
-Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0.321680367, 0, 0.0569620244, 0)
-Title.Size = UDim2.new(0.356306285, 0, 0.13837488, 0)
-Title.Font = Enum.Font.Highway
-Title.Text = "Auto Bonds "..ScVer
-Title.TextColor3 = Color3.fromRGB(85, 255, 0)
-Title.TextScaled = true
-Title.TextSize = 14
-CreateUIStroke(Title, Color3.fromRGB(0, 0, 0), 2, Enum.ApplyStrokeMode.Contextual)
-
-Button.Name = "Button"
-Button.Parent = Frame
-Button.AnchorPoint = Vector2.new(0, 0.5)
-Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-Button.Position = UDim2.new(0.54400003, 0, 0.5, 0)
-Button.Size = UDim2.new(0.375, 0, 0.316455692, 0)
-Button.Font = Enum.Font.Highway
-Button.Text = "Start"
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.TextScaled = true
-Button.TextSize = 14
-Button.TextStrokeTransparency = 0
-CreateUIStroke(Button, Color3.fromRGB(0, 0, 0), 2, Enum.ApplyStrokeMode.Border)
-
-Toggle.Name = "Toggle"
-Toggle.Parent = Frame
-Toggle.AnchorPoint = Vector2.new(0, 0.5)
-Toggle.BackgroundTransparency = 1
-Toggle.Position = UDim2.new(0.0309999995, 0, 0.5, 0)
-Toggle.Size = UDim2.new(0.461144984, 0, 0.212025464, 0)
-Toggle.Font = Enum.Font.Highway
-Toggle.Text = "Toggle:"
-Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-Toggle.TextScaled = true
-Toggle.TextSize = 14
-CreateUIStroke(Toggle, Color3.fromRGB(0, 0, 0), 2, Enum.ApplyStrokeMode.Contextual)
-
-Collected.Name = "Collected"
-Collected.Parent = sg
-Collected.BackgroundTransparency = 1
-Collected.Position = UDim2.new(0.00999999978, 0, 0.553971469, 0)
-Collected.Size = UDim2.new(0.172499999, 0, 0.0794297382, 0)
-Collected.Font = Enum.Font.Highway
-Collected.Text = "Collected Bonds: 0"
-Collected.TextColor3 = Color3.fromRGB(255, 170, 127)
-Collected.TextScaled = true
-Collected.TextSize = 14
-Collected.TextStrokeTransparency = 0
-Collected.TextXAlignment = Enum.TextXAlignment.Left
-
-Warn.Name = "Warn"
-Warn.Parent = sg
-Warn.AnchorPoint = Vector2.new(0.5, 0)
-Warn.BackgroundTransparency = 1
-Warn.Position = UDim2.new(0.498, 0, 0.136, 0)
-Warn.Size = UDim2.new(0.358749986, 0, 0.0916496962, 0)
-Warn.Font = Enum.Font.Highway
-Warn.Text = "DON'T UNEQUIP YOUR SACK!"
-Warn.TextColor3 = Color3.new(255, 0, 0)
-Warn.TextScaled = true
-Warn.TextSize = 14
-Warn.TextStrokeTransparency = 0
-Warn.Visible = false
-
-Reset.Name = "Reset"
-Reset.Parent = sg
-Reset.BackgroundColor3 = Color3.new(1, 0, 0)
-Reset.Position = UDim2.new(0.00935485866, 0, 0.646832883, 0)
-Reset.Size = UDim2.new(0.116250001, 0, 0.0570264757, 0)
-Reset.Font = Enum.Font.Highway
-Reset.Text = "Reset UI"
-Reset.TextColor3 = Color3.fromRGB(255, 255, 255)
-Reset.TextScaled = true
-Reset.TextSize = 14
-Reset.TextStrokeTransparency = 0
-CreateUIStroke(Reset, Color3.fromRGB(0, 0, 0), 2, Enum.ApplyStrokeMode.Border)
-
-local startFlag = false 
-local CD = false
-
-local root = hum.RootPart
-
+local root = char:WaitForChild("HumanoidRootPart")
 local start = root.Position
 local endpos = Vector3.new(-424.443603515625, 29.518972396850586, -49040.59375)
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local RemotePromise = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Network"):WaitForChild("RemotePromise"):WaitForChild("Remotes")
-local CollectBondNetwork = RemotePromise:WaitForChild("C_ActivateObject")
-
-local collectedBond = 0
-
-local antivoidLoop = nil
-local noclipLoop = nil
-local collectedSet = {}
-local hasChair = false
-
-local function toggleAntiVoid(enabled)
-	if enabled then
-		antivoidLoop = RunService.Stepped:Connect(function()
-			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 100 then
-				root.Velocity = root.Velocity + Vector3.new(0, 250, 0)
-			end
-		end)
-	else
-		if antivoidLoop then
-			antivoidLoop:Disconnect()
-			antivoidLoop = nil
-		end
-	end
-end
-local function toggleNoclip(enabled)
-	if enabled then
-		noclipLoop = RunService.Stepped:Connect(function()
-			if char ~= nil then
-				for _, child in pairs(char:GetDescendants()) do
-					if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
-						child.CanCollide = false
-					end
-				end
-			end
-		end)
-	else
-		if noclipLoop then
-			noclipLoop:Disconnect()
-			noclipLoop = nil
-		end
-	end
-end
-
-local train = nil
-local trainSeat = nil
-
-for _, v in pairs(Trains) do
-	if workspace:FindFirstChild(v) then
-		train = workspace:FindFirstChild(v)
-		trainSeat = train.RequiredComponents.Controls.ConductorSeat:FindFirstChildWhichIsA("VehicleSeat")
-	end
-end
-
-local function teleportToTrain()
-	if trainSeat.Occupant == nil then
-		trainSeat:Sit(hum)
-		return true
-	else
-		return false
-	end
-end
-
-local function stopIfNeeded()
-	if not startFlag then
-		toggleAntiVoid(false)
-		toggleNoclip(false)
-		root.CFrame = CFrame.new(start)
-		return true
-	end
-	return false
-end
-
-local function updateBonds()
-	collectedBond += 1
-	Collected.Text = "Collected Bonds: " .. collectedBond
-end
 
 local function collectBond(model)
-	if not model or model.Parent == nil then return end
-	if collectedSet[model] then return end -- already collected
-	collectedSet[model] = true
-
-	local collected = false
-	local conn
-
-	conn = model.AncestryChanged:Connect(function(_, parent)
-		if not parent and not collected then
-			collected = true
-			updateBonds()
-			if conn then conn:Disconnect() end
-		end
-	end)
-
-	CollectBondNetwork:FireServer(model)
-
-	task.delay(1.5, function()
-		if conn then
-			conn:Disconnect()
-		end
-	end)
-end
-
-local function getNearestItem(itemName)
-	local item, lastDist = nil, math.huge
-	for _, v in pairs(workspace.RuntimeItems:GetChildren()) do
-		if v.Name == itemName and v:IsA("Model") and v:FindFirstChildWhichIsA("BasePart") then
-			local dist = (v.PrimaryPart.Position - root.Position).Magnitude
-			if dist < lastDist then
-				item = v
-				lastDist = dist
-			end
-		end
-	end
-	return item
+    RemotePromise:WaitForChild("C_ActivateObject"):FireServer(model)
 end
 
 local function searchItem(itemname)
-	local newpos = start
+    local newpos = start
+    while not workspace.RuntimeItems:FindFirstChild(itemname) do
+        root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -100)
+        newpos = root.Position
+        task.wait(0.01)
+    end
+end
 
-	--[[if hasChair then
-		root.CFrame = CFrame.new(start)
-		Remotes:WaitForChild("DropItem"):FireServer()
-
-		local chair = getNearestItem("Chair")
-		if chair then
-			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-			if chairSeat then chairSeat:Sit(hum) end
-		end
-		wait(0.1)
-		Remotes:WaitForChild("StoreItem"):FireServer(chair)
-	end]]
-	while not workspace.RuntimeItems:FindFirstChild(itemname) do
-		if stopIfNeeded() then return end
-		root.CFrame = CFrame.new(newpos, endpos)
-		root.CFrame = root.CFrame * CFrame.new(0, 0, -100)
-		newpos = root.Position
-		task.wait(0.01)
-	end
+local function getNearestItem(ItemName)
+    local item = nil
+    local lastDist = math.huge
+    for _, v in pairs(workspace.RuntimeItems:GetChildren()) do
+        if v.Name == ItemName and v:IsA("Model") and v:FindFirstChildWhichIsA("BasePart") then
+            local dist = (v:GetPrimaryPartCFrame().Position - root.Position).Magnitude
+            if dist < lastDist then
+                item = v
+                lastDist = dist
+            end
+        end
+    end
+    return item
 end
 
 local function handleChair()
-	if stopIfNeeded() then return end
-	searchItem("Chair")
-	local chair = workspace.RuntimeItems:FindFirstChild("Chair")
-	if not chair then return end
+    searchItem("Chair")
+    local chair = workspace.RuntimeItems:FindFirstChild("Chair")
+    if not chair then return end
 
-	chair.PrimaryPart = chair.PrimaryPart or chair:FindFirstChildWhichIsA("BasePart")
-	local seat = chair:FindFirstChildWhichIsA("Seat")
-	local tik = 0
+    if not chair.PrimaryPart then
+        chair.PrimaryPart = chair:FindFirstChild("PrimaryPart") or chair:FindFirstChildWhichIsA("BasePart")
+    end
 
-	while not hum.Sit and tik < 5 do
-		if stopIfNeeded() then return end
-		root.CFrame = CFrame.new(chair.PrimaryPart.Position)
-		if seat then seat:Sit(hum) end
-		tik += 0.01
-		task.wait(0.01)
-	end
+    local seat = chair:FindFirstChildWhichIsA("Seat")
+    local tik = 0
 
-	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-		hum:EquipTool(plr.Backpack.Sack)
-		task.wait(0.2)
-	end
+    while not hum.Sit and tik < 5 do
+        root.CFrame = CFrame.new(chair.PrimaryPart.Position)
+        if seat then seat:Sit(hum) end
+        tik += 0.01
+        task.wait(0.01)
+    end
 
-	Remotes:WaitForChild("StoreItem"):FireServer(chair)
-	root.CFrame = CFrame.new(start)
+    if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+        hum:EquipTool(plr.Backpack.Sack)
+    end
+
+    Remotes:WaitForChild("StoreItem"):FireServer(chair)
+    root.CFrame = CFrame.new(start)
 end
 
 local function autoBond()
-	local success, msg = pcall(function()
-		while startFlag do
-			if stopIfNeeded() then break end
+    local success, msg = pcall(function()
+        searchItem("Bond")
+        local bond = getNearestItem("Bond")
+        if bond then
+            if not bond.PrimaryPart then
+                bond.PrimaryPart = bond:FindFirstChildWhichIsA("BasePart")
+            end
 
-			searchItem("Bond")
-			local bond = getNearestItem("Bond")
-			if not bond then break end
-			
-			bond.PrimaryPart = bond.PrimaryPart or bond:FindFirstChildWhichIsA("BasePart")
-			if not bond.PrimaryPart then break end
+            local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
+            if distance > 5 then
+                root.CFrame = CFrame.new(bond.PrimaryPart.Position)
+                Remotes:WaitForChild("DropItem"):FireServer()
 
-			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
-			local chair = nil
-			local unstoredChair = false 
+                local chair = getNearestItem("Chair")
+                if chair and chair:FindFirstChildWhichIsA("Seat") then
+                    chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
+                end
+            end
 
-			if distance > 8 then
-				if stopIfNeeded() then break end
-				unstoredChair = true
+            task.wait(0.25)
+            collectBond(bond)
+            Remotes:WaitForChild("StoreItem"):FireServer(bond)
+        end
+    end)
 
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0, 3, 0)
-				Remotes:WaitForChild("DropItem"):FireServer()
-
-				chair = getNearestItem("Chair")
-				if chair then
-					local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-					if chairSeat then chairSeat:Sit(hum) end
-				end
-			end
-
-			task.wait(0.2)
-			if stopIfNeeded() then break end
-
-			collectBond(bond)
-
-			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-				hum:EquipTool(plr.Backpack.Sack)
-				task.wait(0.2)
-			end
-
-			if unstoredChair and chair then
-				Remotes:WaitForChild("StoreItem"):FireServer(chair)
-			end
-		end
-	end)
-
-	if not success then
-		warn("Error in auto Bond:", msg)
-	end
+    if success then
+        print("Bond collected successfully.")
+        autoBond()
+    else
+        warn("Error during autoBond:", msg)
+    end
 end
 
-local function toggleStartbtn(bool)
-	if bool then
-		Button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-		Button.Text = "Stop"
-		TS:Create(UiGrad, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = -90}):Play()
-	else
-		Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-		Button.Text = "Start"
-		TS:Create(UiGrad, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = 90}):Play()
-	end
-end
-
-Button.MouseButton1Click:Connect(function()
-	if CD then return end
-	CD = true
-	task.delay(0.1, function()
-		CD = false
-	end)
-	if not startFlag then
-		startFlag = true
-		start = root.Position
-		Warn.Visible = true
-		toggleStartbtn(true)
-		toggleAntiVoid(true)
-		toggleNoclip(true)
-		handleChair()
-		autoBond()
-	else
-		startFlag = false
-		toggleStartbtn(false)
-		stopIfNeeded()
-		Warn.Visible = false
-	end
-end)
-
-Reset.MouseButton1Click:Connect(function()
-	Frame.Position = UDim2.new(0.5, 0, 1.5, 0)
-	TS:Create(Frame, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-end)
-
-Frame.Position = UDim2.new(0.5, 0, 1.5, 0)
-wait(0.5)
-TS:Create(Frame, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
+handleChair()
+autoBond()
