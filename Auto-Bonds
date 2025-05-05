@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "1.745"
+local ScVer = "1.746"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -208,11 +208,12 @@ local function toggleNoclip(enabled)
 end
 
 local train = nil
-local trainSeat = train.RequiredComponents.Controls:FindFirstChildWhichIsA("VehicleSeat")
+local trainSeat = nil
 
 for _, v in pairs(Trains) do
 	if workspace:FindFirstChild(v) then
 		train = workspace:FindFirstChild(v)
+		trainSeat = train.RequiredComponents.Controls:FindFirstChildWhichIsA("VehicleSeat")
 	end
 end
 
