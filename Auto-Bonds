@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.7535"
+local ScVer = "v1.754"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -172,7 +172,8 @@ local collectedBond = 0
 
 local antivoidLoop = nil
 local noclipLoop = nil
---local hasChair = false
+local collectedSet = {}
+local hasChair = false
 
 local function toggleAntiVoid(enabled)
 	if enabled then
@@ -243,6 +244,8 @@ end
 
 local function collectBond(model)
 	if not model or model.Parent == nil then return end
+	if collectedSet[model] then return end -- already collected
+	collectedSet[model] = true
 
 	local collected = false
 	local conn
@@ -281,18 +284,8 @@ end
 local function searchItem(itemname)
 	local newpos = start
 
-	--[[if hasChair and not workspace.RuntimeItems:FindFirstChild(itemname) then
-		local maxWait = 2
-		local timer = 0
-		task.spawn(function()
-			while not hum.Sit and timer < maxWait do
-				if stopIfNeeded() then break end
-				root.CFrame = CFrame.new(start)
-				task.wait(0.1)
-				timer += 0.1
-			end
-		end)
-		wait(.1)
+	if hasChair then
+		root.CFrame = CFrame.new(start)
 		Remotes:WaitForChild("DropItem"):FireServer()
 
 		local chair = getNearestItem("Chair")
@@ -300,17 +293,9 @@ local function searchItem(itemname)
 			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
 			if chairSeat then chairSeat:Sit(hum) end
 		end
-		task.wait(0.2)
-		if stopIfNeeded() then return end
-		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-			hum:EquipTool(plr.Backpack.Sack)
-			task.wait(0.2)
-		end
-
-		if chair then
-			Remotes:WaitForChild("StoreItem"):FireServer(chair)
-		end
-	end]]
+		wait(0.1)
+		Remotes:WaitForChild("StoreItem"):FireServer(chair)
+	end
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		if stopIfNeeded() then return end
 		root.CFrame = CFrame.new(newpos, endpos)
@@ -345,7 +330,7 @@ local function handleChair()
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)
 	root.CFrame = CFrame.new(start)
-	--hasChair = true
+	hasChair = true
 end
 
 local function autoBond()
