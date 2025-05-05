@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "1.735"
+local ScVer = "1.74"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -175,8 +175,10 @@ local function toggleAntiVoid(enabled)
 			end
 		end)
 	else
-		antivoidLoop:Disconnect()
-		antivoidLoop = nil
+		if antivoidLoop then
+			antivoidLoop:Disconnect()
+			antivoidLoop = nil
+		end
 	end
 end
 local function toggleNoclip(enabled)
@@ -191,8 +193,10 @@ local function toggleNoclip(enabled)
 			end
 		end)
 	else
-		noclipLoop:Disconnect()
-		noclipLoop = nil
+		if noclipLoop then
+			noclipLoop:Disconnect()
+			noclipLoop = nil
+		end
 	end
 end
 
@@ -358,7 +362,7 @@ local function autoBond()
 				task.wait(0.2)
 			end
 
-			if far and chair then
+			if unstoredChair and chair then
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
 			end
 		end
@@ -368,7 +372,6 @@ local function autoBond()
 		warn("Error in auto Bond:", msg)
 	end
 end
-
 
 local function toggleStartbtn(bool)
 	if bool then
