@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.747"
+local ScVer = "v1.748"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -282,10 +282,6 @@ local function searchItem(itemname)
 	local newpos = start
 
 	if hasChair and not workspace.RuntimeItems:FindFirstChild(itemname) then
-		local canSit = teleportToTrain()
-		if canSit then
-			hum.Sit = false
-		else
 			local maxWait = 5
 			local timer = 0
 			task.spawn(function()
@@ -315,7 +311,6 @@ local function searchItem(itemname)
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
 			end
 		end
-	end
 
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		if stopIfNeeded() then return end
