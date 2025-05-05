@@ -1,4 +1,5 @@
 local PlaceId = 70876832253163
+local ScVer = "1.72"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -75,7 +76,7 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0.321680367, 0, 0.0569620244, 0)
 Title.Size = UDim2.new(0.356306285, 0, 0.13837488, 0)
 Title.Font = Enum.Font.Highway
-Title.Text = "Auto Bonds v1.7"
+Title.Text = "Auto Bonds "..ScVer
 Title.TextColor3 = Color3.fromRGB(85, 255, 0)
 Title.TextScaled = true
 Title.TextSize = 14
@@ -249,8 +250,21 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
+
 	if hasChair then
-		root.CFrame = CFrame.new(start)
+
+
+		-- Wait until player is really sitting
+		local maxWait = 2
+		local timer = 0
+		task.spawn(function()
+			while not hum.Sit and timer < maxWait do
+				root.CFrame = CFrame.new(start)
+				task.wait(0.1)
+				timer += 0.1
+			end
+		end)
+		
 		Remotes:WaitForChild("DropItem"):FireServer()
 
 		local chair = getNearestItem("Chair")
@@ -258,9 +272,13 @@ local function searchItem(itemname)
 			local chairSeat = chair:FindFirstChildWhichIsA("Seat")
 			if chairSeat then chairSeat:Sit(hum) end
 		end
-		wait(0.1)
-		Remotes:WaitForChild("StoreItem"):FireServer(chair)
+		task.wait(0.2)
+
+		if chair then
+			Remotes:WaitForChild("StoreItem"):FireServer(chair)
+		end
 	end
+
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		if stopIfNeeded() then return end
 		root.CFrame = CFrame.new(newpos, endpos)
@@ -337,7 +355,7 @@ local function autoBond()
 				task.wait(0.2)
 			end
 
-			if far then
+			if far and chair then
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
 			end
 		end
