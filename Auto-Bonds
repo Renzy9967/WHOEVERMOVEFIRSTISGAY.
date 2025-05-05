@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.752"
+local ScVer = "v1.7521"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -172,7 +172,7 @@ local collectedBond = 0
 
 local antivoidLoop = nil
 local noclipLoop = nil
-local hasChair = false
+--local hasChair = false
 
 local function toggleAntiVoid(enabled)
 	if enabled then
@@ -315,11 +315,11 @@ local function handleChair()
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)
 	root.CFrame = CFrame.new(start)
-	hasChair = true
+	--hasChair = true
 end
 
 local function teleportAt(TargetPos)
-	if hasChair then
+	--if hasChair then
 		local maxWait = 5
 		local timer = 0
 		task.spawn(function()
@@ -332,7 +332,7 @@ local function teleportAt(TargetPos)
 		end)
 		wait(.1)
 		Remotes:WaitForChild("DropItem"):FireServer()
-		hasChair = false
+		--hasChair = false
 
 		local chair = getNearestItem("Chair")
 		if chair then
@@ -348,13 +348,13 @@ local function teleportAt(TargetPos)
 
 		if chair then
 			Remotes:WaitForChild("StoreItem"):FireServer(chair)
-			hasChair = true
+			--hasChair = true
 		end
-	else
+	--[[else
 		if not hasChair then
 			handleChair()
 		end
-	end
+	end]]
 end
 
 local function autoBond()
@@ -381,7 +381,7 @@ local function autoBond()
 				
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position + Vector3.new(0, 1, 0))
 				Remotes:WaitForChild("DropItem"):FireServer()
-				hasChair = false
+				--hasChair = false
 
 				chair = getNearestItem("Chair")
 				if chair then
@@ -402,7 +402,7 @@ local function autoBond()
 
 			if unstoredChair and chair then
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
-				hasChair = true
+				--hasChair = true
 			end
 		end
 	end)
