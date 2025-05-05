@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "1.746"
+local ScVer = "1.7461"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -286,7 +286,7 @@ local function searchItem(itemname)
 		if canSit then
 			hum.Sit = false
 		else
-			local maxWait = 2
+			local maxWait = 5
 			local timer = 0
 			task.spawn(function()
 				while not hum.Sit and timer < maxWait do
@@ -358,7 +358,7 @@ local function autoBond()
 	local success, msg = pcall(function()
 		while startFlag do
 			if stopIfNeeded() then break end
-
+			print("searching bonds")
 			searchItem("Bond")
 			local bond = getNearestItem("Bond")
 			if not bond then break end
