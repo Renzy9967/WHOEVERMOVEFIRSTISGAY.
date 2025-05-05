@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.7522"
+local ScVer = "v1.753"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -368,7 +368,7 @@ local function autoBond()
 				if stopIfNeeded() then break end
 				unstoredChair = true
 
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position)
 				Remotes:WaitForChild("DropItem"):FireServer()
 
 				chair = getNearestItem("Chair")
