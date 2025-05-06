@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.771"
+local ScVer = "v1.772"
 if game.PlaceId ~= PlaceId then warn("Script doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -238,7 +238,12 @@ local function collectBond(model)
 		end
 	end)
 
-	CollectBondNetwork:FireServer(model)
+	task.spawn(function()
+		while not Collected and conn do
+			CollectBondNetwork:FireServer(model)
+			task.wait(.15)
+		end
+	end)
 
 	task.delay(1.5, function()
 		if conn then
@@ -315,35 +320,36 @@ end
 local function autoBond()
 	local success, msg = pcall(function()
 		while startFlag do
-		if stopIfNeeded() then return end
-
-		searchItem("Bond")
-		local bond = getNearestItem("Bond")
-		if not bond then return end
-
-		bond.PrimaryPart = bond.PrimaryPart or bond:FindFirstChildWhichIsA("BasePart")
-		if not bond.PrimaryPart then return end
-
-		local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
-		local chair = nil
-
-		if distance > 8 then
 			if stopIfNeeded() then return end
 
-			root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0, 3, 0)
-			Remotes:WaitForChild("DropItem"):FireServer()
+			searchItem("Bond")
+			local bond = getNearestItem("Bond")
+			if not bond then return end
 
-			chair = getNearestItem("Chair")
-			if chair then
-				local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-				if chairSeat then chairSeat:Sit(hum) end
+			bond.PrimaryPart = bond.PrimaryPart or bond:FindFirstChildWhichIsA("BasePart")
+			if not bond.PrimaryPart then return end
+
+			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
+			local chair = nil
+
+			if distance > 8 then
+				if stopIfNeeded() then return end
+
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+				Remotes:WaitForChild("DropItem"):FireServer()
+
+				chair = getNearestItem("Chair")
+				if chair then
+					local chairSeat = chair:FindFirstChildWhichIsA("Seat")
+					if chairSeat then chairSeat:Sit(hum) end
+				end
 			end
-		end
 
-		task.wait(0.25)
-		if stopIfNeeded() then return end
 
-		collectBond(bond)
+			if stopIfNeeded() then return end
+			task.wait(0.25)
+
+			collectBond(bond)
 
 		--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 			hum:EquipTool(plr.Backpack.Sack)
