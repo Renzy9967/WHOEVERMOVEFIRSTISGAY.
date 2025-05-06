@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.9"
+local ScVer = "v1.92"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -19,7 +19,7 @@ local UiGrad = Instance.new("UIGradient")
 
 local plr = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
-local hum = char:WaitForChild("Humanoid")
+local hum: Humanoid = char:WaitForChild("Humanoid")
 if not hum or hum.Health <= 0 then return end
 
 local Trains = {
@@ -263,7 +263,7 @@ local function collectBond(model)
 	if not model or model.Parent == nil then return end
 	if collectedSet[model] then return end -- already collected
 	
-	print("collecting bond")
+	--print("collecting bond")
 
 	local collected = false
 	local conn
@@ -272,7 +272,7 @@ local function collectBond(model)
 		if not parent and not collected and not collectedSet[model] then
 			collected = true
 			collectedSet[model] = true
-			print("bond collected")
+			--print("bond collected")
 			updateBonds()
 			if conn then conn:Disconnect() conn = nil end
 		end
@@ -281,7 +281,7 @@ local function collectBond(model)
 	task.spawn(function()
 		while not collected and conn do
 			CollectBondNetwork:FireServer(model)
-			print("firing collect bond to server")
+			--print("firing collect bond to server")
 			task.wait(1)
 		end
 	end)
@@ -293,7 +293,7 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
-	local maxAttempts = 2000 -- 1000 attempts × 0.01s = 10 seconds)
+	local maxAttempts = 5 
 	local attempts = 0
 
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
@@ -357,7 +357,10 @@ local function autoBond()
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			if distance > 8 then
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position)
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0,2,0)
+				if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+					hum:EquipTool(plr.Backpack.Sack)
+				end
 				Remotes:WaitForChild("DropItem"):FireServer()
 
 				local chair = getNearestItem("Chair")
@@ -390,6 +393,10 @@ local function toggleStartbtn(bool)
 		TS:Create(UiGrad, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = 90}):Play()
 	end
 end
+
+hum.StateChanged:Connect(function(old, new)
+	print("State Changed:", old, "to", new)
+end)
 
 hum.JumpHeight = 0
 hum.JumpPower = 0
