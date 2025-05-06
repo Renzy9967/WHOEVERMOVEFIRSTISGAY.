@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.79"
+local ScVer = "v1.8"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -361,7 +361,8 @@ local function autoBond()
 					chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
 				end
 			end
-
+			
+			task.wait(0.25)
 			collectBond(bond)
 			--Remotes:WaitForChild("StoreItem"):FireServer(bond)
 		end
