@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.94"
+local ScVer = "v1.941"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -293,19 +293,16 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
-	local maxAttempts = 2 
+	local maxAttempts = 5 
 	local attempts = 0
 
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		--if stopIfNeeded() then return end
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
-		local multCF = root.CFrame * CFrame.new(0, 0, -250)
-		local endCF = CFrame.new(endpos) * CFrame.new(0, 0, -250)
-		
-		if root.Position == endpos or root.Position == endCF.Position then
+
+		if root.Position == endpos then
 			attempts += 1
-			print("attempting")
 		end
 		if attempts >= maxAttempts then
 			root.CFrame = CFrame.new(start, endpos)
@@ -314,13 +311,12 @@ local function searchItem(itemname)
 
 		-- Move forward in search path
 		root.CFrame = CFrame.new(newpos, endpos)
-		root.CFrame = multCF
+		root.CFrame = root.CFrame * CFrame.new(0, 0, -250)
 		newpos = root.Position
 
 		task.wait(0.01)
 	end
 end
-
 
 local function handleChair()
 	searchItem("Chair")
