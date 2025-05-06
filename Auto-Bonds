@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.783"
+local ScVer = "v1.784"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -244,14 +244,14 @@ local function teleportToTrain()
 	end
 end
 
-local function stopIfNeeded()
+--[[local function stopIfNeeded()
 	if not startFlag then
 		toggleAntiVoid(false)
 		root.CFrame = CFrame.new(start)
 		return true
 	end
 	return false
-end
+end]]
 
 local function updateBonds()
 	collectedBond += 1
@@ -296,7 +296,7 @@ local function searchItem(itemname)
 	local attempts = 0
 
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
-		if stopIfNeeded() then return end
+		--if stopIfNeeded() then return end
 
 		attempts += 1
 		if attempts >= maxAttempts then
@@ -369,7 +369,6 @@ local function autoBond()
 	end)
 
 	if success then
-		print("Bond collected successfully.")
 		autoBond()
 	else
 		warn("Error during autoBond:", msg)
