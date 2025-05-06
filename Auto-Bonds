@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.935"
+local ScVer = "v1.936"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -333,7 +333,7 @@ local function handleChair()
 
 	while not hum.Sit and tik < 5 do
 		root.CFrame = CFrame.new(chair.PrimaryPart.Position)
-		if seat then seat:Sit(hum) end
+		if seat then hum:ChangeState(Enum.HumanoidStateType.Seated) seat:Sit(hum) end
 		tik += 0.01
 		task.wait(0.01)
 	end
@@ -365,8 +365,18 @@ local function autoBond()
 
 				local chair = getNearestItem("Chair")
 				if chair and chair:FindFirstChildWhichIsA("Seat") then
+					hum:ChangeState(Enum.HumanoidStateType.Seated)
 					chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
-					Remotes:WaitForChild("StoreItem"):FireServer(chair)
+					--Remotes:WaitForChild("StoreItem"):FireServer(chair)
+				else
+					handleChair()
+					chair = getNearestItem("Chair")
+					if chair and chair:FindFirstChildWhichIsA("Seat") then
+						hum:ChangeState(Enum.HumanoidStateType.Seated)
+						chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
+					else
+						warn("no chair found")
+					end
 				end
 			end
 			
