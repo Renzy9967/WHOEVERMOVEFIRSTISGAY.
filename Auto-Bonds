@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.778"
+local ScVer = "v1.779"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -173,7 +173,6 @@ local collectedBond = 0
 local antivoidLoop = nil
 local collectedSet = {}
 local hasChair = false
-local isCollectingBond = false
 
 local function toggleAntiVoid(enabled)
 	if enabled then
@@ -246,17 +245,18 @@ local function updateBonds()
 end
 
 local function collectBond(model)
-	if not model or model.Parent == nil then print("bond parent is nil") return end
-	if collectedSet[model] then print("bond already collected") return end -- already collected
-	collectedSet[model] = true
+	if not model or model.Parent == nil then return end
+	if collectedSet[model] then return end -- already collected
+	
 	print("collecting bond")
 
 	local collected = false
 	local conn
 
 	conn = model.AncestryChanged:Connect(function(_, parent)
-		if not parent and not collected then
+		if not parent and not collected and not collectedSet[model] then
 			collected = true
+			collectedSet[model] = true
 			print("bond collected")
 			updateBonds()
 			if conn then conn:Disconnect() conn = nil end
@@ -347,7 +347,6 @@ local function autoBond()
 	local success, msg = pcall(function()
 		while startFlag do
 			if stopIfNeeded() then return end
-			if isCollectingBond then return end
 
 			searchItem("Bond")
 			local bond = getNearestItem("Bond")
@@ -375,18 +374,16 @@ local function autoBond()
 
 			if stopIfNeeded() then return end
 			task.wait(0.25)
-			isCollectingBond = true
 			collectBond(bond)
 
-			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+			--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 				hum:EquipTool(plr.Backpack.Sack)
 				task.wait(0.2)
 			end
 
 			if chair then
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
-			end
-			isCollectingBond = false
+			end]]
 		end
 	end)
 
