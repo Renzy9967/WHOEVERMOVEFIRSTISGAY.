@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.775"
+local ScVer = "v1.776"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -223,9 +223,10 @@ local function updateBonds()
 end
 
 local function collectBond(model)
-	if not model or model.Parent == nil then return end
-	if collectedSet[model] then return end -- already collected
+	if not model or model.Parent == nil then print("bond parent is nil") return end
+	if collectedSet[model] then print("bond already collected") return end -- already collected
 	collectedSet[model] = true
+	print("collecting bond")
 
 	local collected = false
 	local conn
@@ -233,6 +234,7 @@ local function collectBond(model)
 	conn = model.AncestryChanged:Connect(function(_, parent)
 		if not parent and not collected then
 			collected = true
+			print("bond collected")
 			updateBonds()
 			if conn then conn:Disconnect() end
 		end
@@ -241,6 +243,7 @@ local function collectBond(model)
 	task.spawn(function()
 		while not Collected and conn do
 			CollectBondNetwork:FireServer(model)
+			print("firing collect bond to server")
 			task.wait(.15)
 		end
 	end)
@@ -337,7 +340,7 @@ local function handleChair()
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)
 	root.CFrame = CFrame.new(start)
-	safeStart()
+	--safeStart()
 end
 
 local function autoBond()
@@ -374,14 +377,14 @@ local function autoBond()
 
 			collectBond(bond)
 
-		--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 			hum:EquipTool(plr.Backpack.Sack)
 			task.wait(0.2)
 		end
 
-		if unstoredChair and chair then
+		if chair then
 			Remotes:WaitForChild("StoreItem"):FireServer(chair)
-		end]]
+		end
 		end
 	end)
 
