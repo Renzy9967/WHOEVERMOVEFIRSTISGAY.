@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.78"
+local ScVer = "v1.781"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -339,6 +339,12 @@ local function handleChair()
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)]]
 	root.CFrame = CFrame.new(start)
+	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+		hum:EquipTool(plr.Backpack.Sack)
+		task.wait(0.2)
+	end
+
+	Remotes:WaitForChild("StoreItem"):FireServer(chair)
 	--safeStart()
 end
 
@@ -361,7 +367,11 @@ local function autoBond()
 				if stopIfNeeded() then return end
 
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position) --* CFrame.new(0, 3, 0)
-				--Remotes:WaitForChild("DropItem"):FireServer()
+				if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+					hum:EquipTool(plr.Backpack.Sack)
+					task.wait(0.2)
+				end
+				Remotes:WaitForChild("DropItem"):FireServer()
 
 				chair = getNearestItem("Chair")
 				if chair then
@@ -375,14 +385,14 @@ local function autoBond()
 			task.wait(0.25)
 			collectBond(bond)
 
-			--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 				hum:EquipTool(plr.Backpack.Sack)
 				task.wait(0.2)
 			end
 
 			if chair then
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
-			end]]
+			end
 		end
 	end)
 
