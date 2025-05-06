@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.779"
+local ScVer = "v1.7791"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -199,6 +199,20 @@ for _, v in pairs(Trains) do
 	end
 end
 
+local function getNearestItem(itemName)
+	local item, lastDist = nil, math.huge
+	for _, v in pairs(workspace.RuntimeItems:GetChildren()) do
+		if v.Name == itemName and v:IsA("Model") and v:FindFirstChildWhichIsA("BasePart") then
+			local dist = (v.PrimaryPart.Position - root.Position).Magnitude
+			if dist < lastDist then
+				item = v
+				lastDist = dist
+			end
+		end
+	end
+	return item
+end
+
 local function safeStart()
 	local tik = 0
 	while not hum.Sit and tik < 5 do
@@ -274,21 +288,6 @@ local function collectBond(model)
 	task.delay(1.5, function()
 		if conn then conn:Disconnect() conn = nil end
 	end)
-end
-
-
-local function getNearestItem(itemName)
-	local item, lastDist = nil, math.huge
-	for _, v in pairs(workspace.RuntimeItems:GetChildren()) do
-		if v.Name == itemName and v:IsA("Model") and v:FindFirstChildWhichIsA("BasePart") then
-			local dist = (v.PrimaryPart.Position - root.Position).Magnitude
-			if dist < lastDist then
-				item = v
-				lastDist = dist
-			end
-		end
-	end
-	return item
 end
 
 local function searchItem(itemname)
