@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.781"
+local ScVer = "v1.782"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -247,7 +247,7 @@ end
 local function stopIfNeeded()
 	if not startFlag then
 		toggleAntiVoid(false)
-		safeStart()
+		root.CFrame = CFrame.new(start)
 		return true
 	end
 	return false
@@ -382,7 +382,6 @@ local function autoBond()
 
 
 			if stopIfNeeded() then return end
-			task.wait(0.25)
 			collectBond(bond)
 
 			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
