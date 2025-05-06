@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.9361"
+local ScVer = "v1.937"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -346,6 +346,8 @@ local function handleChair()
 	root.CFrame = CFrame.new(start)
 end
 
+local firstRun = true
+
 local function autoBond()
 	local success, msg = pcall(function()
 		searchItem("Bond")
@@ -357,17 +359,27 @@ local function autoBond()
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			if distance > 8 then
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0,2,0)
-				--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-					hum:EquipTool(plr.Backpack.Sack)
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position + Vector3.new(0, 2, 0))
+				if firstRun then
+					firstRun = false
+					if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+						hum:EquipTool(plr.Backpack.Sack)
+					end
+					local chair = getNearestItem("Chair")
+					if chair and chair:FindFirstChildWhichIsA("Seat") then
+						if hum:GetState() ~= Enum.HumanoidStateType.Seated then
+							hum:ChangeState(Enum.HumanoidStateType.Seated)
+							chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
+						end
+						Remotes:WaitForChild("StoreItem"):FireServer(chair)
+					end
 				end
-				Remotes:WaitForChild("DropItem"):FireServer()]]
 
 				local chair = getNearestItem("Chair")
 				if chair and chair:FindFirstChildWhichIsA("Seat") then
 					hum:ChangeState(Enum.HumanoidStateType.Seated)
 					chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
-					--Remotes:WaitForChild("StoreItem"):FireServer(chair)
+					--
 				else
 					handleChair()
 					chair = getNearestItem("Chair")
