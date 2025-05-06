@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.784"
+local ScVer = "v1.79"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -301,9 +301,8 @@ local function searchItem(itemname)
 
 		attempts += 1
 		if attempts >= maxAttempts then
-			print("Item not found after max attempts, teleporting back to start")
 			root.CFrame = CFrame.new(start)
-			return
+			return error("Item not found after max attempts, teleporting back to start")
 		end
 
 		-- Move forward in search path
@@ -353,7 +352,7 @@ local function autoBond()
 			end
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
-			if distance > 5 then
+			if distance > 8 then
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position)
 				Remotes:WaitForChild("DropItem"):FireServer()
 
@@ -363,7 +362,6 @@ local function autoBond()
 				end
 			end
 
-			task.wait(0.25)
 			collectBond(bond)
 			--Remotes:WaitForChild("StoreItem"):FireServer(bond)
 		end
@@ -388,6 +386,8 @@ local function toggleStartbtn(bool)
 	end
 end
 
+hum.JumpHeight = 0
+hum.JumpPower = 0
 toggleAntiVoid(true)
 handleChair()
 autoBond()
