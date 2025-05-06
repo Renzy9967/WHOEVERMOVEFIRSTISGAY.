@@ -338,11 +338,11 @@ local function handleChair()
 		task.wait(0.01)
 	end
 
-	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+	--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 		hum:EquipTool(plr.Backpack.Sack)
 	end
 
-	Remotes:WaitForChild("StoreItem"):FireServer(chair)
+	Remotes:WaitForChild("StoreItem"):FireServer(chair)]]
 	root.CFrame = CFrame.new(start)
 end
 
@@ -358,10 +358,10 @@ local function autoBond()
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			if distance > 8 then
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position) * CFrame.new(0,2,0)
-				if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+				--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 					hum:EquipTool(plr.Backpack.Sack)
 				end
-				Remotes:WaitForChild("DropItem"):FireServer()
+				Remotes:WaitForChild("DropItem"):FireServer()]]
 
 				local chair = getNearestItem("Chair")
 				if chair and chair:FindFirstChildWhichIsA("Seat") then
