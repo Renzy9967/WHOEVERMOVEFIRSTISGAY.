@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.81"
+local ScVer = "v1.9"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -293,15 +293,19 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
-	local maxAttempts = 1000 -- 1000 attempts × 0.01s = 10 seconds)
+	local maxAttempts = 2000 -- 1000 attempts × 0.01s = 10 seconds)
 	local attempts = 0
 
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		--if stopIfNeeded() then return end
-
-		attempts += 1
+		hum.JumpHeight = 0
+		hum.JumpPower = 0
+		
+		if root.Position == endpos then
+			attempts += 1
+		end
 		if attempts >= maxAttempts then
-			root.CFrame = CFrame.new(start)
+			root.CFrame = CFrame.new(start, endpos)
 			return error("Item not found after max attempts, teleporting back to start")
 		end
 
