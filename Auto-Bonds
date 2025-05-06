@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.942"
+local ScVer = "v1.943"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -301,8 +301,9 @@ local function searchItem(itemname)
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
 		local multCF = root.CFrame * CFrame.new(0, 0, -250)
+		local endCF = CFrame.new(endpos) * CFrame.new(0, 0, -250)
 		
-		if root.Position == endpos or root.Position == multCF.Position then
+		if root.Position == endpos or root.Position == endCF.Position then
 			attempts += 1
 			print("attempting")
 		end
