@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.936"
+local ScVer = "v1.9361"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -404,9 +404,9 @@ local function toggleStartbtn(bool)
 	end
 end
 
---[[hum.StateChanged:Connect(function(old, new)
-	--print("State Changed:", old, "to", new)
-	if new ~= Enum.HumanoidStateType.Seated then
+hum.StateChanged:Connect(function(old, new)
+	print("State Changed:", old, "to", new)
+	--[[if new ~= Enum.HumanoidStateType.Seated then
 		hum:ChangeState(Enum.HumanoidStateType.FallingDown)
 		local chair = getNearestItem("Chair")
 		if chair and chair:FindFirstChildWhichIsA("Seat") then
@@ -416,8 +416,8 @@ end
 		else
 			
 		end
-	end
-end)]]
+	end]]
+end)
 
 hum.JumpHeight = 0
 hum.JumpPower = 0
