@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.7791"
+local ScVer = "v1.78"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -213,7 +213,7 @@ local function getNearestItem(itemName)
 	return item
 end
 
-local function safeStart()
+--[[local function safeStart()
 	local tik = 0
 	while not hum.Sit and tik < 5 do
 		if stopIfNeeded() then break end
@@ -221,7 +221,7 @@ local function safeStart()
 		tik += 0.01
 		task.wait(0.01)
 	end
-	Remotes:WaitForChild("DropItem"):FireServer()
+	--Remotes:WaitForChild("DropItem"):FireServer()
 	local chair = getNearestItem("Chair")
 	if chair then
 		local chairSeat = chair:FindFirstChildWhichIsA("Seat")
@@ -233,7 +233,7 @@ local function safeStart()
 	end
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)
-end
+end]]
 
 local function teleportToTrain()
 	if trainSeat.Occupant == nil then
@@ -281,7 +281,7 @@ local function collectBond(model)
 		while not collected and conn do
 			CollectBondNetwork:FireServer(model)
 			print("firing collect bond to server")
-			task.wait(0.15)
+			task.wait(0.5)
 		end
 	end)
 
@@ -332,12 +332,12 @@ local function handleChair()
 		task.wait(0.01)
 	end
 
-	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+	--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 		hum:EquipTool(plr.Backpack.Sack)
 		task.wait(0.2)
 	end
 
-	Remotes:WaitForChild("StoreItem"):FireServer(chair)
+	Remotes:WaitForChild("StoreItem"):FireServer(chair)]]
 	root.CFrame = CFrame.new(start)
 	--safeStart()
 end
@@ -361,12 +361,12 @@ local function autoBond()
 				if stopIfNeeded() then return end
 
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position) --* CFrame.new(0, 3, 0)
-				Remotes:WaitForChild("DropItem"):FireServer()
+				--Remotes:WaitForChild("DropItem"):FireServer()
 
 				chair = getNearestItem("Chair")
 				if chair then
 					local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-					if chairSeat then chairSeat:Sit(hum) end
+					if chairSeat then chairSeat:Sit(hum) end				
 				end
 			end
 
