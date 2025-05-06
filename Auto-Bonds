@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.777"
+local ScVer = "v1.778"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -200,6 +200,28 @@ for _, v in pairs(Trains) do
 	end
 end
 
+local function safeStart()
+	local tik = 0
+	while not hum.Sit and tik < 5 do
+		if stopIfNeeded() then break end
+		root.CFrame = CFrame.new(start)
+		tik += 0.01
+		task.wait(0.01)
+	end
+	Remotes:WaitForChild("DropItem"):FireServer()
+	local chair = getNearestItem("Chair")
+	if chair then
+		local chairSeat = chair:FindFirstChildWhichIsA("Seat")
+		if chairSeat then chairSeat:Sit(hum) end
+	end
+	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+		hum:EquipTool(plr.Backpack.Sack)
+		task.wait(0.2)
+	end
+
+	Remotes:WaitForChild("StoreItem"):FireServer(chair)
+end
+
 local function teleportToTrain()
 	if trainSeat.Occupant == nil then
 		trainSeat:Sit(hum)
@@ -212,7 +234,7 @@ end
 local function stopIfNeeded()
 	if not startFlag then
 		toggleAntiVoid(false)
-		root.CFrame = CFrame.new(start)
+		safeStart()
 		return true
 	end
 	return false
@@ -293,28 +315,6 @@ local function searchItem(itemname)
 	end
 end
 
-local function safeStart()
-	local tik = 0
-	while not hum.Sit and tik < 5 do
-		if stopIfNeeded() then break end
-		root.CFrame = CFrame.new(start)
-		tik += 0.01
-		task.wait(0.01)
-	end
-	Remotes:WaitForChild("DropItem"):FireServer()
-	local chair = getNearestItem("Chair")
-	if chair then
-		local chairSeat = chair:FindFirstChildWhichIsA("Seat")
-		if chairSeat then chairSeat:Sit(hum) end
-	end
-	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-		hum:EquipTool(plr.Backpack.Sack)
-		task.wait(0.2)
-	end
-
-	Remotes:WaitForChild("StoreItem"):FireServer(chair)
-end
-
 local function handleChair()
 	if stopIfNeeded() then return end
 	searchItem("Chair")
@@ -386,6 +386,7 @@ local function autoBond()
 			if chair then
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
 			end
+			isCollectingBond = false
 		end
 	end)
 
