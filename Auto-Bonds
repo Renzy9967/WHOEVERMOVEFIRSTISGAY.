@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.937"
+local ScVer = "v1.94"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -293,16 +293,19 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
-	local maxAttempts = 5 
+	local maxAttempts = 2 
 	local attempts = 0
 
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
 		--if stopIfNeeded() then return end
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
+		local multCF = root.CFrame * CFrame.new(0, 0, -250)
+		local endCF = CFrame.new(endpos) * CFrame.new(0, 0, -250)
 		
-		if root.Position == endpos then
+		if root.Position == endpos or root.Position == endCF.Position then
 			attempts += 1
+			print("attempting")
 		end
 		if attempts >= maxAttempts then
 			root.CFrame = CFrame.new(start, endpos)
@@ -311,7 +314,7 @@ local function searchItem(itemname)
 
 		-- Move forward in search path
 		root.CFrame = CFrame.new(newpos, endpos)
-		root.CFrame = root.CFrame * CFrame.new(0, 0, -250)
+		root.CFrame = multCF
 		newpos = root.Position
 
 		task.wait(0.01)
@@ -330,10 +333,12 @@ local function handleChair()
 
 	local seat = chair:FindFirstChildWhichIsA("Seat")
 	local tik = 0
+	root.CFrame = CFrame.new(chair.PrimaryPart.Position)
+	hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
 
 	while not hum.Sit and tik < 5 do
 		root.CFrame = CFrame.new(chair.PrimaryPart.Position)
-		if seat then hum:ChangeState(Enum.HumanoidStateType.Seated) seat:Sit(hum) end
+		if seat then hum:ChangeState(Enum.HumanoidStateType.Running) seat:Sit(hum) end
 		tik += 0.01
 		task.wait(0.01)
 	end
@@ -344,6 +349,7 @@ local function handleChair()
 
 	Remotes:WaitForChild("StoreItem"):FireServer(chair)]]
 	root.CFrame = CFrame.new(start)
+	hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
 end
 
 local firstRun = true
@@ -368,7 +374,8 @@ local function autoBond()
 					local chair = getNearestItem("Chair")
 					if chair and chair:FindFirstChildWhichIsA("Seat") then
 						if hum:GetState() ~= Enum.HumanoidStateType.Seated then
-							hum:ChangeState(Enum.HumanoidStateType.Seated)
+							hum:ChangeState(Enum.HumanoidStateType.Running) 
+							wait(.1)
 							chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
 						end
 						Remotes:WaitForChild("StoreItem"):FireServer(chair)
