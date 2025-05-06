@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.776"
+local ScVer = "v1.777"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -173,6 +173,7 @@ local collectedBond = 0
 local antivoidLoop = nil
 local collectedSet = {}
 local hasChair = false
+local isCollectingBond = false
 
 local function toggleAntiVoid(enabled)
 	if enabled then
@@ -236,24 +237,23 @@ local function collectBond(model)
 			collected = true
 			print("bond collected")
 			updateBonds()
-			if conn then conn:Disconnect() end
+			if conn then conn:Disconnect() conn = nil end
 		end
 	end)
-
+	wait(.01)
 	task.spawn(function()
-		while not Collected and conn do
+		while not collected and conn do
 			CollectBondNetwork:FireServer(model)
 			print("firing collect bond to server")
-			task.wait(.15)
+			task.wait(0.15)
 		end
 	end)
 
 	task.delay(1.5, function()
-		if conn then
-			conn:Disconnect()
-		end
+		if conn then conn:Disconnect() conn = nil end
 	end)
 end
+
 
 local function getNearestItem(itemName)
 	local item, lastDist = nil, math.huge
@@ -347,6 +347,7 @@ local function autoBond()
 	local success, msg = pcall(function()
 		while startFlag do
 			if stopIfNeeded() then return end
+			if isCollectingBond then return end
 
 			searchItem("Bond")
 			local bond = getNearestItem("Bond")
@@ -374,17 +375,17 @@ local function autoBond()
 
 			if stopIfNeeded() then return end
 			task.wait(0.25)
-
+			isCollectingBond = true
 			collectBond(bond)
 
-		if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-			hum:EquipTool(plr.Backpack.Sack)
-			task.wait(0.2)
-		end
+			if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+				hum:EquipTool(plr.Backpack.Sack)
+				task.wait(0.2)
+			end
 
-		if chair then
-			Remotes:WaitForChild("StoreItem"):FireServer(chair)
-		end
+			if chair then
+				Remotes:WaitForChild("StoreItem"):FireServer(chair)
+			end
 		end
 	end)
 
