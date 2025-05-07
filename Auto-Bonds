@@ -419,7 +419,7 @@ local function autoBond()
 				end
 			end
 
-			task.wait(0.25) -- Let physics catch up
+			--task.wait(0.25) -- Let physics catch up
 			collectBond(bond)
 		end
 	end)
