@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.982"
+local ScVer = "v1.983"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -248,7 +248,7 @@ local function teleportToTrain()
 	end
 end
 
-local function ownChair()
+local function ownChair(targetPos)
 	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 		hum:EquipTool(plr.Backpack.Sack)
 	end
@@ -256,11 +256,10 @@ local function ownChair()
 	
 	if chair then
 		local tik = 0
-		local currentPos = root.Position
 		local seat = chair:FindFirstChildWhichIsA("Seat")
 		task.spawn(function()
 			while tik < 5 do
-				root.CFrame = CFrame.new(currentPos)
+				root.CFrame = CFrame.new(targetPos)
 				if chair then
 					seat:Sit(hum)
 					hum:ChangeState(Enum.HumanoidStateType.Seated)
@@ -461,7 +460,7 @@ local function autoBond()
 				-- First run: only sit down, do NOT store
 				if firstRun then
 					firstRun = false
-					ownChair()
+					ownChair(bond.PrimaryPart.Position)
 				end
 
 				-- Ensure seated before collecting
@@ -472,7 +471,7 @@ local function autoBond()
 					hum:ChangeState(Enum.HumanoidStateType.Seated)
 				else
 					ensureSeated() -- get a chair
-					ownChair(chair)
+					ownChair(bond.PrimaryPart.Position)
 				end
 				
 			end
