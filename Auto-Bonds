@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.954"
+local ScVer = "v1.955"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -418,11 +418,9 @@ local function autoBond()
 				local chair = getNearestItem("Chair")
 				if chair and chair:FindFirstChildWhichIsA("Seat") then
 					local seat = chair:FindFirstChildWhichIsA("Seat")
-					if hum:GetState() ~= Enum.HumanoidStateType.Seated then
-						hum:ChangeState(Enum.HumanoidStateType.Running)
-						wait(1)
-						seat:Sit(hum)
-					end
+					hum:ChangeState(Enum.HumanoidStateType.Running)
+					wait(1)
+					seat:Sit(hum)
 				else
 					ensureSeated() -- get a chair
 				end
