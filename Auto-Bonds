@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.953"
+local ScVer = "v1.954"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -340,9 +340,7 @@ local function ensureSeated()
 				seat:Sit(hum)
 				wait(.25)
 				hum:ChangeState(Enum.HumanoidStateType.Running)
-				root.CFrame = CFrame.new(seat.Position)
 				wait(.25)
-				root.CFrame = CFrame.new(seat.Position)
 				seat:Sit(hum)
 				return true
 			end
@@ -404,8 +402,6 @@ local function autoBond()
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			if distance > 8 then
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position + Vector3.new(0, 2, 0))
-
 				-- First run: only sit down, do NOT store
 				--[[if firstRun then
 					firstRun = false
@@ -430,6 +426,7 @@ local function autoBond()
 				else
 					ensureSeated() -- get a chair
 				end
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position + Vector3.new(0, 2, 0))
 			end
 
 			--RunService.Stepped:Wait() -- Let physics catch up
