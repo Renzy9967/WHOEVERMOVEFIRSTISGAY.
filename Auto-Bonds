@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.97"
+local ScVer = "v1.98"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -438,7 +438,14 @@ local function autoBond()
 				-- First run: only sit down, do NOT store
 				if firstRun then
 					firstRun = false
-					ownChair()
+					local chair = getNearestItem("Chair")
+					if chair then
+						ownChair(chair)
+					else
+						ensureSeated() -- get a chair
+						chair = getNearestItem("Chair")
+						ownChair(chair)
+					end
 				end
 
 				-- Ensure seated before collecting
@@ -449,7 +456,7 @@ local function autoBond()
 					hum:ChangeState(Enum.HumanoidStateType.Seated)
 				else
 					ensureSeated() -- get a chair
-					ownChair()
+					ownChair(chair)
 				end
 				
 			end
