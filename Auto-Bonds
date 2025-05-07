@@ -315,7 +315,7 @@ local function searchItem(itemname)
 			task.spawn(function()
 				for i = 1, 5  do
 					root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
-					wait(5)
+					wait(1)
 				end
 				wait(1)
 				hum.JumpHeight = 7.2
