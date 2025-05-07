@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.944"
+local ScVer = "v1.945"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -264,16 +264,15 @@ end
 local function collectBond(model)
 	if not model or model.Parent == nil then return end
 	if collectedSet[model] then return end -- already collected
-	
+	collectedSet[model] = true
 	--print("collecting bond")
 
 	local collected = false
 	local conn
 
 	conn = model.AncestryChanged:Connect(function(_, parent)
-		if not parent and not collected and not collectedSet[model] then
+		if not parent and not collected then
 			collected = true
-			collectedSet[model] = true
 			--print("bond collected")
 			updateBonds()
 			if conn then conn:Disconnect() conn = nil end
@@ -452,20 +451,9 @@ local function toggleStartbtn(bool)
 	end
 end
 
---[[hum.StateChanged:Connect(function(old, new)
+hum.StateChanged:Connect(function(old, new)
 	print("State Changed:", old, "to", new)
-	--[[if new ~= Enum.HumanoidStateType.Seated then
-		hum:ChangeState(Enum.HumanoidStateType.FallingDown)
-		local chair = getNearestItem("Chair")
-		if chair and chair:FindFirstChildWhichIsA("Seat") then
-			chair:FindFirstChildWhichIsA("Seat"):Sit(hum)
-			wait(.5)
-			if hum:GetState() ~= 
-		else
-			
-		end
-	end
-end)]]
+end)
 
 hum.JumpHeight = 0
 hum.JumpPower = 0
