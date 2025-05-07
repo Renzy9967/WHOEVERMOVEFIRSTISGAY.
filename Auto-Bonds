@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.96"
+local ScVer = "v1.961"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -418,8 +418,8 @@ local function autoBond()
 				-- First run: only sit down, do NOT store
 				if firstRun then
 					firstRun = false
-					Remotes:WaitForChild("DropItem"):FireServer()
-					wait(.2)
+					--Remotes:WaitForChild("DropItem"):FireServer()
+					--wait(.2)
 					local chair = getNearestItem("Chair")
 					if chair and chair:FindFirstChildWhichIsA("Seat") then
 						local seat = chair:FindFirstChildWhichIsA("Seat")
