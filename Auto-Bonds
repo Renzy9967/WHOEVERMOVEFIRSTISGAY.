@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.949"
+local ScVer = "v1.95"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -313,7 +313,10 @@ local function searchItem(itemname)
 		if attempts >= maxAttempts then
 			returning = true
 			task.spawn(function()
-				root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
+				for i = 1, 5  do
+					root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
+					wait(5)
+				end
 				wait(1)
 				hum.JumpHeight = 7.2
 				hum.JumpPower = 50
