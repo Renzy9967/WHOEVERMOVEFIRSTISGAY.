@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.959"
+local ScVer = "v1.96"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -331,6 +331,8 @@ local function searchItem(itemname)
 
 		task.wait(0.01)
 	end
+	hum.JumpHeight = 7.2
+	hum.JumpPower = 50
 end
 
 local function ensureSeated()
@@ -338,14 +340,15 @@ local function ensureSeated()
 		local chair = getNearestItem("Chair")
 		if chair then
 			local seat = chair:FindFirstChildWhichIsA("Seat")
-			if firstRun then
+			--[[if firstRun then
 				if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 					hum:EquipTool(plr.Backpack.Sack)
 				end
-
+				seat:Sit(hum)
+				wait(.2)
 				Remotes:WaitForChild("StoreItem"):FireServer(chair)
 				return true
-			end
+			end]]
 			if seat then
 				seat:Sit(hum)
 				wait(.2)
@@ -424,6 +427,8 @@ local function autoBond()
 						wait(.2)
 						seat:Sit(hum)
 						hum:ChangeState(Enum.HumanoidStateType.Seated)
+					else
+						ensureSeated()
 					end
 				end
 
@@ -451,6 +456,16 @@ local function autoBond()
 	end
 end
 
+hum.StateChanged:Connect(function(old, new)
+	print("State Changed:", old, "to", new)
+end)
+
+hum.JumpHeight = 0
+hum.JumpPower = 0
+toggleAntiVoid(true)
+--ensureSeated()
+autoBond()
+
 local function toggleStartbtn(bool)
 	if bool then
 		Button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
@@ -462,16 +477,6 @@ local function toggleStartbtn(bool)
 		TS:Create(UiGrad, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = 90}):Play()
 	end
 end
-
-hum.StateChanged:Connect(function(old, new)
-	print("State Changed:", old, "to", new)
-end)
-
-hum.JumpHeight = 0
-hum.JumpPower = 0
-toggleAntiVoid(true)
-ensureSeated()
-autoBond()
 
 --[[Button.MouseButton1Click:Connect(function()
 	if CD then return end
