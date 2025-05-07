@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.981"
+local ScVer = "v1.982"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -253,15 +253,37 @@ local function ownChair()
 		hum:EquipTool(plr.Backpack.Sack)
 	end
 	local chair = getNearestItem("Chair")
-	local seat = chair:FindFirstChildWhichIsA("Seat")
-	if seat then
+	
+	if chair then
+		local tik = 0
+		local currentPos = root.Position
+		local seat = chair:FindFirstChildWhichIsA("Seat")
+		task.spawn(function()
+			while tik < 5 do
+				root.CFrame = CFrame.new(currentPos)
+				if chair then
+					seat:Sit(hum)
+					hum:ChangeState(Enum.HumanoidStateType.Seated)
+				end
+				tik += 0.1
+				task.wait(0.01)
+			end
+		end)
+		wait(2)
+		root.CFrame = seat.CFrame
+		Remotes.StoreItem:FireServer(chair)
+		wait(.2)
+		Remotes.DropItem:FireServer()
+		wait(.2)
+		chair = getNearestItem("Chair")
+		local seat = chair:FindFirstChildWhichIsA("Seat")
+		wait(.1)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		Remotes.StoreItem:FireServer(chair)
-		Remotes.DropItem:FireServer()
 		chair = getNearestItem("Chair")
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
+		wait(.5)
 	end
 end
 
