@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.952"
+local ScVer = "v1.953"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -340,7 +340,9 @@ local function ensureSeated()
 				seat:Sit(hum)
 				wait(.25)
 				hum:ChangeState(Enum.HumanoidStateType.Running)
+				root.CFrame = CFrame.new(seat.Position)
 				wait(.25)
+				root.CFrame = CFrame.new(seat.Position)
 				seat:Sit(hum)
 				return true
 			end
@@ -461,7 +463,7 @@ end)
 hum.JumpHeight = 0
 hum.JumpPower = 0
 toggleAntiVoid(true)
---ensureSeated()
+ensureSeated()
 autoBond()
 
 --[[Button.MouseButton1Click:Connect(function()
