@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.961"
+local ScVer = "v1.97"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -248,14 +248,21 @@ local function teleportToTrain()
 	end
 end
 
---[[local function stopIfNeeded()
-	if not startFlag then
-		toggleAntiVoid(false)
-		root.CFrame = CFrame.new(start)
-		return true
+local function ownChair(chair)
+	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+		hum:EquipTool(plr.Backpack.Sack)
 	end
-	return false
-end]]
+	local seat = chair:FindFirstChildWhichIsA("Seat")
+	if seat then
+		seat:Sit(hum)
+		hum:ChangeState(Enum.HumanoidStateType.Seated)
+		Remotes.StoreItem:FireServer(chair)
+		Remotes.DropItem:FireServer()
+		chair = getNearestItem("Chair")
+		seat:Sit(hum)
+		hum:ChangeState(Enum.HumanoidStateType.Seated)
+	end
+end
 
 local function updateBonds()
 	collectedBond += 1
@@ -299,7 +306,19 @@ local function searchItem(itemname)
 	local maxAttempts = 2
 	local attempts = 0
 
-	while not workspace.RuntimeItems:FindFirstChild(itemname) and not returning do
+	while not returning do
+		local found = workspace.RuntimeItems:FindFirstChild(itemname)
+
+		-- If we're looking for a chair, ensure it's unoccupied
+		if itemname == "Chair" and found then
+			local seat = found:FindFirstChildWhichIsA("Seat")
+			if seat and seat.Occupant then
+				found = nil -- mark as invalid and keep searching
+			end
+		end
+
+		if found then break end -- Valid item found
+
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
 
@@ -314,7 +333,7 @@ local function searchItem(itemname)
 		if attempts >= maxAttempts then
 			returning = true
 			task.spawn(function()
-				for i = 1, 5  do
+				for i = 1, 5 do
 					root.Velocity = Vector3.new(0,0,0)
 					root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
 					wait(1)
@@ -331,6 +350,7 @@ local function searchItem(itemname)
 
 		task.wait(0.01)
 	end
+
 	hum.JumpHeight = 7.2
 	hum.JumpPower = 50
 end
@@ -418,18 +438,7 @@ local function autoBond()
 				-- First run: only sit down, do NOT store
 				if firstRun then
 					firstRun = false
-					--Remotes:WaitForChild("DropItem"):FireServer()
-					--wait(.2)
-					local chair = getNearestItem("Chair")
-					if chair and chair:FindFirstChildWhichIsA("Seat") then
-						local seat = chair:FindFirstChildWhichIsA("Seat")
-						hum:ChangeState(Enum.HumanoidStateType.Running)
-						wait(.2)
-						seat:Sit(hum)
-						hum:ChangeState(Enum.HumanoidStateType.Seated)
-					else
-						ensureSeated()
-					end
+					ownChair()
 				end
 
 				-- Ensure seated before collecting
@@ -440,6 +449,7 @@ local function autoBond()
 					hum:ChangeState(Enum.HumanoidStateType.Seated)
 				else
 					ensureSeated() -- get a chair
+					ownChair()
 				end
 				
 			end
