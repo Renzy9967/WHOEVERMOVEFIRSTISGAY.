@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.9391"
+local ScVer = "v1.9392"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -328,6 +328,8 @@ local function ensureSeated()
 			if seat and not hum.Sit then
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
 				seat:Sit(hum)
+				wait(1)
+				hum:ChangeState(Enum.HumanoidStateType.Running)
 				return true
 			end
 		end
