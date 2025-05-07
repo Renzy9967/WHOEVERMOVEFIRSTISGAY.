@@ -334,10 +334,11 @@ local function ensureSeated()
 		if chair then
 			local seat = chair:FindFirstChildWhichIsA("Seat")
 			if seat and not hum.Sit then
-				hum:ChangeState(Enum.HumanoidStateType.Seated)
 				seat:Sit(hum)
 				wait(1)
 				hum:ChangeState(Enum.HumanoidStateType.Running)
+				wait(1)
+				seat:Sit(hum)
 				return true
 			end
 		end
