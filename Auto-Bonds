@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.98"
+local ScVer = "v1.981"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -248,10 +248,11 @@ local function teleportToTrain()
 	end
 end
 
-local function ownChair(chair)
+local function ownChair()
 	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 		hum:EquipTool(plr.Backpack.Sack)
 	end
+	local chair = getNearestItem("Chair")
 	local seat = chair:FindFirstChildWhichIsA("Seat")
 	if seat then
 		seat:Sit(hum)
@@ -438,14 +439,7 @@ local function autoBond()
 				-- First run: only sit down, do NOT store
 				if firstRun then
 					firstRun = false
-					local chair = getNearestItem("Chair")
-					if chair then
-						ownChair(chair)
-					else
-						ensureSeated() -- get a chair
-						chair = getNearestItem("Chair")
-						ownChair(chair)
-					end
+					ownChair()
 				end
 
 				-- Ensure seated before collecting
