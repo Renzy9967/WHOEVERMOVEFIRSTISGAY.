@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.943"
+local ScVer = "v1.944"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -264,7 +264,7 @@ end
 local function collectBond(model)
 	if not model or model.Parent == nil then return end
 	if collectedSet[model] then return end -- already collected
-	collectedSet[model] = true
+	
 	--print("collecting bond")
 
 	local collected = false
@@ -273,19 +273,21 @@ local function collectBond(model)
 	conn = model.AncestryChanged:Connect(function(_, parent)
 		if not parent and not collected and not collectedSet[model] then
 			collected = true
+			collectedSet[model] = true
 			--print("bond collected")
 			updateBonds()
 			if conn then conn:Disconnect() conn = nil end
 		end
 	end)
 	wait(.01)
-	task.spawn(function()
+	CollectBondNetwork:FireServer(model)
+	--[[task.spawn(function()
 		while not collected and conn do
 			CollectBondNetwork:FireServer(model)
 			--print("firing collect bond to server")
 			task.wait(1)
 		end
-	end)
+	end)]]
 
 	task.delay(3, function()
 		if conn then conn:Disconnect() conn = nil end
@@ -405,8 +407,10 @@ local function autoBond()
 					local chair = getNearestItem("Chair")
 					if chair and chair:FindFirstChildWhichIsA("Seat") then
 						local seat = chair:FindFirstChildWhichIsA("Seat")
+						seat:Sit(hum)
+						wait(1)
 						hum:ChangeState(Enum.HumanoidStateType.Running)
-						wait(.2)
+						wait(1)
 						seat:Sit(hum)
 					end
 				end
