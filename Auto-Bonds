@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.9381"
+local ScVer = "v1.939"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -293,31 +293,55 @@ end
 
 local function searchItem(itemname)
 	local newpos = start
-	local maxAttempts = 2 
+	local maxAttempts = 2
 	local attempts = 0
 
 	while not workspace.RuntimeItems:FindFirstChild(itemname) do
-		--if stopIfNeeded() then return end
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
-		local multCF = root.CFrame * CFrame.new(0, 0, -250)
 
-		if (multCF.Position - start).Magnitude > (endpos - start).Magnitude then
+		local currentDistance = (newpos - start).Magnitude
+		local totalDistance = (endpos - start).Magnitude
+
+		if currentDistance >= totalDistance then
 			attempts += 1
+			newpos = start
 		end
+
 		if attempts >= maxAttempts then
 			root.CFrame = CFrame.new(start, endpos)
 			return error("Item not found after max attempts, teleporting back to start")
 		end
 
-		-- Move forward in search path
-		root.CFrame = CFrame.new(newpos, endpos)
-		root.CFrame = multCF
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -250)
 		newpos = root.Position
 
 		task.wait(0.01)
 	end
 end
+
+local function ensureSeated()
+	local function trySit()
+		local chair = getNearestItem("Chair")
+		if chair then
+			local seat = chair:FindFirstChildWhichIsA("Seat")
+			if seat and not hum.Sit then
+				hum:ChangeState(Enum.HumanoidStateType.Seated)
+				seat:Sit(hum)
+				return true
+			end
+		end
+		return false
+	end
+
+	if not trySit() then
+		-- only searches for Chair — won't recurse
+		searchItem("Chair")
+		task.wait(0.2)
+		trySit()
+	end
+end
+
 
 local function handleChair()
 	searchItem("Chair")
@@ -355,6 +379,7 @@ local firstRun = true
 
 local function autoBond()
 	local success, msg = pcall(function()
+		ensureSeated()
 		searchItem("Bond")
 		local bond = getNearestItem("Bond")
 		if bond then
