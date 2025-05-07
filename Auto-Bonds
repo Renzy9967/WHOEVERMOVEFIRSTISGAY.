@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.958"
+local ScVer = "v1.959"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -176,11 +176,12 @@ local antivoidLoop = nil
 local collectedSet = {}
 local hasChair = false
 local returning = false
+local firstRun = true
 
 local function toggleAntiVoid(enabled)
 	if enabled then
 		antivoidLoop = RunService.Stepped:Connect(function()
-			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 100 then
+			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 500 then
 				root.Velocity = root.Velocity + Vector3.new(0, 250, 0)
 			end
 		end)
@@ -314,6 +315,7 @@ local function searchItem(itemname)
 			returning = true
 			task.spawn(function()
 				for i = 1, 5  do
+					root.Velocity = Vector3.new(0,0,0)
 					root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
 					wait(1)
 				end
@@ -336,11 +338,19 @@ local function ensureSeated()
 		local chair = getNearestItem("Chair")
 		if chair then
 			local seat = chair:FindFirstChildWhichIsA("Seat")
-			if seat and not hum.Sit then
+			if firstRun then
+				if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+					hum:EquipTool(plr.Backpack.Sack)
+				end
+
+				Remotes:WaitForChild("StoreItem"):FireServer(chair)
+				return true
+			end
+			if seat then
 				seat:Sit(hum)
-				wait(.25)
+				wait(.2)
 				hum:ChangeState(Enum.HumanoidStateType.Running)
-				wait(.25)
+				wait(.2)
 				seat:Sit(hum)
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
 				return true
@@ -390,8 +400,6 @@ end
 	hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
 end]]
 
-local firstRun = true
-
 local function autoBond()
 	local success, msg = pcall(function()
 		searchItem("Bond")
@@ -407,11 +415,13 @@ local function autoBond()
 				-- First run: only sit down, do NOT store
 				if firstRun then
 					firstRun = false
+					Remotes:WaitForChild("DropItem"):FireServer()
+					wait(.2)
 					local chair = getNearestItem("Chair")
 					if chair and chair:FindFirstChildWhichIsA("Seat") then
 						local seat = chair:FindFirstChildWhichIsA("Seat")
 						hum:ChangeState(Enum.HumanoidStateType.Running)
-						wait(.25)
+						wait(.2)
 						seat:Sit(hum)
 						hum:ChangeState(Enum.HumanoidStateType.Seated)
 					end
