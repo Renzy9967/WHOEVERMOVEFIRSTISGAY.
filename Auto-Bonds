@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.941"
+local ScVer = "v1.942"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 
 local sg = Instance.new("ScreenGui")
@@ -314,7 +314,6 @@ local function searchItem(itemname)
 			task.spawn(function()
 				root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
 				wait(1)
-				hum:ChangeState(Enum.HumanoidStateType.Running)
 				hum.JumpHeight = 7.2
 				hum.JumpPower = 50
 			end)
@@ -406,11 +405,9 @@ local function autoBond()
 					local chair = getNearestItem("Chair")
 					if chair and chair:FindFirstChildWhichIsA("Seat") then
 						local seat = chair:FindFirstChildWhichIsA("Seat")
-						if seat and hum:GetState() ~= Enum.HumanoidStateType.Seated then
-							-- Sit without storing
-							hum:ChangeState(Enum.HumanoidStateType.Seated)
-							seat:Sit(hum)
-						end
+						hum:ChangeState(Enum.HumanoidStateType.Running)
+						wait(.2)
+						seat:Sit(hum)
 					end
 				end
 
