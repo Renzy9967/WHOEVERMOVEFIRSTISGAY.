@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.938"
+local ScVer = "v1.9381"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 local TS = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -436,7 +436,7 @@ end)
 hum.JumpHeight = 0
 hum.JumpPower = 0
 toggleAntiVoid(true)
-handleChair()
+--handleChair()
 autoBond()
 
 --[[Button.MouseButton1Click:Connect(function()
