@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.945"
+local ScVer = "v1.946"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -264,15 +264,15 @@ end
 local function collectBond(model)
 	if not model or model.Parent == nil then return end
 	if collectedSet[model] then return end -- already collected
-	collectedSet[model] = true
 	--print("collecting bond")
 
 	local collected = false
 	local conn
 
 	conn = model.AncestryChanged:Connect(function(_, parent)
-		if not parent and not collected then
+		if not parent and not collected and not collectedSet[model] then
 			collected = true
+			collectedSet[model] = true
 			--print("bond collected")
 			updateBonds()
 			if conn then conn:Disconnect() conn = nil end
@@ -428,7 +428,7 @@ local function autoBond()
 				end
 			end
 
-			RunService.Stepped:Wait() -- Let physics catch up
+			--RunService.Stepped:Wait() -- Let physics catch up
 			collectBond(bond)
 		end
 	end)
