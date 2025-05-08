@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.992"
+local ScVer = "v2"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -238,21 +238,19 @@ local function ownChair(targetPos)
 
 	local tik = 0
 	local mult = CFrame.new(targetPos)
-
-	task.spawn(function()
-		while tik < 5 do
-			root.CFrame = mult
-			if chair then
-				seat:Sit(hum)
-				hum:ChangeState(Enum.HumanoidStateType.Seated)
-				hum:ChangeState(Enum.HumanoidStateType.Freefall)
-			end
-			wait(0.01)
-			tik += 0.1
+	
+	for i = 1, 20 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+		root.CFrame = mult
+		if chair then
+			seat:Sit(hum)
+			hum:ChangeState(Enum.HumanoidStateType.Seated)
+			hum:ChangeState(Enum.HumanoidStateType.Freefall)
+		else
+			break
 		end
-	end)
-
-	task.wait(1)
+		task.wait(0.01)
+	end
+	
 	--root.CFrame = seat.CFrame
 	--Remotes.StoreItem:FireServer(chair)
 	--wait(.2)
