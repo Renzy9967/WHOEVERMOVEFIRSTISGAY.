@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.988"
+local ScVer = "v1.989"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -226,9 +226,9 @@ local function teleportToTrain()
 end
 
 local function ownChair(targetPos)
-	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+	--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
 		hum:EquipTool(plr.Backpack.Sack)
-	end
+	end]]
 
 	local chair = getNearestItem("Chair")
 	if not chair then return end
@@ -237,7 +237,7 @@ local function ownChair(targetPos)
 	if not seat then return end
 
 	local tik = 0
-	local mult = CFrame.new(targetPos) * CFrame.new(0, 0, -250)
+	local mult = CFrame.new(targetPos)
 
 	task.spawn(function()
 		while tik < 5 do
@@ -441,7 +441,6 @@ local function autoBond()
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			if distance > 8 then
 				root.CFrame = CFrame.new(bond.PrimaryPart.Position + Vector3.new(0, 2, 0))
-				-- First run: only sit down, do NOT store
 				if firstRun then
 					firstRun = false
 					ownChair(bond.PrimaryPart.Position)
