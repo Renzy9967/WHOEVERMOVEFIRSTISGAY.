@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.984"
+local ScVer = "v1.985"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -121,7 +121,7 @@ Collected.Parent = sg
 Collected.BackgroundTransparency = 1
 Collected.Position = UDim2.new(0.00999999978, 0, 0.553971469, 0)
 Collected.Size = UDim2.new(0.172499999, 0, 0.0794297382, 0)
-Collected.Font = Enum.Font.Highway
+Collected.FontFace.Family = "rbxassetid://12187372175"
 Collected.Text = "Collected Bonds: 0"
 Collected.TextColor3 = Color3.fromRGB(255, 170, 127)
 Collected.TextScaled = true
@@ -160,7 +160,6 @@ local startFlag = false
 local CD = false
 
 local root = hum.RootPart
-
 local start = root.Position
 local endpos = Vector3.new(-424.443603515625, 29.518972396850586, -49040.59375)
 local RunService = game:GetService("RunService")
@@ -255,7 +254,6 @@ local function ownChair(targetPos)
 	task.wait(2)
 	root.CFrame = seat.CFrame
 	Remotes.StoreItem:FireServer(chair)
-	task.wait(0.2)
 	Remotes.DropItem:FireServer()
 	task.wait(0.2)
 
@@ -270,7 +268,6 @@ local function ownChair(targetPos)
 		end
 	end
 end
-
 
 local function updateBonds()
 	collectedBond += 1
