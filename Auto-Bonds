@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v1.93"
+local ScVer = "v2"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 
@@ -16,7 +16,7 @@ local Reset = Instance.new("TextButton")
 local FrameConstraint = Instance.new("UIAspectRatioConstraint")
 local UiGrad = Instance.new("UIGradient")
 
-local plr = game.Players.LocalPlayer
+local plr: Player = game.Players.LocalPlayer
 local char = plr.Character or plr.CharacterAdded:Wait()
 local hum: Humanoid = char:WaitForChild("Humanoid")
 if not hum or hum.Health <= 0 then return end
@@ -162,6 +162,7 @@ local CD = false
 local root = hum.RootPart
 local start = root.Position
 local endpos = Vector3.new(-424.443603515625, 29.518972396850586, -49040.59375)
+local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
@@ -176,6 +177,8 @@ local collectedSet = {}
 local hasChair = false
 local returning = false
 local firstRun = true
+
+queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
 
 local function toggleAntiVoid(enabled)
 	if enabled then
@@ -226,10 +229,6 @@ local function teleportToTrain()
 end
 
 local function ownChair(targetPos)
-	--[[if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-		hum:EquipTool(plr.Backpack.Sack)
-	end]]
-
 	local chair = getNearestItem("Chair")
 	if not chair then return end
 
@@ -257,13 +256,12 @@ local function ownChair(targetPos)
 	--Remotes.DropItem:FireServer()
 	--task.wait(0.2)
 
-	-- Reacquire chair and reseat
 	chair = getNearestItem("Chair")
 	if chair then
 		local seat = chair:FindFirstChildWhichIsA("Seat")
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(0.5)
+		wait(0.2)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
 		wait(0.5)
 	end
@@ -451,7 +449,6 @@ local function autoBond()
 					ensureSeated() -- get a chair
 					ownChair(bond.PrimaryPart.Position)
 				end
-				
 			end
 
 			--RunService.Stepped:Wait() -- Let physics catch up
@@ -476,6 +473,10 @@ toggleAntiVoid(true)
 ensureSeated()
 autoBond()
 
+if _G.AutoDeath then
+	hum:ChangeState(Enum.HumanoidStateType.Dead)
+end
+
 local function toggleStartbtn(bool)
 	if bool then
 		Button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
@@ -488,37 +489,10 @@ local function toggleStartbtn(bool)
 	end
 end
 
---[[Button.MouseButton1Click:Connect(function()
-	if CD then return end
-	CD = true
-	task.delay(0.1, function()
-		CD = false
-	end)
-	if not startFlag then
-		startFlag = true
-		start = root.Position
-		--Warn.Visible = true
-		hum.JumpHeight = 0
-		hum.JumpPower = 0
-		toggleStartbtn(true)
-		toggleAntiVoid(true)
-		handleChair()
-		autoBond()
-	else
-		startFlag = false
-		hum.JumpHeight = 7.2
-		hum.JumpPower = 50
-		toggleStartbtn(false)
-		stopIfNeeded()
-		Warn.Visible = false
+local TeleportCheck = false
+plr.OnTeleport:Connect(function(State)
+	if KeepInfYield and (not TeleportCheck) and queueteleport then
+		TeleportCheck = true
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()")
 	end
 end)
-
-Reset.MouseButton1Click:Connect(function()
-	Frame.Position = UDim2.new(0.5, 0, 1.5, 0)
-	TS:Create(Frame, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-end)
-
-Frame.Position = UDim2.new(0.5, 0, 1.5, 0)
-wait(0.5)
-TS:Create(Frame, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()]]
