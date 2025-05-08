@@ -261,7 +261,7 @@ local function ownChair(targetPos)
 		local seat = chair:FindFirstChildWhichIsA("Seat")
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(0.2)
+		wait(1)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
 		wait(0.5)
 	end
