@@ -262,11 +262,11 @@ local function ownChair(targetPos)
 	-- Reacquire chair and reseat
 	chair = getNearestItem("Chair")
 	if chair then
-		hum:ChangeState(Enum.HumanoidStateType.Running)
 		local seat = chair:FindFirstChildWhichIsA("Seat")
+		hum:ChangeState(Enum.HumanoidStateType.Freefall)
+		wait(0.5)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(0.5)
 	end
 end
 
