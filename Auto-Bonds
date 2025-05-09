@@ -143,6 +143,7 @@ Warn.BackgroundTransparency = 1
 Warn.Position = UDim2.new(0.498, 0, 0.136, 0)
 Warn.Size = UDim2.new(0.358749986, 0, 0.0916496962, 0)
 Warn.Font = Enum.Font.Highway
+Warn.RichText = true
 Warn.Text = "Made by Renzy".."/n".. "<font color='rgb(255,0,0)'>(Jump if bond not collecting)</font>"
 Warn.TextColor3 = Color3.fromRGB(0, 255, 0)
 Warn.TextScaled = true
