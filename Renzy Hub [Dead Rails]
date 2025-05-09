@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12351"
+local ScVer = "v1.12352"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1286,6 +1286,7 @@ local searchingItem = false
 local currentSection = nil
 local sectionDb = false
 local teleportDb = false
+local exitDb = false
 local runningConnections = {
 	GetItem = nil,
 	Teleport = nil,
@@ -1636,6 +1637,8 @@ local function openSection(newSection: Frame)
 end
 
 local function promptExitMenu()
+	if exitDb then return end
+	exitDb = true
 	sectionDb = true
 	TS:Create(Selection, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Position = Exit.Position, Size = Exit.Size}):Play()
 	ExitConfirm.Visible = true
@@ -1652,6 +1655,7 @@ local function closeExit()
 	wait(.8)
 	ExitConfirm.Visible = false
 	sectionDb = false
+	exitDb = false
 end
 local function safeExit()
 	for key, connection in pairs(runningConnections) do
