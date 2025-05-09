@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12352"
+local ScVer = "v1.12353"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1554,7 +1554,7 @@ local function getItem()
 	coroutine.resume(thread)
 end
 local function teleportDestination()
-	if not table.find(teleports, Var.teleportVar.selectedDestination) or
+	if not table.find(Destinations, Var.teleportVar.selectedDestination) or
 		teleportDb then
 		return
 	end
