@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.121"
+local ScVer = "v1.122"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1375,7 +1375,7 @@ local function searchItem(itemname, instancePath, startPos, speed)
 			task.spawn(function()
 				for i = 1, 5 do
 					root.Velocity = Vector3.new(0,0,0)
-					root.CFrame = CFrame.new(startPos) * CFrame.new(0,3,0)
+					root.CFrame = CFrame.new(lastPos) * CFrame.new(0,3,0)
 					wait(1)
 				end
 				wait(1)
@@ -1500,7 +1500,7 @@ local function getItem()
 				
 				ownChair()
 				
-				searchItem(selectedItem, path, start, 100)
+				searchItem(selectedItem, path, start, 25)
 				local foundItem = getNearestItem(selectedItem)
 
 				if foundItem then
