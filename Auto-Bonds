@@ -466,7 +466,7 @@ toggleAntiVoid(true)
 ensureSeated()
 autoBond()
 
-local AutoDeath = _G.AutoDeath
+local AutoDeath = _G.AutoDeath or true
 
 if AutoDeath then
 	hum:ChangeState(Enum.HumanoidStateType.Dead)
@@ -491,7 +491,7 @@ local TeleportCheck = false
 plr.OnTeleport:Connect(function(State)
 	if (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("_G.AutoDeath ="..tostring(AutoDeath).." loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()")
+		queueteleport("_G.AutoDeath = "..tostring(AutoDeath).." loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()")
 	else
 		warn('Incompatible Exploit','Your exploit does not support this command (missing queue_on_teleport)')
 	end
