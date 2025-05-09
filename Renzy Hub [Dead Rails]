@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1231"
+local ScVer = "v1.1232"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1414,23 +1414,26 @@ local function ownChair(targetPos: Vector3)
 		unweldNetwork:FireServer(chair)
 		wait(.2)
 	end
-	seat:Sit(hum)
 	
 	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0,0,-100)).Position
 	local tik = 0
 	local mult = CFrame.new(targetPos) 
 	local done = false
+	local a = 1
 
 	task.spawn(function()
-		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
-			root.CFrame = mult
+		for i = 1, 100 do -- Runs for ~1 second (0.01s * 100)
+			root.CFrame = (a == 1) and seat.CFrame or mult
+			a = (a == 1) and 2 or 1
+
 			if chair then
+				hum:ChangeState(Enum.HumanoidStateType.Freefall)
 				seat:Sit(hum)
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
-				hum:ChangeState(Enum.HumanoidStateType.Freefall)
 			else
 				break
 			end
+
 			task.wait(0.01)
 		end
 	end)
@@ -1580,12 +1583,16 @@ local function closeExit()
 	sectionDb = false
 end
 local function safeExit()
-	for _, connection: RBXScriptConnection in pairs(runningConnections) do
-		if connection.Connected then
+	for key, connection in pairs(runningConnections) do
+		if typeof(connection) == "RBXScriptConnection" and connection.Connected then
 			connection:Disconnect()
+			runningConnections[key] = nil
+		elseif typeof(connection) == "boolean" then
+			runningConnections[key] = nil
 		end
 	end
 end
+
 
 local function loadMenu()
 	wait(5)
