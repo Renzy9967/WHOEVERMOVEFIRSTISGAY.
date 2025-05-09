@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12353"
+local ScVer = "v1.12355"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1562,7 +1562,7 @@ local function teleportDestination()
 	
 	local thread = coroutine.create(function()
 		lastPos = root.Position
-		local selectedDestination = Var.getItemVar.selectedDestination
+		local selectedDestination = Var.teleportVar.selectedDestination
 		local path = (selectedDestination == "Farm") and workspace.RandomBuildings or workspace
 		
 		local success, msg = pcall(function()
@@ -1590,10 +1590,10 @@ local function teleportDestination()
 			if foundModel then
 				if selectedDestination == "Farm" then
 					local floor = foundModel:FindFirstChild("Floor")
-					root.CFrame = floor.CFrame * CFrame.new(0, 0, -40)
-				elseif selectedMode == "VampireCastle" then
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
+				elseif selectedDestination == "VampireCastle" then
 					local floor = foundModel.House:FindFirstChild("MainFloor")
-					root.CFrame = floor.CFrame * CFrame.new(0, 0, -40)
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, -80)
 				else
 					root.CFrame = CFrame.new(foundModel.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 				end
@@ -1810,6 +1810,7 @@ for _, v in pairs(Trains) do
 	if workspace:FindFirstChild(v) then
 		train = workspace:FindFirstChild(v)
 		trainSeat = train.RequiredComponents.Controls.ConductorSeat:FindFirstChildWhichIsA("VehicleSeat")
+		break
 	end
 end
 
