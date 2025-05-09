@@ -1448,7 +1448,7 @@ local function ownChair(targetPos: Vector3)
 			seat:Sit(hum)
 			hum:ChangeState(Enum.HumanoidStateType.Seated)
 		end
-		root.CFrame = lastPos
+		root.CFrame = CFrame.new(lastPos)
 	end
 end
 
