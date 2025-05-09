@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12344"
+local ScVer = "v1.1235"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1277,7 +1277,7 @@ local Items = {
 	"JadeTablet4",
 }
 local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip"}
-local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"Castle",	"TeslaLab",	"Farm",		"Pyramid",	"79km"}
+local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km"}
 local Trains = {		"armor",	"cattle",	"default",	"golden"}
 local allTextBoxes = {Item, Mode, Amount}
 local train = nil
@@ -1285,8 +1285,10 @@ local trainSeat = nil
 local searchingItem = false
 local currentSection = nil
 local sectionDb = false
+local teleportDb = false
 local runningConnections = {
 	GetItem = nil,
+	Teleport = nil,
 }
 local Var = {
 	getItemVar = {selectedItem = nil, itemAmount = 0, selectedMode = "Store", cancelGetItem = false},
@@ -1432,12 +1434,12 @@ local function ownChair(targetPos: Vector3?)
 			tik += 0.1
 		end
 	end)
-	wait(2)
+	wait(1)
 	hum:ChangeState(Enum.HumanoidStateType.Running)
-	wait(3)
+	wait(.5)
 	seat:Sit(hum)
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
-	wait(1)
+	wait(.5)
 	root.CFrame = CFrame.new(lastPos)
 	
 	--[[task.delay(0.2, function()
@@ -1461,6 +1463,9 @@ end
 
 
 local function teleportToTrain()
+	if hum.Sit then
+		hum.Sit = false
+	end
 	if trainSeat.Occupant == nil then
 		trainSeat:Sit(hum)
 		return true
@@ -1493,16 +1498,15 @@ end
 local function getItem()
 	if not table.find(ItemModes, Var.getItemVar.selectedMode) or
 		not table.find(Items, Var.getItemVar.selectedItem) or
-		runningConnections.GetItem then
+		runningConnections.GetItem or
+		teleportDb then
 		return
 	end
+	teleportDb = true
 
-	local cancelGetItem = Var.getItemVar.cancelGetItem
-	cancelGetItem = false
+	Var.getItemVar.cancelGetItem = false
 
-	runningConnections.GetItem = true -- Just a flag, not a connection
-
-	task.spawn(function()
+	local thread = coroutine.create(function()
 		local success, msg = pcall(function()
 			lastPos = root.Position
 			local selectedItem = Var.getItemVar.selectedItem
@@ -1511,10 +1515,10 @@ local function getItem()
 			local path = (selectedItem == "Model_Unicorn") and workspace or workspace.RuntimeItems
 
 			for i = 1, loopAmount do
-				if cancelGetItem then break end -- check if the user pressed stop
-				
+				if Var.getItemVar.cancelGetItem then break end 
+
 				ownChair()
-				
+
 				searchItem(selectedItem, path, start, 15)
 				local foundItem = getNearestItem(selectedItem)
 
@@ -1544,6 +1548,63 @@ local function getItem()
 
 		runningConnections.GetItem = nil
 	end)
+
+	runningConnections.GetItem = thread
+	coroutine.resume(thread)
+end
+local function teleportDestination()
+	if not table.find(teleports, Var.teleportVar.selectedDestination) or
+		teleportDb then
+		return
+	end
+	teleportDb = true
+	
+	local thread = coroutine.create(function()
+		lastPos = root.Position
+		local selectedDestination = Var.getItemVar.selectedDestination
+		local path = (selectedDestination == "Farm") and workspace.RandomBuildings or workspace
+		
+		local success, msg = pcall(function()
+			if selectedDestination == "Train" then
+				teleportToTrain()
+				runningConnections.Teleport = nil
+				return
+			end
+			
+			ownChair()
+			
+			if selectedDestination == "79km" then
+				local targetPosition = Vector3.new(-320, 3, -49000)
+				root.CFrame = CFrame.new(targetPosition)
+				return
+			elseif selectedDestination == "StrangePyramid" then
+				local targetPosition = Vector3.new(905.209, 12, 39459)
+				root.CFrame = CFrame.new(targetPosition)
+				return
+			end
+
+			searchItem(selectedDestination, path, start, 15)
+			local foundModel = getNearestItem(selectedDestination)
+
+			if foundModel then
+				if selectedDestination == "Farm" then
+					local floor = foundModel:FindFirstChild("Floor")
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, -40)
+				elseif selectedMode == "VampireCastle" then
+					local floor = foundModel.House:FindFirstChild("MainFloor")
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, -40)
+				else
+					root.CFrame = CFrame.new(foundModel.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+				end
+			end
+		end)
+		if not success then
+			warn("Teleport Error:", msg)
+		end
+		runningConnections.Teleport = nil
+	end)
+	runningConnections.Teleport = thread
+	coroutine.resume(thread)
 end
 
 --- UI FUNCTIONS ---
@@ -1669,7 +1730,7 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 			new.Visible = true
 			new.Active = true
 			new.Parent = ScrollingFrame
-			new.MouseButton1Down:Connect(function()
+			new.MouseButton1Click:Connect(function()
 				if frameName == "ItemList" then
 					Var.getItemVar.selectedItem = v
 				elseif frameName == "ModeList" then
@@ -1796,9 +1857,9 @@ Search.MouseButton1Click:Connect(function()
 	getItem()
 end)
 Stop.MouseButton1Click:Connect(function()
-	if runningConnections.GetItem then
+	if runningConnections.GetItem and typeof(runningConnections.GetItem) == "thread" then
 		Var.getItemVar.cancelGetItem = true
-		runningConnections.GetItem = nil
+		coroutine.close(runningConnections.GetItem)
 		root.CFrame = CFrame.new(lastPos)
 	end
 end)
