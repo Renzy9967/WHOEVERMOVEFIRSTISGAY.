@@ -247,17 +247,19 @@ local function ownChair(targetPos)
 	local tik = 0
 	local mult = CFrame.new(targetPos)
 	
-	for i = 1, 10 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
-		root.CFrame = mult
-		if chair then
-			seat:Sit(hum)
-			hum:ChangeState(Enum.HumanoidStateType.Seated)
-			hum:ChangeState(Enum.HumanoidStateType.Freefall)
-		else
-			break
+	task.spawn(function()
+		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+			root.CFrame = mult
+			if chair then
+				seat:Sit(hum)
+				hum:ChangeState(Enum.HumanoidStateType.Seated)
+				hum:ChangeState(Enum.HumanoidStateType.Freefall)
+			else
+				break
+			end
+			task.wait(0.01)
 		end
-		task.wait(0.1)
-	end
+	end)
 
 	if chair then
 		local seat = chair:FindFirstChildWhichIsA("Seat")
@@ -266,9 +268,6 @@ local function ownChair(targetPos)
 		wait(.2)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
 		wait(0.5)
-		seat:Sit(hum)
-		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(.2)
 	end
 end
 
@@ -491,7 +490,7 @@ local TeleportCheck = false
 plr.OnTeleport:Connect(function(State)
 	if (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("_G.AutoDeath = "..tostring(AutoDeath).." loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()")
 	else
 		warn('Incompatible Exploit','Your exploit does not support this command (missing queue_on_teleport)')
 	end
