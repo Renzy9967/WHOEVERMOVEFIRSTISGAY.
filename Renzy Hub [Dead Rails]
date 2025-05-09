@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.11"
+local ScVer = "v1.12"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1400,8 +1400,10 @@ local function ownChair(targetPos: Vector3)
 		hum.sit = false
 	end
 	local chair = getNearestItem("Chair")
-	if not chair then searchItem("Chair") end
-	chair = getNearestItem("Chair")
+	if not chair then
+		searchItem("Chair") 
+		chair = getNearestItem("Chair")
+	end
 	
 	local primaryPart = chair.PrimaryPart
 	local seat = chair:FindFirstChildWhichIsA("Seat")
@@ -1497,7 +1499,7 @@ local function getItem()
 			for i = 1, loopAmount do
 				if cancelGetItem then break end -- check if the user pressed stop
 				
-				ownChair(start)
+				ownChair()
 				
 				searchItem(selectedItem, path, start, 100)
 				local foundItem = getNearestItem(selectedItem)
