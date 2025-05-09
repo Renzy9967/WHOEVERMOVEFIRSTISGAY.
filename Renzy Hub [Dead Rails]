@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12343"
+local ScVer = "v1.12344"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1520,6 +1520,7 @@ local function getItem()
 
 				if foundItem then
 					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+					wait(3)
 					if selectedMode == "Store" then
 						equipSack()
 						storeNetwork:FireServer(foundItem)
@@ -1531,7 +1532,7 @@ local function getItem()
 						equipArmorNetwork:FireServer(foundItem)
 					end
 
-					task.wait(0.2)
+					task.wait(1)
 					root.CFrame = CFrame.new(lastPos)
 				end
 			end
