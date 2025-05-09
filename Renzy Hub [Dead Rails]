@@ -3,7 +3,7 @@ local GameId = 70876832253163
 local ScVer = "v1"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
-if game.PlaceId ~= PlaceId or game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
+if game.PlaceId ~= PlaceId and game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9960") or plr.PlayerGui:FindFirstChild("Skibidi9960") then warn("Script is already running!") return end
 
 local DRMenu = Instance.new("ScreenGui")
