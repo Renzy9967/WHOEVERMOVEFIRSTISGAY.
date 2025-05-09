@@ -71,7 +71,8 @@ Credit.BackgroundTransparency = 1
 Credit.Position = UDim2.new(0.321680367, 0, 0.860759497, 0)
 Credit.Size = UDim2.new(0.356306285, 0, 0.13837488, 0)
 Credit.Font = Enum.Font.Highway
-Credit.Text = "Made by Renzy"
+Credit.RichText = true
+Credit.Text = "Made by Renzy".."\n".."<font color='rgb(255,0,0)'>(Jump if bond not collecting)</font>"
 Credit.TextColor3 = Color3.new(0.984314, 1, 0)
 Credit.TextScaled = true
 Credit.TextSize = 14
@@ -335,16 +336,14 @@ local function searchItem(itemname)
 
 		if attempts >= maxAttempts then
 			returning = true
-			task.spawn(function()
-				for i = 1, 5 do
-					root.Velocity = Vector3.new(0,0,0)
-					root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
-					wait(1)
-				end
+			for i = 1, 3 do
+				root.Velocity = Vector3.new(0,0,0)
+				root.CFrame = CFrame.new(start) * CFrame.new(0,3,0)
 				wait(1)
-				hum.JumpHeight = 7.2
-				hum.JumpPower = 50
-			end)
+			end
+			wait(1)
+			hum.JumpHeight = 7.2
+			hum.JumpPower = 50
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 
@@ -363,15 +362,6 @@ local function ensureSeated()
 		local chair = getNearestItem("Chair")
 		if chair then
 			local seat = chair:FindFirstChildWhichIsA("Seat")
-			--[[if firstRun then
-				if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-					hum:EquipTool(plr.Backpack.Sack)
-				end
-				seat:Sit(hum)
-				wait(.2)
-				Remotes:WaitForChild("StoreItem"):FireServer(chair)
-				return true
-			end]]
 			if seat then
 				seat:Sit(hum)
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
@@ -382,11 +372,9 @@ local function ensureSeated()
 	end
 
 	if not trySit() then
-		-- only searches for Chair — won't recurse
 		searchItem("Chair")
 		task.wait(0.2)
 		trySit()
-		--root.CFrame = CFrame.new(start)
 	end
 end
 
@@ -475,6 +463,9 @@ autoBond()
 
 if _G.AutoDeath then
 	hum:ChangeState(Enum.HumanoidStateType.Dead)
+	wait(15)
+	Remotes.EndDecision:FireServer(false)
+	Remotes.EndGame:FireServer()
 end
 
 local function toggleStartbtn(bool)
@@ -491,8 +482,11 @@ end
 
 local TeleportCheck = false
 plr.OnTeleport:Connect(function(State)
-	if KeepInfYield and (not TeleportCheck) and queueteleport then
+	if (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
+		task.wait(5)
 		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()")
+	else
+		warn('Incompatible Exploit','Your exploit does not support this command (missing queue_on_teleport)')
 	end
 end)
