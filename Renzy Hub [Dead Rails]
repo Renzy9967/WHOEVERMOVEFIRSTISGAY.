@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1234"
+local ScVer = "v1.12341"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1441,11 +1441,14 @@ local function ownChair(targetPos: Vector3)
 	if chair then
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(.2)
-		root.CFrame = CFrame.new(mult)
-		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		wait(0.8)
+		--[[wait(.2)
+		root.CFrame = mult
+		hum:ChangeState(Enum.HumanoidStateType.Jumping)[[]]
+		wait(1)
 		if hum:GetState() ~= Enum.HumanoidStateType.Seated then
+			root.CFrame = mult
+			hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			wait(.5)
 			seat:Sit(hum)
 			hum:ChangeState(Enum.HumanoidStateType.Seated)
 		end
