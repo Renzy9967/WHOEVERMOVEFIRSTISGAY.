@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1"
+local ScVer = "v1.1"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1333,9 +1333,10 @@ local function getNearestItem(instancePath, itemName)
 	return item
 end
 
-local function searchItem(itemname, instancePath, startPos)
+local function searchItem(itemname, instancePath, startPos, speed)
 	startPos = startPos or start
 	instancePath = instancePath or workspace.RuntimeItems
+	speed = speed or 250
 	local newpos = startPos
 	local maxAttempts = 2
 	local attempts = 0
@@ -1384,7 +1385,7 @@ local function searchItem(itemname, instancePath, startPos)
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -250)
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
 		newpos = root.Position
 
 		task.wait(0.01)
@@ -1495,13 +1496,14 @@ local function getItem()
 
 			for i = 1, loopAmount do
 				if cancelGetItem then break end -- check if the user pressed stop
-
-				searchItem(selectedItem, path, start)
+				
+				ownChair(start)
+				
+				searchItem(selectedItem, path, start, 100)
 				local foundItem = getNearestItem(selectedItem)
 
 				if foundItem then
-					ownChair(foundItem.PrimaryPart.Position)
-
+					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 					if selectedMode == "Store" then
 						equipSack()
 						storeNetwork:FireServer(foundItem)
@@ -1778,4 +1780,7 @@ Stop.MouseButton1Click:Connect(function()
 		runningConnections.GetItem = nil
 		root.CFrame = CFrame.new(lastPos)
 	end
+end)
+Toggle.MouseButton1Click:Connect(function()
+	Holder.Visible = not Holder.Visible
 end)
