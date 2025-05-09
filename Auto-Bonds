@@ -239,7 +239,7 @@ local function ownChair(targetPos)
 	local tik = 0
 	local mult = CFrame.new(targetPos)
 	
-	for i = 1, 20 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+	for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
 		root.CFrame = mult
 		if chair then
 			seat:Sit(hum)
@@ -262,9 +262,12 @@ local function ownChair(targetPos)
 		local seat = chair:FindFirstChildWhichIsA("Seat")
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(1)
+		wait(.2)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
 		wait(0.5)
+		seat:Sit(hum)
+		hum:ChangeState(Enum.HumanoidStateType.Seated)
+		wait(.2)
 	end
 end
 
