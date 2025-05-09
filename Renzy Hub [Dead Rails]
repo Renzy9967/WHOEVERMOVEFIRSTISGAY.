@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12341"
+local ScVer = "v1.12342"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1395,66 +1395,61 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 	hum.JumpPower = 50
 end
 
-local function ownChair(targetPos: Vector3)
-	if hum.Sit then
-		hum.Sit = false
-	end
+local function ownChair(targetPos: Vector3?)
 	local chair = getNearestItem("Chair")
 	if not chair then
-		searchItem("Chair") 
+		searchItem("Chair")
 		chair = getNearestItem("Chair")
+		if not chair then return end
 	end
-	
-	local primaryPart = chair.PrimaryPart
+
 	local seat = chair:FindFirstChildWhichIsA("Seat")
 	if not seat then return end
-	local weld = primaryPart:FindFirstChildWhichIsA("WeldConstraint")
+
+	-- Optional: Handle chair welds if needed (like in your new version)
+	local weld = chair.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
 	if weld and weld.Name == "DragWeldConstraint" then
 		seat:Sit(hum)
 		unweldNetwork:FireServer(chair)
-		wait(.2)
+		task.wait(0.2)
 	end
-	
-	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0,0,-100)).Position
-	local tik = 0
-	local mult = CFrame.new(targetPos) 
-	local done = false
-	local a = 1
+
+	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0, 0, -30)).Position
+	local mult = CFrame.new(targetPos)
 
 	task.spawn(function()
-		for i = 1, 100 do -- Runs for ~1 second (0.01s * 100)
-			root.CFrame = (a == 1) and seat.CFrame*CFrame.new(0,3,0) or mult
-			a = (a == 1) and 2 or 1
+		for _ = 1, 100 do -- 100 * 0.01 = 1 second
+			root.CFrame = mult
 
-			if chair then
-				hum:ChangeState(Enum.HumanoidStateType.Freefall)
+			if seat and not seat.Occupant then
 				seat:Sit(hum)
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
-			else
-				break
+				hum:ChangeState(Enum.HumanoidStateType.Freefall)
 			end
 
 			task.wait(0.01)
 		end
 	end)
 
-	if chair then
-		seat:Sit(hum)
-		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		--[[wait(.2)
-		root.CFrame = mult
-		hum:ChangeState(Enum.HumanoidStateType.Jumping)[[]]
-		wait(1)
-		if hum:GetState() ~= Enum.HumanoidStateType.Seated then
-			root.CFrame = mult
-			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			wait(.5)
+	task.delay(0.2, function()
+		if seat and not seat.Occupant then
 			seat:Sit(hum)
 			hum:ChangeState(Enum.HumanoidStateType.Seated)
 		end
-		root.CFrame = CFrame.new(lastPos)
-	end
+	end)
+
+	task.delay(0.4, function()
+		hum:ChangeState(Enum.HumanoidStateType.Jumping)
+	end)
+
+	task.delay(1, function()
+		if seat and not seat.Occupant then
+			seat:Sit(hum)
+			hum:ChangeState(Enum.HumanoidStateType.Seated)
+		end
+	end)
 end
+
 
 local function teleportToTrain()
 	if trainSeat.Occupant == nil then
