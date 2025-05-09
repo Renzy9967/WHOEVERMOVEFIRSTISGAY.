@@ -457,9 +457,9 @@ local function autoBond()
 	end
 end
 
-hum.StateChanged:Connect(function(old, new)
+--[[hum.StateChanged:Connect(function(old, new)
 	print("State Changed:", old, "to", new)
-end)
+end)]]
 
 hum.JumpHeight = 0
 hum.JumpPower = 0
@@ -471,6 +471,7 @@ local AutoDeath = _G.AutoDeath or true
 
 if AutoDeath then
 	hum:ChangeState(Enum.HumanoidStateType.Dead)
+	hum.Sit = false
 	wait(15)
 	Remotes.EndDecision:FireServer(false)
 	Remotes.EndGame:FireServer()
