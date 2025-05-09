@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1235"
+local ScVer = "v1.12351"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1862,6 +1862,9 @@ Stop.MouseButton1Click:Connect(function()
 		coroutine.close(runningConnections.GetItem)
 		root.CFrame = CFrame.new(lastPos)
 	end
+end)
+TeleportBtn.MouseButton1Click:Connect(function()
+	teleportDestination()
 end)
 Toggle.MouseButton1Click:Connect(function()
 	Holder.Visible = not Holder.Visible
