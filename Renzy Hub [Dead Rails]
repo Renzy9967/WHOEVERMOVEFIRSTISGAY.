@@ -236,7 +236,7 @@ CreateUIStroke(Title, Color3.fromRGB(255, 255, 255), 1, Enum.ApplyStrokeMode.Bor
 
 Item.Name = "Item"
 Item.Parent = GetItem
-Item.Active = false
+Item.Active = true
 Item.BackgroundColor3 = Color3.new(0.27451, 0.27451, 0.27451)
 Item.BorderColor3 = Color3.new(0, 0, 0)
 Item.BorderSizePixel = 0
@@ -255,7 +255,7 @@ Item.TextWrapped = true
 
 Mode.Name = "Mode"
 Mode.Parent = GetItem
-Mode.Active = false
+Mode.Active = true
 Mode.BackgroundColor3 = Color3.new(0.27451, 0.27451, 0.27451)
 Mode.BorderColor3 = Color3.new(0, 0, 0)
 Mode.BorderSizePixel = 0
@@ -274,7 +274,7 @@ Mode.TextWrapped = true
 
 Amount.Name = "Amount"
 Amount.Parent = GetItem
-Amount.Active = false
+Amount.Active = true
 Amount.BackgroundColor3 = Color3.new(0.27451, 0.27451, 0.27451)
 Amount.BorderColor3 = Color3.new(0, 0, 0)
 Amount.BorderSizePixel = 0
@@ -353,7 +353,7 @@ UIGridLayout.CellSize = UDim2.new(1, 0, 0, 25)
 
 Template.Name = "Template"
 Template.Parent = ModeList
-Template.Active = false
+Template.Active = true
 Template.BackgroundColor3 = Color3.new(0.47451, 0.47451, 0.47451)
 Template.BorderColor3 = Color3.new(0, 0, 0)
 Template.BorderSizePixel = 0
@@ -402,7 +402,7 @@ UIGridLayout_2.CellSize = UDim2.new(1, 0, 0, 25)
 
 Template_2.Name = "Template"
 Template_2.Parent = ItemList
-Template_2.Active = false
+Template_2.Active = true
 Template_2.BackgroundColor3 = Color3.new(0.47451, 0.47451, 0.47451)
 Template_2.BorderColor3 = Color3.new(0, 0, 0)
 Template_2.BorderSizePixel = 0
@@ -680,7 +680,7 @@ CreateUIStroke(Title_13, Color3.fromRGB(255, 255, 255), 1, Enum.ApplyStrokeMode.
 
 Destination.Name = "Item"
 Destination.Parent = Teleport
-Destination.Active = false
+Destination.Active = true
 Destination.BackgroundColor3 = Color3.new(0.27451, 0.27451, 0.27451)
 Destination.BorderColor3 = Color3.new(0, 0, 0)
 Destination.BorderSizePixel = 0
@@ -730,7 +730,7 @@ UIGridLayout_3.CellSize = UDim2.new(1, 0, 0, 25)
 
 Template_3.Name = "Template"
 Template_3.Parent = DestinationList
-Template_3.Active = false
+Template_3.Active = true
 Template_3.BackgroundColor3 = Color3.new(0.47451, 0.47451, 0.47451)
 Template_3.BorderColor3 = Color3.new(0, 0, 0)
 Template_3.BorderSizePixel = 0
@@ -1139,12 +1139,12 @@ Toggle.TextColor3 = Color3.new(1, 1, 1)
 Toggle.TextScaled = true
 Toggle.TextSize = 14
 Toggle.TextWrapped = true
-CreateUIConstraint(Holder, 1.458)
+CreateUIConstraint(Toggle, 1.458)
 
 Bg_2.Name = "Bg"
 Bg_2.Parent = Toggle
 Bg_2.AnchorPoint = Vector2.new(0.5, 0.5)
-Bg_2.BackgroundColor3 = Color3.new(1, 1, 1)
+Bg_2.BackgroundColor3 = Color3.new(1, 1, 1) 
 Bg_2.BackgroundTransparency = 1
 Bg_2.BorderColor3 = Color3.new(0, 0, 0)
 Bg_2.BorderSizePixel = 0
@@ -1285,9 +1285,11 @@ local trainSeat = nil
 local searchingItem = false
 local currentSection = nil
 local sectionDb = false
-local runningConnections = {}
+local runningConnections = {
+	GetItem = nil,
+}
 local Var = {
-	getItemVar = {selectedItem = nil, itemAmount = 0, selectedMode = "Store"},
+	getItemVar = {selectedItem = nil, itemAmount = 0, selectedMode = "Store", cancelGetItem = false},
 	espVar = {playersEsp = false, itemsEsp = false, mobsEsp = false},
 	teleportVar = {selectedDestination = nil},
 }
@@ -1472,24 +1474,34 @@ local function equipSack()
 end
 
 local function getItem()
-	if not table.find(ItemModes, Var.getItemVar.selectedMode) or not table.find(Items, Var.getItemVar.selectedItem) or runningConnections.GetItem then return end
-	runningConnections.GetItem = RunService.Heartbeat:Connect(function()
+	if not table.find(ItemModes, Var.getItemVar.selectedMode) or
+		not table.find(Items, Var.getItemVar.selectedItem) or
+		runningConnections.GetItem then
+		return
+	end
+
+	local cancelGetItem = Var.getItemVar.cancelGetItem
+	cancelGetItem = false
+
+	runningConnections.GetItem = true -- Just a flag, not a connection
+
+	task.spawn(function()
 		local success, msg = pcall(function()
 			lastPos = root.Position
 			local selectedItem = Var.getItemVar.selectedItem
 			local selectedMode = Var.getItemVar.selectedMode
 			local loopAmount = Var.getItemVar.itemAmount
-			local path
-			if selectedItem == "Model_Unicorn" then
-				path = workspace
-			else
-				path = workspace.RuntimeItems
-			end
+			local path = (selectedItem == "Model_Unicorn") and workspace or workspace.RuntimeItems
+
 			for i = 1, loopAmount do
+				if cancelGetItem then break end -- check if the user pressed stop
+
 				searchItem(selectedItem, path, start)
 				local foundItem = getNearestItem(selectedItem)
+
 				if foundItem then
 					ownChair(foundItem.PrimaryPart.Position)
+
 					if selectedMode == "Store" then
 						equipSack()
 						storeNetwork:FireServer(foundItem)
@@ -1500,18 +1512,18 @@ local function getItem()
 					elseif selectedMode == "Equip" then
 						equipArmorNetwork:FireServer(foundItem)
 					end
-					wait(.2)
+
+					task.wait(0.2)
 					root.CFrame = CFrame.new(lastPos)
 				end
 			end
 		end)
-		
+
 		if not success then
-			print(msg)
+			warn("GetItem Error:", msg)
 		end
-		if runningConnections.GetItem then
-			runningConnections.GetItem:Disconnect()
-		end
+
+		runningConnections.GetItem = nil
 	end)
 end
 
@@ -1761,9 +1773,9 @@ Search.MouseButton1Click:Connect(function()
 	getItem()
 end)
 Stop.MouseButton1Click:Connect(function()
-	local index = runningConnections["GetItem"]
-	if index then
-		index:Disconnect()
+	if runningConnections.GetItem then
+		Var.getItemVar.cancelGetItem = true
+		runningConnections.GetItem = nil
 		root.CFrame = CFrame.new(lastPos)
 	end
 end)
