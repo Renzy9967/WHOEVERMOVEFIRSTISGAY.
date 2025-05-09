@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1233"
+local ScVer = "v1.1234"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1397,7 +1397,7 @@ end
 
 local function ownChair(targetPos: Vector3)
 	if hum.Sit then
-		hum.sit = false
+		hum.Sit = false
 	end
 	local chair = getNearestItem("Chair")
 	if not chair then
@@ -1423,7 +1423,7 @@ local function ownChair(targetPos: Vector3)
 
 	task.spawn(function()
 		for i = 1, 100 do -- Runs for ~1 second (0.01s * 100)
-			root.CFrame = (a == 1) and seat.CFrame or mult
+			root.CFrame = (a == 1) and seat.CFrame*CFrame.new(0,3,0) or mult
 			a = (a == 1) and 2 or 1
 
 			if chair then
@@ -1442,11 +1442,14 @@ local function ownChair(targetPos: Vector3)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
 		wait(.2)
+		root.CFrame = CFrame.new(mult)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		wait(0.5)
+		wait(0.8)
+		if hum:GetState() ~= Enum.HumanoidStateType.Seated then
+			seat:Sit(hum)
+			hum:ChangeState(Enum.HumanoidStateType.Seated)
+		end
 		root.CFrame = CFrame.new(lastPos)
-		seat:Sit(hum)
-		hum:ChangeState(Enum.HumanoidStateType.Seated)
 	end
 end
 
@@ -1505,7 +1508,7 @@ local function getItem()
 				
 				ownChair()
 				
-				searchItem(selectedItem, path, start, 25)
+				searchItem(selectedItem, path, start, 15)
 				local foundItem = getNearestItem(selectedItem)
 
 				if foundItem then
