@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1"
+local ScVer = "v1.11"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
@@ -1318,7 +1318,7 @@ local unweldNetwork = RemoteEvent.RequestUnweld
 
 --- SCRIPT FUNCTIONS ---
 
-local function getNearestItem(instancePath, itemName)
+local function getNearestItem(itemName, instancePath)
 	instancePath = instancePath or workspace.RuntimeItems
 	local item, lastDist = nil, math.huge
 	for _, v in pairs(instancePath:GetChildren()) do
