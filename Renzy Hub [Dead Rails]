@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123742"
+local ScVer = "v1.123743"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1355,12 +1355,12 @@ local function cameraLookAt(targetPos: Vector3, override: boolean)
 		if overrideCam then return end
 		camCurrentLook = true
 	else
-		overrideCam = false -- let the thread before closes
+		overrideCam = false -- let the thread before close
 		camCurrentLook = false
 		task.wait(0.2)
 		overrideCam = true
 	end
-	
+
 	if runningConnections.cameraThread then
 		overrideCam = false
 		camCurrentLook = false -- Thread will clean itself up on next wait iteration
@@ -1368,7 +1368,8 @@ local function cameraLookAt(targetPos: Vector3, override: boolean)
 
 	local thread = coroutine.create(function()
 		local success, err = pcall(function()
-			runningConnections.cameraConnection = RunService.RenderStepped:Connect(function()
+			runningConnections.cameraConnection = RunService.Stepped:Connect(function()
+				-- Update the camera CFrame to look at the target position
 				camera.CFrame = CFrame.lookAt(camera.CFrame.Position, targetPos)
 			end)
 
@@ -1383,10 +1384,9 @@ local function cameraLookAt(targetPos: Vector3, override: boolean)
 			runningConnections.cameraConnection:Disconnect()
 			runningConnections.cameraConnection = nil
 		end
-		
+
 		overrideCam = false
 		camCurrentLook = false
-		teleportDb = false
 		runningConnections.cameraThread = nil
 
 		if not success then
@@ -1403,6 +1403,7 @@ local function getNearestItem(itemName, instancePath)
 	local item, lastDist = nil, math.huge
 	for _, v in pairs(instancePath:GetChildren()) do
 		if v.Name == itemName and v:IsA("Model") then
+			if not v.PrimaryPart then return error("Couldn't find PrimaryPart inside: " .. v.Name) end
 			if itemName == "Chair" then
 				local seat = v:FindFirstChildWhichIsA("Seat")
 				local weld = v.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
@@ -1642,7 +1643,7 @@ local function getItem()
 
 				ownChair()
 
-				searchItem(selectedItem, path, start, 15)
+				searchItem(selectedItem, path, start, 25)
 				local foundItem = getNearestItem(selectedItem)
 
 				if foundItem then
