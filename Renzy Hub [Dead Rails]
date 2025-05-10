@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123691"
+local ScVer = "v1.1237"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1415,17 +1415,18 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 end
 
 local function ownChair(targetPos: Vector3?)
+	local seatPart = hum.SeatPart
+	if seatPart then
+		local chair = seatPart.Parent
+		if chair then
+			if chair.Name == "Chair" then return end
+		end
+	end
 	local chair = getNearestItem("Chair")
 	if not chair then
 		searchItem("Chair")
 		chair = getNearestItem("Chair")
 		if not chair then return end
-	end
-
-	local seat = chair:FindFirstChildWhichIsA("Seat")
-	if not seat then return end
-	if seat.Occupant == hum then
-		return
 	end
 
 	chair.PrimaryPart = chair.PrimaryPart or chair:FindFirstChild("Seat") or chair:FindFirstChildWhichIsA("BasePart")
@@ -1442,6 +1443,7 @@ local function ownChair(targetPos: Vector3?)
 
 	local mult = CFrame.new(targetPos)
 	local tik = 0
+	local done = false
 
 	task.spawn(function()
 		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
@@ -1456,6 +1458,7 @@ local function ownChair(targetPos: Vector3?)
 			end
 			wait(0.01)
 		end
+		done = true
 	end)
 
 	if chair then
@@ -1465,6 +1468,8 @@ local function ownChair(targetPos: Vector3?)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
 	end
+	
+	repeat wait() until done
 end
 
 local function teleportToTrain()
