@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12365"
+local ScVer = "v1.12366"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1422,6 +1422,9 @@ local function ownChair(targetPos: Vector3?)
 
 	local seat = chair:FindFirstChildWhichIsA("Seat")
 	if not seat then return end
+	if seat.Occupant == hum then
+		return
+	end
 
 	-- Optional: Handle chair welds if needed (like in your new version)
 	local weld = chair.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
@@ -1430,15 +1433,16 @@ local function ownChair(targetPos: Vector3?)
 		unweldNetwork:FireServer(chair)
 		task.wait(0.2)
 	end
+	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0, 0, -30)).Position
+	
 	seat:Sit(hum)
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
 
-	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0, 0, -30)).Position
 	local mult = CFrame.new(targetPos)
 	local tik = 0
 
 	task.spawn(function()
-		for i = 1, 5 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+		for i = 1, 3 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
 			root.CFrame = mult
 			if chair then
 				seat:Sit(hum)
@@ -1446,7 +1450,7 @@ local function ownChair(targetPos: Vector3?)
 			else
 				break
 			end
-			task.wait(1)
+			task.wait(0.5)
 		end
 	end)
 
@@ -1457,6 +1461,7 @@ local function ownChair(targetPos: Vector3?)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
 		wait(1)
 		hum:ChangeState(Enum.HumanoidStateType.Running)
+		wait(.2)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
 	end
