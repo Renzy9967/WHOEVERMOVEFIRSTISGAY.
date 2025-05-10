@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1237"
+local ScVer = "v1.12371"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1428,6 +1428,12 @@ local function ownChair(targetPos: Vector3?)
 		chair = getNearestItem("Chair")
 		if not chair then return end
 	end
+	
+	local seat = chair:FindFirstChildWhichIsA("Seat")
+	if not seat then return end
+	if seat.Occupant == hum then
+		return
+	end
 
 	chair.PrimaryPart = chair.PrimaryPart or chair:FindFirstChild("Seat") or chair:FindFirstChildWhichIsA("BasePart")
 	local weld = chair.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
@@ -1536,7 +1542,7 @@ local function getItem()
 				if foundItem then
 					foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
 					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, 3, 0)
-					wait(2)
+					wait(.2)
 					if selectedMode == "Store" then
 						equipSack()
 						wait(.2)
@@ -1549,7 +1555,7 @@ local function getItem()
 						equipArmorNetwork:FireServer(foundItem)
 					end
 
-					task.wait(1)
+					task.wait(.2)
 					root.CFrame = CFrame.new(lastPos)
 				end
 			end
