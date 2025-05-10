@@ -1,9 +1,9 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12355"
+local ScVer = "v1.1236"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
-if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails ] " .. ScVer .." doesn't work in this place!") return end
+if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9960") or plr.PlayerGui:FindFirstChild("Skibidi9960") then warn("Script is already running!") return end
 
 local DRMenu = Instance.new("ScreenGui")
@@ -1547,7 +1547,8 @@ local function getItem()
 			warn("GetItem Error:", msg)
 		end
 
-		runningConnections.GetItem = nil
+		teleportDb = false
+		runningConnections.Teleport = nil
 	end)
 
 	runningConnections.GetItem = thread
@@ -1568,6 +1569,7 @@ local function teleportDestination()
 		local success, msg = pcall(function()
 			if selectedDestination == "Train" then
 				teleportToTrain()
+				teleportDb = false
 				runningConnections.Teleport = nil
 				return
 			end
@@ -1577,15 +1579,19 @@ local function teleportDestination()
 			if selectedDestination == "79km" then
 				local targetPosition = Vector3.new(-320, 3, -49000)
 				root.CFrame = CFrame.new(targetPosition)
+				teleportDb = false
+				runningConnections.Teleport = nil
 				return
 			elseif selectedDestination == "StrangePyramid" then
 				local targetPosition = Vector3.new(905.209, 12, 39459)
 				root.CFrame = CFrame.new(targetPosition)
+				teleportDb = false
+				runningConnections.Teleport = nil
 				return
 			end
 
 			searchItem(selectedDestination, path, start, 15)
-			local foundModel = getNearestItem(selectedDestination)
+			local foundModel = getNearestItem(selectedDestination, path)
 
 			if foundModel then
 				if selectedDestination == "Farm" then
@@ -1599,9 +1605,12 @@ local function teleportDestination()
 				end
 			end
 		end)
+		
 		if not success then
 			warn("Teleport Error:", msg)
 		end
+		
+		teleportDb = false
 		runningConnections.Teleport = nil
 	end)
 	runningConnections.Teleport = thread
