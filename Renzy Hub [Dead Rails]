@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12366"
+local ScVer = "v1.12367"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1225,6 +1225,8 @@ local Items = {
 	"StrangeMask",
 	"Vampire Knife",
 	"BrainJar",
+	"Model_Werewolf",
+	"Model_Vampire",
 	"Cavalry Sword",
 	"Shovel",
 	"Tomahawk",
@@ -1442,31 +1444,20 @@ local function ownChair(targetPos: Vector3?)
 	local tik = 0
 
 	task.spawn(function()
-		for i = 1, 3 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
 			root.CFrame = mult
-			if chair then
-				seat:Sit(hum)
-				hum:ChangeState(Enum.HumanoidStateType.Seated)
-			else
-				break
-			end
-			task.wait(0.5)
+			task.wait(0.01)
 		end
 	end)
 
 	if chair then
-		seat:Sit(hum)
-		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(1)
+		wait(.5)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		wait(1)
-		hum:ChangeState(Enum.HumanoidStateType.Running)
-		wait(.2)
+		wait(.4)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
 	end
 end
-
 
 local function teleportToTrain()
 	if hum.Sit then
