@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123741"
+local ScVer = "v1.123742"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1328,7 +1328,7 @@ local root = hum.RootPart
 
 local lastPos = root.Position
 local start = Vector3.new(42, 3, 30000)
-local endpos = Vector3.new(-377.3, 3, -49021.703)
+local endpos = Vector3.new(-506.865, 0.75, -49221.016)
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
@@ -1701,7 +1701,7 @@ local function teleportDestination()
 			ownChair()
 			
 			if selectedDestination == "79km" then
-				local targetPosition = Vector3.new(-320, 3, -49000)
+				local targetPosition = Vector3.new(-348.684, 3, -48436.215)
 				moveTo(lastPos, targetPosition, 250)
 				teleportDb = false
 				runningConnections.Teleport = nil
