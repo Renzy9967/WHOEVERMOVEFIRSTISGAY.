@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12373"
+local ScVer = "v1.12374"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1362,8 +1362,8 @@ local function cameraLookAt(targetPos: Vector3, override: boolean)
 	end
 	
 	if runningConnections.cameraThread then
-		camCurrentLook = false
-		overrideCam = false -- Thread will clean itself up on next wait iteration
+		overrideCam = false
+		camCurrentLook = false -- Thread will clean itself up on next wait iteration
 	end
 
 	local thread = coroutine.create(function()
@@ -1383,6 +1383,7 @@ local function cameraLookAt(targetPos: Vector3, override: boolean)
 			runningConnections.cameraConnection:Disconnect()
 			runningConnections.cameraConnection = nil
 		end
+		
 		overrideCam = false
 		camCurrentLook = false
 		teleportDb = false
@@ -1554,7 +1555,7 @@ local function ownChair(targetPos: Vector3?)
 	local tik = 0
 	local done = false
 	
-	cameraLookAt(seat.Position, true)
+	cameraLookAt(chair.PrimaryPart.Position, true)
 
 	task.spawn(function()
 		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
