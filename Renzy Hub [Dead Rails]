@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12374"
+local ScVer = "v1.123741"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1460,7 +1460,6 @@ local function moveTo(startPos, targetPos, speed)
 	print("Arrived at destination.")
 end
 
-
 local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 	startPos = startPos or start
 	instancePath = instancePath or workspace.RuntimeItems
@@ -1554,8 +1553,8 @@ local function ownChair(targetPos: Vector3?)
 	local mult = CFrame.new(targetPos)
 	local tik = 0
 	local done = false
-	
-	cameraLookAt(chair.PrimaryPart.Position, true)
+	local downPos = (root.Position - Vector3.new(0, 3, 0))
+	cameraLookAt(downPos, true)
 
 	task.spawn(function()
 		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
