@@ -1678,7 +1678,6 @@ local function safeExit()
 	end
 end
 
-
 local function loadMenu()
 	wait(5)
 	TS:Create(Text, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
@@ -1864,6 +1863,7 @@ Player_2.MouseButton1Click:Connect(function()
 	openSection(Player)
 end)
 Exit.MouseButton1Click:Connect(function()
+	if exitDb then return end
 	promptExitMenu()
 end)
 Yes.MouseButton1Click:Connect(function()
