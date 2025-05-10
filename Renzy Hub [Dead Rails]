@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123641"
+local ScVer = "v1.12365"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1221,11 +1221,15 @@ UIScale.Scale = 0.5
 
 local Items = {
 	"Model_Unicorn",
+	"StrangeMachine",
+	"StrangeMask",
+	"Vampire Knife",
+	"BrainJar",
+	"Cavalry Sword",
 	"Shovel",
 	"Tomahawk",
-	"Cavalry Sword",
+	"Bond",
 	"Jade Sword",
-	"Vampire Knife",
 	"Pickaxe",
 	"Dynamite",
 	"Molotov",
@@ -1241,7 +1245,6 @@ local Items = {
 	"Navy Revolver",
 	"Revolver",
 	"Supply Depot Key",
-	"BrainJar",
 	"Coal",
 	"Chair",
 	"Torch",
@@ -1250,9 +1253,7 @@ local Items = {
 	"Sheet Metal",
 	"LightningRod",
 	"Barbed Wire",
-	"StrangeMachine",
 	"Tumbleweed",
-	"StrangeMask",
 	"GoldPocketWatch",
 	"GoldStatue",
 	"GoldPlate",
@@ -1437,7 +1438,7 @@ local function ownChair(targetPos: Vector3?)
 	local tik = 0
 
 	task.spawn(function()
-		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+		for i = 1, 5 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
 			root.CFrame = mult
 			if chair then
 				seat:Sit(hum)
@@ -1445,17 +1446,16 @@ local function ownChair(targetPos: Vector3?)
 			else
 				break
 			end
-			task.wait(0.01)
+			task.wait(1)
 		end
 	end)
 
 	if chair then
-		local seat = chair:FindFirstChildWhichIsA("Seat")
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
-		wait(.5)
+		wait(1)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		wait(0.5)
+		wait(1)
 		hum:ChangeState(Enum.HumanoidStateType.Running)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
@@ -1525,10 +1525,12 @@ local function getItem()
 				local foundItem = getNearestItem(selectedItem)
 
 				if foundItem then
+					foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
 					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, 3, 0)
-					wait(3)
+					wait(2)
 					if selectedMode == "Store" then
 						equipSack()
+						wait(.2)
 						storeNetwork:FireServer(foundItem)
 					elseif selectedMode == "Collect" then
 						collectNetwork:FireServer(foundItem)
