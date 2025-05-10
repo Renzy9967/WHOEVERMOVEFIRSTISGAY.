@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12371"
+local ScVer = "v1.12372"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1415,25 +1415,20 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 end
 
 local function ownChair(targetPos: Vector3?)
-	local seatPart = hum.SeatPart
-	if seatPart then
-		local chair = seatPart.Parent
-		if chair then
-			if chair.Name == "Chair" then return end
-		end
+	if hum.SeatPart and hum.SeatPart.Parent and hum.SeatPart.Parent.Name == "Chair" then
+		return
 	end
+
 	local chair = getNearestItem("Chair")
 	if not chair then
 		searchItem("Chair")
 		chair = getNearestItem("Chair")
 		if not chair then return end
 	end
-	
+
 	local seat = chair:FindFirstChildWhichIsA("Seat")
 	if not seat then return end
-	if seat.Occupant == hum then
-		return
-	end
+	if seat.Occupant == hum then return end
 
 	chair.PrimaryPart = chair.PrimaryPart or chair:FindFirstChild("Seat") or chair:FindFirstChildWhichIsA("BasePart")
 	local weld = chair.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
