@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12362"
+local ScVer = "v1.12363"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1326,6 +1326,19 @@ local function getNearestItem(itemName, instancePath)
 	local item, lastDist = nil, math.huge
 	for _, v in pairs(instancePath:GetChildren()) do
 		if v.Name == itemName and v:IsA("Model") then
+			if itemName == "Chair" then
+				local seat = v:FindFirstChildWhichIsA("Seat")
+				local weld = v.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
+				
+				if seat and seat.Occupant then
+					continue
+				end
+				if weld and weld.Name == "DragWeldConstraint" then
+					root.CFrame = v.PrimaryPart.CFrame
+					unweldNetwork:FireServer(chair)
+					task.wait(0.2)
+				end
+			end
 			local dist = (v.PrimaryPart.Position - root.Position).Magnitude
 			if dist < lastDist then
 				item = v
@@ -1417,58 +1430,43 @@ local function ownChair(targetPos: Vector3?)
 		task.wait(0.2)
 	end
 	seat:Sit(hum)
+	hum:ChangeState(Enum.HumanoidStateType.Seated)
 
 	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0, 0, -30)).Position
 	local mult = CFrame.new(targetPos)
 	local tik = 0
 
 	task.spawn(function()
-		while tik < 5 do -- 100 * 0.01 = 1 second
+		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
 			root.CFrame = mult
-
-			if seat and not seat.Occupant then
+			if chair then
 				seat:Sit(hum)
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
+				hum:ChangeState(Enum.HumanoidStateType.Freefall)
+			else
+				break
 			end
-
 			task.wait(0.01)
-			tik += 0.1
-		end
-	end)
-	wait(1)
-	hum:ChangeState(Enum.HumanoidStateType.Running)
-	wait(.2)
-	seat:Sit(hum)
-	hum:ChangeState(Enum.HumanoidStateType.Seated)
-	wait(.5)
-	root.CFrame = CFrame.new(lastPos)
-	seat:Sit(hum)
-	hum:ChangeState(Enum.HumanoidStateType.Seated)
-	root.CFrame = CFrame.new(lastPos)
-	
-	--[[task.delay(0.2, function()
-		if seat and not seat.Occupant then
-			seat:Sit(hum)
-			hum:ChangeState(Enum.HumanoidStateType.Seated)
 		end
 	end)
 
-	task.delay(0.4, function()
+	if chair then
+		local seat = chair:FindFirstChildWhichIsA("Seat")
+		seat:Sit(hum)
+		hum:ChangeState(Enum.HumanoidStateType.Seated)
+		wait(.3)
 		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-	end)
-
-	task.delay(1, function()
-		if seat and not seat.Occupant then
-			seat:Sit(hum)
-			hum:ChangeState(Enum.HumanoidStateType.Seated)
-		end
-	end)]]
+		wait(0.5)
+		seat:Sit(hum)
+		hum:ChangeState(Enum.HumanoidStateType.Seated)
+	end
 end
 
 
 local function teleportToTrain()
 	if hum.Sit then
 		hum.Sit = false
+		wait(.2)
 	end
 	if trainSeat.Occupant == nil then
 		trainSeat:Sit(hum)
@@ -1551,7 +1549,7 @@ local function getItem()
 		end
 
 		teleportDb = false
-		runningConnections.Teleport = nil
+		runningConnections.GetItem = nil
 	end)
 
 	runningConnections.GetItem = thread
@@ -1738,6 +1736,8 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 				child:Destroy()
 			end
 		end
+		
+		local clickDb = false
 
 		for _, v in ipairs(Lists) do
 			local new = Clone:Clone()
@@ -1747,6 +1747,8 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 			new.Active = true
 			new.Parent = ScrollingFrame
 			new.MouseButton1Click:Connect(function()
+				if clickDb then return end
+				clickDb = true
 				if frameName == "ItemList" then
 					Var.getItemVar.selectedItem = v
 				elseif frameName == "ModeList" then
@@ -1756,6 +1758,8 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 				end
 				Box.Text = v
 				Box:ReleaseFocus()
+				wait(.3)
+				clickDb = false
 			end)
 			updateCanvasSize()
 		end
