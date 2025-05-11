@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12376"
+local ScVer = "v1.123761"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1687,12 +1687,12 @@ local function getItem()
 
 				ownChair()
 
-				searchItem(selectedItem, path, start, 250)
+				searchItem(selectedItem, path, start, 100)
 				
 				if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
 					local uni = path:FindFirstChild(selectedItem)
 					local vehicleSeat = uni:FindFirstChildWhichIsA("VehicleSeat")
-					if vehicleSeat then
+					if vehicleSeat and uni:GetAttribute("Tamed") == true then
 						local params = RaycastParams.new()
 						params.FilterDescendantsInstances = {uni}
 						params.FilterType = Enum.RaycastFilterType.Exclude
