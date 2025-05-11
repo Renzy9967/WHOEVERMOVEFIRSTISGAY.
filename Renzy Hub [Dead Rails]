@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123743"
+local ScVer = "v1.12375"
 local plr = game.Players.LocalPlayer
 local CP = game:GetService("ContentProvider")
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
@@ -1021,7 +1021,7 @@ Title_21.BackgroundColor3 = Color3.new(0.368627, 0.368627, 0.368627)
 Title_21.BackgroundTransparency = 1
 Title_21.BorderColor3 = Color3.new(1, 1, 1)
 Title_21.BorderSizePixel = 0
-Title_21.Position = UDim2.new(0.83767134, 0, 0.496235907, 0)
+Title_21.Position = UDim2.new(0.536010206, 0, 0.496236056, 0)
 Title_21.Size = UDim2.new(0.274512559, 0, 0.130562693, 0)
 Title_21.Font = Enum.Font.TitilliumWeb
 Title_21.Text = "Full bright"
@@ -1030,7 +1030,7 @@ Title_21.TextScaled = true
 Title_21.TextSize = 14
 Title_21.TextStrokeTransparency = 0
 Title_21.TextWrapped = true
-CreateUIStroke(Title_20, Color3.fromRGB(255, 255, 255), 1, Enum.ApplyStrokeMode.Border)
+CreateUIStroke(Title_21, Color3.fromRGB(255, 255, 255), 1, Enum.ApplyStrokeMode.Border)
 
 Fullbright.Name = "Fullbright"
 Fullbright.Parent = Holder_2
@@ -1403,7 +1403,17 @@ local function getNearestItem(itemName, instancePath)
 	local item, lastDist = nil, math.huge
 	for _, v in pairs(instancePath:GetChildren()) do
 		if v.Name == itemName and v:IsA("Model") then
-			if not v.PrimaryPart then return error("Couldn't find PrimaryPart inside: " .. v.Name) end
+			if not v.PrimaryPart then 
+				local tik = 0
+				local posTemp = v:FindFirstChildWhichIsA("BasePart").Position or v.WorldPivot.Position
+				while tik < 3 and not v.PrimaryPart do
+					root.CFrame = CFrame.new(posTemp)
+					tik += 1
+					wait(1)
+				end
+				if not v.PrimaryPart then return error("Couldn't find PrimaryPart inside: " .. v.Name)  end
+			end
+			
 			if itemName == "Chair" then
 				local seat = v:FindFirstChildWhichIsA("Seat")
 				local weld = v.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
@@ -1447,7 +1457,7 @@ local function moveTo(startPos, targetPos, speed)
 			break
 		end
 
-		local moveStep = direction.Unit * math.min(speed * 0.01, distance)
+		local moveStep = direction.Unit * math.min(speed, distance)
 		root.CFrame = CFrame.new(currentPos + moveStep)
 
 		task.wait(0.01)
@@ -1554,8 +1564,7 @@ local function ownChair(targetPos: Vector3?)
 	local mult = CFrame.new(targetPos)
 	local tik = 0
 	local done = false
-	local downPos = (root.Position - Vector3.new(0, 3, 0))
-	cameraLookAt(downPos, true)
+	cameraLookAt(root.Position - Vector3.new(0, 3, 0), true)
 
 	task.spawn(function()
 		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
@@ -1703,13 +1712,33 @@ local function teleportDestination()
 			
 			if selectedDestination == "79km" then
 				local targetPosition = Vector3.new(-348.684, 3, -48436.215)
-				moveTo(lastPos, targetPosition, 250)
+				--moveTo(lastPos, targetPosition, 250)
+				hum.JumpHeight = 0
+				hum.JumpPower = 0
+				for i = 1, 3 do
+					root.Velocity = Vector3.new(0,0,0)
+					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
+					wait(1)
+				end
+				wait(1)
+				hum.JumpHeight = 7.2
+				hum.JumpPower = 50
 				teleportDb = false
 				runningConnections.Teleport = nil
 				return
 			elseif selectedDestination == "StrangePyramid" then
-				local targetPosition = Vector3.new(905.209, 12, 39459)
-				moveTo(lastPos, targetPosition, 250)
+				local targetPosition = Vector3.new(901.7, 4, -39467)
+				--moveTo(lastPos, targetPosition, 250)
+				hum.JumpHeight = 0
+				hum.JumpPower = 0
+				for i = 1, 3 do
+					root.Velocity = Vector3.new(0,0,0)
+					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
+					wait(1)
+				end
+				wait(1)
+				hum.JumpHeight = 7.2
+				hum.JumpPower = 50
 				teleportDb = false
 				runningConnections.Teleport = nil
 				return
@@ -2007,6 +2036,7 @@ Stop.MouseButton1Click:Connect(function()
 		coroutine.close(runningConnections.GetItem)
 		teleportDb = false
 		runningConnections.GetItem = nil
+		overrideCam = false
 		root.CFrame = CFrame.new(lastPos)
 	end
 end)
