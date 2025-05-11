@@ -1687,52 +1687,64 @@ local function getItem()
 
 				ownChair()
 
-				searchItem(selectedItem, path, start, 25)
+				searchItem(selectedItem, path, start, 250)
 				
 				if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
-					local vehicleSeat = path:FindFirstChild(selectedItem):FindFirstChildWhichIsA("VehicleSeat")
-					if vehicleSeat and vehicleSeat.Occupant then
-						local enemyHum = vehicleSeat.Occupant
-						local enemyChar = enemyHum.Parent
-						local done = false
-						local newPos = root.Position
+					local uni = path:FindFirstChild(selectedItem)
+					local vehicleSeat = uni:FindFirstChildWhichIsA("VehicleSeat")
+					if vehicleSeat then
+						local params = RaycastParams.new()
+						params.FilterDescendantsInstances = {uni}
+						params.FilterType = Enum.RaycastFilterType.Exclude
 						
-						hum:UnequipTools()
-						local rifle = plr.Backpack:FindFirstChild("Rifle")
-						
-						if not rifle then
-							searchItem("Rifle", workspace.RuntimeItems, start, 250, 1)
-							rifle = getNearestItem("Rifle")
-							if not rifle then return end
-							rifle.PrimaryPart = rifle.PrimaryPart or rifle:FindFirstChildWhichIsA("BasePart")
-							root.CFrame = CFrame.new(rifle.PrimaryPart.Position) * CFrame.new(0, 3, 0)
-							wait(.2)
-							pickUpNetwork:FireServer(rifle)
-							root.CFrame = CFrame.new(newPos)
-						end
-						
-						local stateFol = rifle:FindFirstChild("ClientWeaponState")
-						local serverStateFol = rifle:FindFirstChild("ServerWeaponState")
-						local config = rifle:FindFirstChild("WeaponConfiguration")
-						if not stateFol or not serverStateFol or not config then return end
-						local currentAmmo = stateFol:FindFirstChild("CurrentAmmo")
-						local serverCurrentAmmo = stateFol:FindFirstChild("CurrentAmmo")
-						if not currentAmmo then
-							currentAmmo = Instance.new("NumberValue")
-							currentAmmo.Name = "CurrentAmmo"
-							currentAmmo.Value = serverCurrentAmmo and serverCurrentAmmo.Value or 6
-							currentAmmo.Parent = rifle
-						end
-						
-						hum:EquipTool(rifle)
-						camera.CameraSubject = enemyHum
-						setCamZoom("Lock")
-						mouse1click()
-						wait(.2)
-						while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
-							mouse1press()
-							wait(.2)
-							mouse1release()
+						local result = workspace:Raycast(uni.PrimaryPart.Position+Vector3.new(0,1,0),  Vector3.new(0,5,0), params)
+						if result then
+							local enemyChar = result.Instance.Parent
+							if enemyChar and string.find(string.lower(enemyChar.Name), string.lower("Outlaw")) then
+								local enemyHum = enemyChar:FindFirstChildWhichIsA("Humanoid")
+								if enemyHum then
+									local done = false
+									local newPos = root.Position
+
+									hum:UnequipTools()
+									local rifle = plr.Backpack:FindFirstChild("Rifle")
+
+									if not rifle then
+										searchItem("Rifle", workspace.RuntimeItems, start, 250, 1)
+										rifle = getNearestItem("Rifle")
+										if not rifle then return end
+										rifle.PrimaryPart = rifle.PrimaryPart or rifle:FindFirstChildWhichIsA("BasePart")
+										root.CFrame = CFrame.new(rifle.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+										wait(.2)
+										pickUpNetwork:FireServer(rifle)
+										root.CFrame = CFrame.new(newPos)
+									end
+
+									local stateFol = rifle:FindFirstChild("ClientWeaponState")
+									local serverStateFol = rifle:FindFirstChild("ServerWeaponState")
+									local config = rifle:FindFirstChild("WeaponConfiguration")
+									if not stateFol or not serverStateFol or not config then return end
+									local currentAmmo = stateFol:FindFirstChild("CurrentAmmo")
+									local serverCurrentAmmo = stateFol:FindFirstChild("CurrentAmmo")
+									if not currentAmmo then
+										currentAmmo = Instance.new("NumberValue")
+										currentAmmo.Name = "CurrentAmmo"
+										currentAmmo.Value = serverCurrentAmmo and serverCurrentAmmo.Value or 6
+										currentAmmo.Parent = rifle
+									end
+
+									hum:EquipTool(rifle)
+									camera.CameraSubject = enemyHum
+									setCamZoom("Lock")
+									mouse1click()
+									wait(.2)
+									while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
+										mouse1press()
+										wait(.2)
+										mouse1release()
+									end
+								end
+							end
 						end
 					end
 				end
@@ -1799,7 +1811,7 @@ local function teleportDestination()
 				--moveTo(lastPos, targetPosition, 250)
 				hum.JumpHeight = 0
 				hum.JumpPower = 0
-				for i = 1, 3 do
+				for i = 1, 2 do
 					root.Velocity = Vector3.new(0,0,0)
 					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
 					wait(1)
@@ -1811,11 +1823,11 @@ local function teleportDestination()
 				runningConnections.Teleport = nil
 				return
 			elseif selectedDestination == "StrangePyramid" then
-				local targetPosition = Vector3.new(901.7, 4, -39467)
+				local targetPosition = Vector3.new(901.7, 12, -39467)
 				--moveTo(lastPos, targetPosition, 250)
 				hum.JumpHeight = 0
 				hum.JumpPower = 0
-				for i = 1, 3 do
+				for i = 1, 2 do
 					root.Velocity = Vector3.new(0,0,0)
 					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
 					wait(1)
