@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123764"
+local ScVer = "v1.12377"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1336,15 +1336,21 @@ local Items = {
 	"JadeTablet3",
 	"JadeTablet4",
 }
-local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip"}
 local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km"}
+local rareItems = {
+	"Model_Unicorn",
+	"Model_Tesla"
+}
+local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip"}
 local Trains = {		"armor",	"cattle",	"default",	"golden"}
 local EspColor = {
 	["Item"] = Color3.fromRGB(255, 255, 255),
 	["Mob"] = Color3.fromRGB(255, 0, 0),
 	["Player"] = Color3.fromRGB(0, 255, 0),
-	["BankCombo"] = Color3.fromRGB(255, 255, 0)
+	["BankCombo"] = Color3.fromRGB(255, 255, 0),
+	["RareItem"] = Color3.fromRGB(160, 51, 255),
 }
+local allToggleButtons = {ItemEsp, MobEsp, PlayerEsp, Antivoid, Fly, Fullbright, Infinitejump, Instantpp, Noclip}
 local allTextBoxes = {Item, Mode, Amount, Flyspeed}
 local train = nil
 local trainSeat = nil
@@ -1358,8 +1364,12 @@ local runningConnections = {
 	Teleport = nil,
 	cameraConnection = nil,
 	cameraThread = nil,
+	antivoidLoop = nil,
+	noclipLoop = nil,
+	flyLoop = nil,
 }
 local Var = {
+	localPlayer = {antiVoid = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 0},
 	getItemVar = {selectedItem = nil, itemAmount = 0, selectedMode = "Store", cancelGetItem = false},
 	espVar = {playersEsp = false, itemsEsp = false, mobsEsp = false},
 	teleportVar = {selectedDestination = nil},
@@ -1373,9 +1383,12 @@ local root = hum.RootPart
 local lastPos = root.Position
 local start = Vector3.new(42, 3, 30000)
 local endpos = Vector3.new(-506.865, 0.75, -49221.016)
+local crankPos = Vector3.new(-351.3, 3.5, -49041.695)
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
+local VirtualUser = game:GetService("VirtualUser")
+local Baseplates = workspace.Baseplates
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local Network = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Network")
 local RemoteEvent = Network:WaitForChild("RemoteEvent")
@@ -1388,6 +1401,7 @@ local storeNetwork = Remotes.StoreItem
 local dropItemNetwork = Remotes.DropItem
 local reloadNetwork = Remotes.Weapon.Reload
 local unweldNetwork = RemoteEvent.RequestUnweld
+local crankTimer = 600
 
 local camera = workspace.CurrentCamera
 local overrideCam = false
@@ -1442,26 +1456,109 @@ local overrideCam = false
 	coroutine.resume(thread)
 end]]
 
+local function toggleAntiVoid(enabled)
+	if enabled then
+		runningConnections.antivoidLoop = RunService.Stepped:Connect(function()
+			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 500 then
+				root.AssemblyLinearVelocity = root.AssemblyLinearVelocity + Vector3.new(0, 250, 0)
+			end
+		end)
+	else
+		if runningConnections.antivoidLoop then
+			runningConnections.antivoidLoop:Disconnect()
+			runningConnections.antivoidLoop = nil
+		end
+	end
+end
+local function toggleNoClip(enabled)
+	if enabled then
+		runningConnections.noclipLoop = RunService.Stepped:Connect(function()
+			for _, child in pairs(char:GetDescendants()) do
+				if child:IsA("BasePart") and child.CanCollide == true then
+					child.CanCollide = false
+				end
+			end
+		end)
+	else
+		if runningConnections.noclipLoop then
+			runningConnections.noclipLoop:Disconnect()
+			runningConnections.noclipLoop = nil
+		end
+	end
+end
+--[[local function toggleFly(enabled)
+	if enabled then
+		if not IsOnMobile then
+			NOFLY()
+			wait()
+			sFLY(true)
+		else
+			mobilefly(speaker, true)
+		end
+	else
+		if not IsOnMobile then NOFLY() else unmobilefly(speaker) end
+		if runningConnections.flyLoop then
+			runningConnections.flyLoop:Disconnect()
+			runningConnections.flyLoop = nil
+		end
+	end
+end]]
+local function antiAfk()
+	local GC = getconnections or get_signal_cons
+	if GC then
+		for i,v in pairs(GC(Players.LocalPlayer.Idled)) do
+			if v["Disable"] then
+				v["Disable"](v)
+			elseif v["Disconnect"] then
+				v["Disconnect"](v)
+			end
+		end
+	else
+		Players.LocalPlayer.Idled:Connect(function()
+			VirtualUser:CaptureController()
+			VirtualUser:ClickButton2(Vector2.new())
+		end)
+	end
+end
+
 local function updateEspUI()
 	for model, info in pairs(EspInstances) do
-		local dist = math.floor((model:GetPivot().Position - root.Position).Magnitude)
-		if dist > 10000 then info.ui.Enabled = false continue end
-		info.ui.Enabled = true
-		if model.Name == "BankCombo" then
-			info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " | " .. model.BankCombo.SurfaceGui.Textlabel.Text
-			info.ui.TextLabel.Color3 = EspColor.BankCombo
-		else
-			info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
-		end
-		if model:HasTag("DraggableObject") then
-			info.ui.TextLabel.Color3 = EspColor.Item
-		elseif model:HasTag("Enemy") then
-			info.ui.TextLabel.Color3 = EspColor.Mob
-		elseif Players:GetPlayerFromCharacter(model) then
-			info.ui.TextLabel.Color3 = EspColor.Player
-		else
-			info.ui.TextLabel.Color3 = EspColor.Item
-		end
+		task.spawn(function()
+			local dist = math.floor((model:GetPivot().Position - root.Position).Magnitude)
+			if dist > 10000 then info.ui.Enabled = false return end
+			info.ui.Enabled = true
+			local overrideColor = false
+			if model.Name == "BankCombo" then
+				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " m | " .. model.BankCombo.SurfaceGui.Textlabel.Text
+				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
+				overrideColor = true
+			elseif table.find(rareItems, model.Name) then
+				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
+				info.ui.TextLabel.TextColor3 = EspColor.RareItem
+				overrideColor = true
+			else
+				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
+			end
+			if model:HasTag("DraggableObject") then
+				if not overrideColor then
+					info.ui.TextLabel.TextColor3 = EspColor.Item
+				end
+				info.ui.Enabled = Var.espVar.itemsEsp
+			elseif model:HasTag("Enemy") then
+				if not overrideColor then
+					info.ui.TextLabel.TextColor3 = EspColor.Mob
+				end
+				info.ui.Enabled = Var.espVar.mobsEsp
+			elseif Players:GetPlayerFromCharacter(model) then
+				if not overrideColor then
+					info.ui.TextLabel.TextColor3 = EspColor.Player
+				end
+				info.ui.Enabled = Var.espVar.playersEsp
+			else
+				info.ui.TextLabel.TextColor3 = EspColor.Item
+				info.ui.Enabled = Var.espVar.itemsEsp
+			end
+		end)
 	end
 end
 
@@ -1489,11 +1586,11 @@ local function removeEsp(model: Model)
 end
 
 local function handleEsp(tag: string)
-	task.spawn(function()
-		for _, v in pairs(CS:GetTagged(tag)) do
+	for _, v in pairs(CS:GetTagged(tag)) do
+		task.spawn(function()
 			createEsp(v)
-		end
-	end)
+		end)
+	end
 	CS:GetInstanceAddedSignal(tag):Connect(createEsp)
 	CS:GetInstanceRemovedSignal(tag):Connect(removeEsp)
 end
@@ -1828,6 +1925,7 @@ local function getItem()
 								if enemyHum then
 									local done = false
 									local newPos = root.Position
+									local conn
 
 									hum:UnequipTools()
 									local rifle = plr.Backpack:FindFirstChild("Rifle")
@@ -1861,11 +1959,16 @@ local function getItem()
 									setCamZoom("Lock")
 									mouse1click()
 									wait(.2)
+									conn = RunService.RenderStepped:Connect(function()
+										root.CFrame = uni.PrimaryPart.CFrame * CFrame.new(0, -6, 0)
+										camera.CFrame = CFrame.lookAt(camera.CFrame.Position, enemyChar.Head)
+									end)
 									while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
 										mouse1press()
 										wait(.2)
-										mouse1release()
+										mouse1release() 
 									end
+									conn:Disconnect()
 								end
 							end
 						end
@@ -1880,7 +1983,6 @@ local function getItem()
 					wait(.2)
 					if selectedMode == "Store" then
 						equipSack()
-						wait(.2)
 						storeNetwork:FireServer(foundItem)
 					elseif selectedMode == "Collect" then
 						collectNetwork:FireServer(foundItem)
@@ -2059,6 +2161,22 @@ local function loadMenu()
 	openSection(Credits)
 end
 
+local function setupToggleBtn()
+	for _, Button in ipairs(allToggleButtons) do
+		task.spawn(function()
+			local toggled = false
+			Button.MouseButton1Click:Connect(function()
+				if not Button.Active then return end
+				Button.Active = false
+				Button.BackgroundTransparency = 0.5
+				Button.BackgroundColor3 = not toggled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
+				wait(0.1)
+				Button.Active = true
+			end)
+		end)
+	end
+end
+
 local function setupExclusiveFocus(targetBox: TextBox, allBoxes: {TextBox})
 	targetBox.Focused:Connect(function()
 		for _, box in ipairs(allBoxes) do
@@ -2092,6 +2210,14 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 		ScrollingFrame.CanvasPosition = Vector2.new(0, 0)
 		ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 25)
 	end
+	
+	local function enableOtherButton(blacklisted: TextButton, togle: boolean)
+		for _, v in pairs(ScrollingFrame:GetChildren()) do
+			if v:IsA("TextButton") and v ~= blacklisted then
+				v.Active = togle
+			end
+		end
+	end
 
 	local function handleList()
 		local Template: TextButton = ScrollingFrame:FindFirstChild("Template")
@@ -2107,8 +2233,6 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 				child:Destroy()
 			end
 		end
-		
-		local clickDb = false
 
 		for _, v in ipairs(Lists) do
 			local new = Clone:Clone()
@@ -2118,8 +2242,8 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 			new.Active = true
 			new.Parent = ScrollingFrame
 			new.MouseButton1Click:Connect(function()
-				if clickDb then return end
-				clickDb = true
+				if not new.Active then return end
+				disableOtherButton(new, false)
 				if frameName == "ItemList" then
 					Var.getItemVar.selectedItem = v
 				elseif frameName == "ModeList" then
@@ -2129,8 +2253,8 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 				end
 				Box.Text = v
 				Box:ReleaseFocus()
-				wait(.3)
-				clickDb = false
+				wait(.4)
+				disableOtherButton(new, true)
 			end)
 			updateCanvasSize()
 		end
@@ -2188,6 +2312,8 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 
 	handleList()
 end
+
+setupToggleBtn()
 
 for _, box in ipairs(allTextBoxes) do
 	setupExclusiveFocus(box, allTextBoxes)
@@ -2264,6 +2390,48 @@ TeleportBtn.MouseButton1Click:Connect(function()
 end)
 Toggle.MouseButton1Click:Connect(function()
 	Holder.Visible = not Holder.Visible
+end)
+ItemEsp.MouseButton1Click:Connect(function()
+	Var.espVar.itemsEsp = not Var.espVar.itemsEsp
+end)
+MobEsp.MouseButton1Click:Connect(function()
+	Var.espVar.mobsEsp = not Var.espVar.mobsEsp
+end)
+PlayerEsp.MouseButton1Click:Connect(function()
+	Var.espVar.playersEsp = not Var.espVar.playersEsp
+end)
+AutoBonds.MouseButton1Click:Connect(function()
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()
+end)
+AutoWins.MouseButton1Click:Connect(function()
+	if crankTimer > 0 then return end
+	lastPos = root.Position
+	ownChair()
+	task.spawn(function()
+		root.CFrame = CFrame.lookAt(root.Position, crankPos)
+		root.CFrame = CFrame.new(crankPos)
+		wait(.2)
+		for _, prompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
+			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
+				prompt.HoldDuration = 0
+				prompt:InputHoldBegin()
+				wait(.1)
+				prompt:InputHoldEnd()
+				root.CFrame = CFrame.new(lastPos)
+			end
+		end
+	end)
+end)
+
+task.spawn(function()
+	for i = crankTimer, 0, -1 do
+		local minutes = math.floor(i / 60)
+		local seconds = i % 60
+		local text = string.format("%02d:%02d", minutes, seconds)
+		Crank.Text = text
+		crankTimer = i
+		wait(1)
+	end
 end)
 
 handleEsp("DraggableObject")
