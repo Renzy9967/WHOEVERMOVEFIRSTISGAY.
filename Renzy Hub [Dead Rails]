@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123763"
+local ScVer = "v1.123764"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2268,4 +2268,4 @@ end)
 
 handleEsp("DraggableObject")
 handleEsp("Enemy")
-root.Changed:Connect(updateEspUI)
+RunService.RenderStepped:Connect(updateEspUI)
