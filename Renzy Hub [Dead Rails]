@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123761"
+local ScVer = "v1.123762"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -158,10 +158,9 @@ CP:PreloadAsync({Transition})
 CP:PreloadAsync({Bg})
 
 BillboardUI.Name = "Esp"
-BillboardUI.Parent = game.CoreGui.Folder
+BillboardUI.Parent = espFol
 BillboardUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 BillboardUI.Active = true
-BillboardUI.Adornee = game.Workspace.Seat
 BillboardUI.AlwaysOnTop = true
 BillboardUI.LightInfluence = 1
 BillboardUI.Size = UDim2.new(0, 100, 0, 50)
