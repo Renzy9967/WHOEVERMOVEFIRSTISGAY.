@@ -1,8 +1,10 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
 local ScVer = "v1.123761"
-local plr = game.Players.LocalPlayer
+local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
+local CS = game:GetService("CollectionService")
+local plr = Players.LocalPlayer
 if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9960") or plr.PlayerGui:FindFirstChild("Skibidi9960") then warn("Script is already running!") return end
 
@@ -89,6 +91,9 @@ local UIGradient = Instance.new("UIGradient")
 local Transition = Instance.new("ImageLabel")
 local Toggle = Instance.new("TextButton")
 local Bg_2 = Instance.new("ImageLabel")
+local BillboardUI = Instance.new("BillboardGui")
+local espInfo = Instance.new("TextLabel")
+local espFol = Instance.new("Folder")
 
 local function CreateUIStroke(Parent,Color,Thickness,Mode)
 	local uiStroke = Instance.new("UIStroke")
@@ -108,6 +113,7 @@ local function CreateUIConstraint(Parent,AspectRatio,AspectType,DominantAxis)
 end
 
 DRMenu.Name = "Skibidi9960"
+espFol.Name = "SkibidiEsp"
 local success = pcall(function()
 	DRMenu.Parent = game.CoreGui
 end)
@@ -115,6 +121,12 @@ if not success then
 	DRMenu.Parent = plr.PlayerGui
 end
 DRMenu.IgnoreGuiInset = true
+local success2 = pcall(function()
+	espFol.Parent = game.CoreGui
+end)
+if not success2 then
+	espFol.Parent = plr.PlayerGui
+end
 
 Bg.AnchorPoint = Vector2.new(0.5, 0.5)
 Bg.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -144,6 +156,31 @@ Transition.Image = "rbxassetid://106959228463900"
 CP:PreloadAsync({Loading})
 CP:PreloadAsync({Transition})
 CP:PreloadAsync({Bg})
+
+BillboardUI.Name = "Esp"
+BillboardUI.Parent = game.CoreGui.Folder
+BillboardUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+BillboardUI.Active = true
+BillboardUI.Adornee = game.Workspace.Seat
+BillboardUI.AlwaysOnTop = true
+BillboardUI.LightInfluence = 1
+BillboardUI.Size = UDim2.new(0, 100, 0, 50)
+BillboardUI.StudsOffset = Vector3.new(0, 3, 0)
+
+espInfo.Parent = BillboardUI
+espInfo.BackgroundColor3 = Color3.new(1, 1, 1)
+espInfo.BackgroundTransparency = 1
+espInfo.BorderColor3 = Color3.new(0, 0, 0)
+espInfo.BorderSizePixel = 0
+espInfo.Size = UDim2.new(1, 0, 1, 0)
+espInfo.Font = Enum.Font.TitilliumWeb
+espInfo.FontFace.Bold = true
+espInfo.Text = "Item | 0 studs"
+espInfo.TextColor3 = Color3.new(1, 1, 1)
+espInfo.TextScaled = true
+espInfo.TextSize = 14
+espInfo.TextStrokeTransparency = 0
+espInfo.TextWrapped = true
 
 Holder.Name = "Holder"
 Holder.Parent = DRMenu
@@ -1302,6 +1339,12 @@ local Items = {
 local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip"}
 local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km"}
 local Trains = {		"armor",	"cattle",	"default",	"golden"}
+local EspColor = {
+	["Item"] = Color3.fromRGB(255, 255, 255),
+	["Mob"] = Color3.fromRGB(255, 0, 0),
+	["Player"] = Color3.fromRGB(0, 255, 0),
+	["BankCombo"] = Color3.fromRGB(255, 255, 0)
+}
 local allTextBoxes = {Item, Mode, Amount, Flyspeed}
 local train = nil
 local trainSeat = nil
@@ -1321,6 +1364,7 @@ local Var = {
 	espVar = {playersEsp = false, itemsEsp = false, mobsEsp = false},
 	teleportVar = {selectedDestination = nil},
 }
+local EspInstances = {}
 
 local char = plr.Character or plr.CharacterAdded:Wait()
 local hum: Humanoid = char:WaitForChild("Humanoid")
@@ -1398,20 +1442,91 @@ local overrideCam = false
 	coroutine.resume(thread)
 end]]
 
+local function updateEspUI()
+	for model, info in pairs(EspInstances) do
+		local dist = (model:GetPivot().Position - root.Position).Magnitude
+		if dist > 10000 then continue end
+		if model.Name == "BankCombo" then
+			info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " | " .. model.BankCombo.SurfaceGui.Textlabel.Text
+			info.ui.TextLabel.Color3 = EspColor.BankCombo
+		else
+			info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
+		end
+		if model:HasTag("DraggableObject") then
+			info.ui.TextLabel.Color3 = EspColor.Item
+		elseif model:HasTag("Enemy") then
+			info.ui.TextLabel.Color3 = EspColor.Mob
+		elseif Players:GetPlayerFromCharacter(model) then
+			info.ui.TextLabel.Color3 = EspColor.Player
+		else
+			info.ui.TextLabel.Color3 = EspColor.Item
+		end
+	end
+end
+
+local function createEsp(model: Model)
+	if EspInstances[model] ~= nil then return end
+	
+	local hightlight = Instance.new("Highlight", espFol)
+	hightlight.Name = model.Name
+	hightlight.Adornee = model
+	local espUI = BillboardUI:Clone()
+	espUI.Parent = espFol
+	espUI.Name = model.Name
+	espUI.Adornee = model
+	local dist = (model:GetPivot().Position - root.Position).Magnitude
+	espUI.TextLabel.Text = model.Name .. " | " .. tostring(dist)
+	
+	EspInstances[model] = {highlight = hightlight, ui = espUI}
+end
+
+local function removeEsp(model: Model)
+	if EspInstances[model] == nil then return end
+	EspInstances[model].highlight:Destroy()
+	EspInstances[model].ui:Destroy()
+	EspInstances[model] = nil
+end
+
+local function handleEsp(tag: string)
+	task.spawn(function()
+		for _, v in pairs(CS:GetTagged(tag)) do
+			createEsp(v)
+		end
+	end)
+	CS:GetInstanceAddedSignal(tag):Connect(createEsp)
+	CS:GetInstanceRemovedSignal(tag):Connect(removeEsp)
+end
+
+task.spawn(function()
+	for _, v in pairs(Players:GetPlayers()) do
+		local plrChar = v.Character or v.CharacterAdded:Wait()
+		createEsp(plrChar)
+		plrChar.AncestryChanged:Connect(function(_, parent)
+			if not parent then
+				removeEsp(plrChar)
+			end
+		end)
+	end
+end)
+
 local function getNearestItem(itemName, instancePath)
 	instancePath = instancePath or workspace.RuntimeItems
 	local item, lastDist = nil, math.huge
 	for _, v in pairs(instancePath:GetChildren()) do
 		if v.Name == itemName and v:IsA("Model") then
-			if not v.PrimaryPart then 
+			if not v.PrimaryPart then
+				local base = v:FindFirstChildWhichIsA("BasePart")
+				local posTemp = base and base.Position or v:GetPivot().Position
+
 				local tik = 0
-				local posTemp = v:FindFirstChildWhichIsA("BasePart").Position or v.WorldPivot.Position
 				while tik < 3 and not v.PrimaryPart do
 					root.CFrame = CFrame.new(posTemp)
 					tik += 1
 					wait(1)
 				end
-				if not v.PrimaryPart then return error("Couldn't find PrimaryPart inside: " .. v.Name)  end
+				if not v.PrimaryPart then
+					error("Couldn't find PrimaryPart inside: " .. v.Name)
+				end
 			end
 			
 			if itemName == "Chair" then
@@ -1482,16 +1597,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 
 	while not returning do
 		local found = instancePath:FindFirstChild(itemname)
-
-		if itemname == "Chair" and found then
-			local seat = found:FindFirstChildWhichIsA("Seat")
-			if seat and seat.Occupant then
-				found = nil
-			end
-		end
-
-		if found then break end
-
+		
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
 
@@ -1517,9 +1623,25 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 			end)
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
-
+		
 		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
 		newpos = root.Position
+		
+		if found then
+			if itemname == "Chair" then
+				local seat = found:FindFirstChildWhichIsA("Seat")
+				if seat and seat.Occupant then
+					found = nil
+				end
+			else
+				local weld = found.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
+				if weld and weld.Name == "DragWeldConstraint" then
+					found = nil
+				end
+			end
+		end
+
+		if found then break end
 
 		task.wait(0.01)
 	end
@@ -1561,8 +1683,8 @@ local function ownChair(targetPos: Vector3?)
 	end
 	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0, 0, -30)).Position
 	
-	seat:Sit(hum)
-	hum:ChangeState(Enum.HumanoidStateType.Seated)
+	--seat:Sit(hum)
+	--hum:ChangeState(Enum.HumanoidStateType.Seated)
 
 	local mult = CFrame.new(targetPos)
 	local tik = 0
@@ -2141,4 +2263,10 @@ TeleportBtn.MouseButton1Click:Connect(function()
 end)
 Toggle.MouseButton1Click:Connect(function()
 	Holder.Visible = not Holder.Visible
+end)
+
+handleEsp("DraggableObject")
+handleEsp("Enemy")
+root:GetPropertyChangedSignal("CFrame"):Connect(function()
+	updateEspUI()
 end)
