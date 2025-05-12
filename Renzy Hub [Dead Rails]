@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123762"
+local ScVer = "v1.123763"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -165,6 +165,7 @@ BillboardUI.AlwaysOnTop = true
 BillboardUI.LightInfluence = 1
 BillboardUI.Size = UDim2.new(0, 100, 0, 50)
 BillboardUI.StudsOffset = Vector3.new(0, 3, 0)
+BillboardUI.Enabled = false
 
 espInfo.Parent = BillboardUI
 espInfo.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -1443,8 +1444,9 @@ end]]
 
 local function updateEspUI()
 	for model, info in pairs(EspInstances) do
-		local dist = (model:GetPivot().Position - root.Position).Magnitude
-		if dist > 10000 then continue end
+		local dist = math.floor((model:GetPivot().Position - root.Position).Magnitude)
+		if dist > 10000 then info.ui.Enabled = false continue end
+		info.ui.Enabled = true
 		if model.Name == "BankCombo" then
 			info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " | " .. model.BankCombo.SurfaceGui.Textlabel.Text
 			info.ui.TextLabel.Color3 = EspColor.BankCombo
@@ -2266,6 +2268,4 @@ end)
 
 handleEsp("DraggableObject")
 handleEsp("Enemy")
-root:GetPropertyChangedSignal("CFrame"):Connect(function()
-	updateEspUI()
-end)
+root.Changed:Connect(updateEspUI)
