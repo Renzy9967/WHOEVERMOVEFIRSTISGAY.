@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.18"
+local ScVer = "v2.19"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -188,6 +188,7 @@ local collectedSet = {}
 local hasChair = false
 local returning = false
 local firstRun = true
+local searchInProgress = false
 local camera = workspace.CurrentCamera
 
 queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
@@ -391,6 +392,17 @@ local function fly()
 end
 
 local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
+	if searchInProgress then return end
+	local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+	if not VelocityHandler then
+		VelocityHandler = Instance.new("BodyVelocity")
+		VelocityHandler.Name = velocityHandlerName
+		VelocityHandler.Parent = root
+		VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+		VelocityHandler.Velocity = Vector3.new(0, 0, 0)
+		VelocityHandler.P = 9e9
+	end
+	searchInProgress = true
 	startPos = startPos or start
 	instancePath = instancePath or workspace.RuntimeItems
 	speed = speed or 250
@@ -430,6 +442,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 
 		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, -6, -speed)
 		newpos = root.Position
+		VelocityHandler.Velocity = root.Velocity
 
 		if found then
 			if itemname == "Chair" then
@@ -449,6 +462,8 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 
 		task.wait(0.01)
 	end
+	
+	searchInProgress = false
 
 	hum.JumpHeight = 7.2
 	hum.JumpPower = 50
@@ -461,9 +476,18 @@ local function ownChair(targetPos: Vector3?)
 
 	local chair = getNearestItem("MaximGun")
 	if not chair then
-		searchItem("MaximGun")
+		local success, err = pcall(function()
+			searchItem("MaximGun", nil, nil, nil, 3)
+		end)
+		if not success then
+			warn("[ownChair] searchItem failed: ", err)
+			return
+		end
 		chair = getNearestItem("MaximGun")
-		if not chair then return end
+		if not chair then
+			warn("[ownChair] chair still not found after search")
+			return
+		end
 	end
 
 	local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
