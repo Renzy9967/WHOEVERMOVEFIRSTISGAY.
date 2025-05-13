@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.16"
+local ScVer = "v2.17"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -188,6 +188,7 @@ local collectedSet = {}
 local hasChair = false
 local returning = false
 local firstRun = true
+local camera = workspace.CurrentCamera
 
 queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
 
@@ -427,7 +428,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, -6, -speed)
 		newpos = root.Position
 
 		if found then
