@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.17"
+local ScVer = "v2.18"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -572,6 +572,16 @@ end
 
 local function autoBond()
 	local success, msg = pcall(function()
+		local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+		if not VelocityHandler then
+			VelocityHandler = Instance.new("BodyVelocity")
+			VelocityHandler.Name = velocityHandlerName
+			VelocityHandler.Parent = root
+			VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+			VelocityHandler.Velocity = Vector3.new(0, 0, 0)
+			VelocityHandler.P = 9e9
+		end
+		VelocityHandler.Velocity = Vector3.new(0, 0, 0)
 		searchItem("Bond")
 		local bond = getNearestItem("Bond")
 		if bond then
@@ -580,20 +590,10 @@ local function autoBond()
 			end
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
-			local VelocityHandler = root:FindFirstChild(velocityHandlerName)
 			
 			if distance > 8 then
-				if VelocityHandler then
-					VelocityHandler.Velocity = bond.PrimaryPart.Position - Vector3.new(0, 5, 0)
-				else
-					VelocityHandler = Instance.new("BodyVelocity")
-					VelocityHandler.Name = velocityHandlerName
-					VelocityHandler.Parent = root
-					VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-					VelocityHandler.Velocity = v3zero
-					VelocityHandler.P = 9e9
-					VelocityHandler.Velocity = bond.PrimaryPart.Position - Vector3.new(0, 5, 0)
-				end
+				VelocityHandler.Velocity = bond.PrimaryPart.Position - Vector3.new(0, 5, 0)
+
 				if firstRun then
 					firstRun = false
 					ownChair(bond.PrimaryPart.Position)
