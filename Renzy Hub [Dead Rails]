@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12377"
+local ScVer = "v1.12378"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1779,10 +1779,12 @@ local function ownChair(targetPos: Vector3?)
 		unweldNetwork:FireServer(chair)
 		task.wait(0.2)
 	end
-	targetPos = targetPos or (CFrame.new(root.Position) * CFrame.new(0, 0, -30)).Position
+	targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	
 	--seat:Sit(hum)
-	--hum:ChangeState(Enum.HumanoidStateType.Seated)
+	hum:ChangeState(Enum.HumanoidStateType.Running)
+	setCanCollide(chair, false)
+	toggleNoClip(true)
 
 	local mult = CFrame.new(targetPos)
 	local tik = 0
@@ -1801,13 +1803,13 @@ local function ownChair(targetPos: Vector3?)
 	end)
 
 	task.spawn(function()
-		for i = 1, 100 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+		for i = 1, 50 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
 			root.CFrame = mult
-			if i >= 50 then
+			if i >= 25 then
 				chair.PrimaryPart.CFrame = mult
 				hum:ChangeState(Enum.HumanoidStateType.Freefall)
 			end
-			if i >= 90 then
+			if i >= 40 then
 				seat:Sit(hum)
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
 			end
@@ -1823,8 +1825,6 @@ local function ownChair(targetPos: Vector3?)
 		seat:Sit(hum)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
 	end
-	
-	setCanCollide(chair, false)
 	
 	humStateConn = hum.StateChanged:Connect(function(old, new)
 		if new ~= Enum.HumanoidStateType.Seated then
@@ -2243,7 +2243,7 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 			new.Parent = ScrollingFrame
 			new.MouseButton1Click:Connect(function()
 				if not new.Active then return end
-				disableOtherButton(new, false)
+				enableOtherButton(new, false)
 				if frameName == "ItemList" then
 					Var.getItemVar.selectedItem = v
 				elseif frameName == "ModeList" then
@@ -2254,7 +2254,7 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 				Box.Text = v
 				Box:ReleaseFocus()
 				wait(.4)
-				disableOtherButton(new, true)
+				enableOtherButton(new, true)
 			end)
 			updateCanvasSize()
 		end
@@ -2428,7 +2428,7 @@ task.spawn(function()
 		local minutes = math.floor(i / 60)
 		local seconds = i % 60
 		local text = string.format("%02d:%02d", minutes, seconds)
-		Crank.Text = text
+		Title_6.Text = text
 		crankTimer = i
 		wait(1)
 	end
