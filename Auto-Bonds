@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.19"
+local ScVer = "v2.2"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -372,7 +372,7 @@ local function fly()
 			VelocityHandler.MaxForce = v3inf
 			GyroHandler.MaxTorque = v3inf
 			GyroHandler.CFrame = camera.CoordinateFrame
-			--VelocityHandler.Velocity = v3none
+			VelocityHandler.Velocity = root.CFrame.Position
 
 			--[[local direction = controlModule:GetMoveVector()
 			if direction.X > 0 then
@@ -393,15 +393,6 @@ end
 
 local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 	if searchInProgress then return end
-	local VelocityHandler = root:FindFirstChild(velocityHandlerName)
-	if not VelocityHandler then
-		VelocityHandler = Instance.new("BodyVelocity")
-		VelocityHandler.Name = velocityHandlerName
-		VelocityHandler.Parent = root
-		VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-		VelocityHandler.Velocity = Vector3.new(0, 0, 0)
-		VelocityHandler.P = 9e9
-	end
 	searchInProgress = true
 	startPos = startPos or start
 	instancePath = instancePath or workspace.RuntimeItems
@@ -442,7 +433,6 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 
 		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, -6, -speed)
 		newpos = root.Position
-		VelocityHandler.Velocity = root.Velocity
 
 		if found then
 			if itemname == "Chair" then
@@ -565,10 +555,7 @@ local function ownChair(targetPos: Vector3?)
 	fly()
 
 	if targetPos then
-		local VelocityHandler = root:FindFirstChild(velocityHandlerName)
-		if VelocityHandler then
-			VelocityHandler.Velocity = targetPos
-		end
+		root.CFrame = CFrame.new(targetPos)
 	end
 	--overrideCam = false
 end
@@ -596,16 +583,6 @@ end
 
 local function autoBond()
 	local success, msg = pcall(function()
-		local VelocityHandler = root:FindFirstChild(velocityHandlerName)
-		if not VelocityHandler then
-			VelocityHandler = Instance.new("BodyVelocity")
-			VelocityHandler.Name = velocityHandlerName
-			VelocityHandler.Parent = root
-			VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-			VelocityHandler.Velocity = Vector3.new(0, 0, 0)
-			VelocityHandler.P = 9e9
-		end
-		VelocityHandler.Velocity = Vector3.new(0, 0, 0)
 		searchItem("Bond")
 		local bond = getNearestItem("Bond")
 		if bond then
@@ -616,7 +593,7 @@ local function autoBond()
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			
 			if distance > 8 then
-				VelocityHandler.Velocity = bond.PrimaryPart.Position - Vector3.new(0, 5, 0)
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0))
 
 				if firstRun then
 					firstRun = false
