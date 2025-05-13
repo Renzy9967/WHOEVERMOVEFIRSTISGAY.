@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.14"
+local ScVer = "v2.15"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -337,6 +337,7 @@ local function fly()
 	bv.Parent = root
 	bv.MaxForce = v3zero
 	bv.Velocity = v3zero
+	bv.P = math.huge()
 
 	local bg = Instance.new("BodyGyro")
 	bg.Name = gyroHandlerName
@@ -351,6 +352,7 @@ local function fly()
 		bv.Parent = root
 		bv.MaxForce = v3zero
 		bv.Velocity = v3zero
+		bv.P = math.huge()
 
 		local bg = Instance.new("BodyGyro")
 		bg.Name = gyroHandlerName
@@ -368,9 +370,9 @@ local function fly()
 			VelocityHandler.MaxForce = v3inf
 			GyroHandler.MaxTorque = v3inf
 			GyroHandler.CFrame = camera.CoordinateFrame
-			VelocityHandler.Velocity = v3none
+			--VelocityHandler.Velocity = v3none
 
-			local direction = controlModule:GetMoveVector()
+			--[[local direction = controlModule:GetMoveVector()
 			if direction.X > 0 then
 				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((1) * 50))
 			end
@@ -382,7 +384,7 @@ local function fly()
 			end
 			if direction.Z < 0 then
 				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((1) * 50))
-			end
+			end]]
 		end
 	end)
 end
@@ -533,14 +535,15 @@ local function ownChair(targetPos: Vector3?)
 		end
 	end)
 
-	wait(.5)
+	wait(.2)
 	
 	fly()
-	
-	wait(.1)
 
 	if targetPos then
-		root.CFrame = CFrame.new(targetPos)
+		local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+		if VelocityHandler then
+			VelocityHandler.Velocity = targetPos
+		end
 	end
 	--overrideCam = false
 end
@@ -576,8 +579,20 @@ local function autoBond()
 			end
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
+			local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+			
 			if distance > 8 then
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0))
+				if VelocityHandler then
+					VelocityHandler.Velocity = bond.PrimaryPart.Position - Vector3.new(0, 5, 0)
+				else
+					VelocityHandler = Instance.new("BodyVelocity")
+					VelocityHandler.Name = velocityHandlerName
+					VelocityHandler.Parent = root
+					VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+					VelocityHandler.Velocity = v3zero
+					VelocityHandler.P = math.huge()
+					VelocityHandler.Velocity = bond.PrimaryPart.Position - Vector3.new(0, 5, 0)
+				end
 				if firstRun then
 					firstRun = false
 					ownChair(bond.PrimaryPart.Position)
