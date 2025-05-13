@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12378"
+local ScVer = "v1.12379"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1785,6 +1785,7 @@ local function ownChair(targetPos: Vector3?)
 	hum:ChangeState(Enum.HumanoidStateType.Running)
 	setCanCollide(chair, false)
 	toggleNoClip(true)
+	toggleAntiVoid(true)
 
 	local mult = CFrame.new(targetPos)
 	local tik = 0
@@ -1836,6 +1837,8 @@ local function ownChair(targetPos: Vector3?)
 	end)
 	
 	repeat wait() until done
+	toggleNoClip(false)
+	toggleAntiVoid(false)
 	overrideCam = false
 end
 
@@ -1893,6 +1896,8 @@ local function getItem()
 	teleportDb = true
 
 	Var.getItemVar.cancelGetItem = false
+	toggleNoClip(true)
+	toggleAntiVoid(true)
 
 	local thread = coroutine.create(function()
 		local success, msg = pcall(function()
@@ -1979,7 +1984,7 @@ local function getItem()
 
 				if foundItem then
 					foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 					wait(.2)
 					if selectedMode == "Store" then
 						equipSack()
@@ -1992,8 +1997,7 @@ local function getItem()
 						equipArmorNetwork:FireServer(foundItem)
 					end
 
-					task.wait(.2)
-					root.CFrame = CFrame.new(lastPos)
+					wait(.2)
 				end
 			end
 		end)
@@ -2001,6 +2005,10 @@ local function getItem()
 		if not success then
 			warn("GetItem Error:", msg)
 		end
+		
+		toggleNoClip(false)
+		toggleAntiVoid(false)
+		root.CFrame = CFrame.new(lastPos)
 
 		teleportDb = false
 		runningConnections.GetItem = nil
