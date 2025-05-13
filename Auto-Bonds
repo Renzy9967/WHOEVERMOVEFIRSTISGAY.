@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.11"
+local ScVer = "v2.12"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -389,8 +389,8 @@ local function ownChair(targetPos: Vector3?)
 		unweldNetwork:FireServer(chair)
 		task.wait(0.2)
 	end
-	if Tripod then	Tripod:Destroy()	end
-	if Gun then	Gun:Destroy()	end
+	--if Tripod then	Tripod:Destroy()	end
+	--if Gun then	Gun:Destroy()	end
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	local humStateConn
 	seat:Sit(hum)
@@ -486,7 +486,7 @@ local function autoBond()
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			if distance > 8 then
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 6, 0))
+				root.CFrame = CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0))
 				if firstRun then
 					firstRun = false
 					ownChair(bond.PrimaryPart.Position)
