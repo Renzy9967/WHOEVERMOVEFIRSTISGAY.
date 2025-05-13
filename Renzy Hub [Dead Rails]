@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12379"
+local ScVer = "v1.123791"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1779,7 +1779,7 @@ local function ownChair(targetPos: Vector3?)
 		unweldNetwork:FireServer(chair)
 		task.wait(0.2)
 	end
-	targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
+	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	
 	--seat:Sit(hum)
 	hum:ChangeState(Enum.HumanoidStateType.Running)
@@ -1787,7 +1787,7 @@ local function ownChair(targetPos: Vector3?)
 	toggleNoClip(true)
 	toggleAntiVoid(true)
 
-	local mult = CFrame.new(targetPos)
+	local mult = CFrame.new(chair.PrimaryPart.Position - Vector3.new(0, 6, 0))
 	local tik = 0
 	local done = false
 	overrideCam = true
@@ -1965,7 +1965,7 @@ local function getItem()
 									mouse1click()
 									wait(.2)
 									conn = RunService.RenderStepped:Connect(function()
-										root.CFrame = uni.PrimaryPart.CFrame * CFrame.new(0, -6, 0)
+										root.CFrame = CFrame.new(uni.PrimaryPart.Position - Vector3.new(0, -6, 0))
 										camera.CFrame = CFrame.lookAt(camera.CFrame.Position, enemyChar.Head)
 									end)
 									while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
@@ -1984,7 +1984,7 @@ local function getItem()
 
 				if foundItem then
 					foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, -6, 0))
 					wait(.2)
 					if selectedMode == "Store" then
 						equipSack()
