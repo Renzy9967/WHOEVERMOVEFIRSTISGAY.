@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.15"
+local ScVer = "v2.16"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -337,7 +337,7 @@ local function fly()
 	bv.Parent = root
 	bv.MaxForce = v3zero
 	bv.Velocity = v3zero
-	bv.P = math.huge()
+	bv.P = 9e9
 
 	local bg = Instance.new("BodyGyro")
 	bg.Name = gyroHandlerName
@@ -352,7 +352,7 @@ local function fly()
 		bv.Parent = root
 		bv.MaxForce = v3zero
 		bv.Velocity = v3zero
-		bv.P = math.huge()
+		bv.P = 9e9
 
 		local bg = Instance.new("BodyGyro")
 		bg.Name = gyroHandlerName
@@ -590,7 +590,7 @@ local function autoBond()
 					VelocityHandler.Parent = root
 					VelocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
 					VelocityHandler.Velocity = v3zero
-					VelocityHandler.P = math.huge()
+					VelocityHandler.P = 9e9
 					VelocityHandler.Velocity = bond.PrimaryPart.Position - Vector3.new(0, 5, 0)
 				end
 				if firstRun then
