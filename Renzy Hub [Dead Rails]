@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123795"
+local ScVer = "v1.123796"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1552,7 +1552,7 @@ end
 local function toggleAntiVoid(enabled)
 	if enabled then
 		runningConnections.antivoidLoop = RunService.Stepped:Connect(function()
-			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 500 then
+			if root and root.Position.Y <= workspace.FallenPartsDestroyHeight + 100 then
 				root.AssemblyLinearVelocity = root.AssemblyLinearVelocity + Vector3.new(0, 250, 0)
 			end
 		end)
@@ -1879,6 +1879,8 @@ local function ownChair(targetPos: Vector3?)
 	end
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	local humStateConn
+	
+	hum.Sit = true
 	seat:Sit(hum)
 	hum.JumpHeight = 0
 	hum.JumpPower = 0
@@ -2117,7 +2119,9 @@ local function getItem()
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
+		flying = false
 		root.CFrame = CFrame.new(lastPos)
+		root.Velocity = Vector3.new(0,0,0)
 		unfly()
 		hum.JumpHeight = 7.2
 		hum.JumpPower = 50
