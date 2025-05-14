@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123791"
+local ScVer = "v1.123792"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1380,6 +1380,7 @@ local char = plr.Character or plr.CharacterAdded:Wait()
 local hum: Humanoid = char:WaitForChild("Humanoid")
 local root = hum.RootPart
 
+local infNum = 1.7976931348622742e+308
 local lastPos = root.Position
 local start = Vector3.new(42, 3, 30000)
 local endpos = Vector3.new(-506.865, 0.75, -49221.016)
@@ -1455,6 +1456,96 @@ local overrideCam = false
 	runningConnections.cameraThread = thread
 	coroutine.resume(thread)
 end]]
+
+function randomString()
+	local length = math.random(10,20)
+	local array = {}
+	for i = 1, length do
+		array[i] = string.char(math.random(32, 126))
+	end
+	return table.concat(array)
+end
+
+local velocityHandlerName = randomString()
+local gyroHandlerName = randomString()
+local mfly1
+local mfly2
+
+local function unfly()
+	pcall(function()
+		root:FindFirstChild(velocityHandlerName):Destroy()
+		root:FindFirstChild(gyroHandlerName):Destroy()
+		hum.PlatformStand = false
+		mfly1:Disconnect()
+		mfly2:Disconnect()
+	end)
+end
+
+local function fly(speed)
+	unfly()
+	speed = speed or 50
+
+	local v3none = Vector3.new()
+	local v3zero = Vector3.new(0, 0, 0)
+	local v3inf = Vector3.new(infNum, infNum, infNum)
+
+	local controlModule = require(plr.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+	local bv = Instance.new("BodyPosition")
+	bv.Name = velocityHandlerName
+	bv.Parent = root
+	bv.MaxForce = v3zero
+	bv.Position = root.Position
+	bv.P = infNum
+
+	local bg = Instance.new("BodyGyro")
+	bg.Name = gyroHandlerName
+	bg.Parent = root
+	bg.MaxTorque = v3inf
+	bg.P = 1000
+	bg.D = 50
+
+	mfly1 = plr.CharacterAdded:Connect(function()
+		local bv = Instance.new("BodyPosition")
+		bv.Name = velocityHandlerName
+		bv.Parent = root
+		bv.MaxForce = v3zero
+		bv.Position = root.Position
+		bv.P = infNum
+
+		local bg = Instance.new("BodyGyro")
+		bg.Name = gyroHandlerName
+		bg.Parent = root
+		bg.MaxTorque = v3inf
+		bg.P = 1000
+		bg.D = 50
+	end)
+
+	mfly2 = RunService.RenderStepped:Connect(function()
+		if hum and root and root:FindFirstChild(velocityHandlerName) and root:FindFirstChild(gyroHandlerName) then
+			local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+			local GyroHandler = root:FindFirstChild(gyroHandlerName)
+
+			VelocityHandler.MaxForce = v3inf
+			GyroHandler.MaxTorque = v3inf
+			GyroHandler.CFrame = camera.CFrame
+			VelocityHandler.Position = root.Position
+
+			local direction = controlModule:GetMoveVector()
+			if direction.X > 0 then
+				VelocityHandler.Position = VelocityHandler.Position + camera.CFrame.RightVector * (direction.X * ((speed) * 50))
+			end
+			if direction.X < 0 then
+				VelocityHandler.Position = VelocityHandler.Position + camera.CFrame.RightVector * (direction.X * ((speed) * 50))
+			end
+			if direction.Z > 0 then
+				VelocityHandler.Position = VelocityHandler.Position - camera.CFrame.LookVector * (direction.Z * ((speed) * 50))
+			end
+			if direction.Z < 0 then
+				VelocityHandler.Position = VelocityHandler.Position - camera.CFrame.LookVector * (direction.Z * ((speed) * 50))
+			end
+		end
+	end)
+end
 
 local function toggleAntiVoid(enabled)
 	if enabled then
@@ -1782,7 +1873,7 @@ local function ownChair(targetPos: Vector3?)
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	
 	--seat:Sit(hum)
-	hum:ChangeState(Enum.HumanoidStateType.Running)
+	--hum:ChangeState(Enum.HumanoidStateType.Running)
 	setCanCollide(chair, false)
 	toggleNoClip(true)
 	toggleAntiVoid(true)
@@ -1793,7 +1884,7 @@ local function ownChair(targetPos: Vector3?)
 	overrideCam = true
 	local camConn
 	local humStateConn
-	camConn = RunService.RenderStepped:Connect(function()
+	--[[camConn = RunService.RenderStepped:Connect(function()
 		if not overrideCam then
 			if camConn then
 				camConn:Disconnect()
@@ -1801,7 +1892,7 @@ local function ownChair(targetPos: Vector3?)
 			end
 		end
 		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, root.Position - Vector3.new(0, 3, 0))
-	end)
+	end)]]
 
 	task.spawn(function()
 		for i = 1, 50 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
@@ -1837,8 +1928,7 @@ local function ownChair(targetPos: Vector3?)
 	end)
 	
 	repeat wait() until done
-	toggleNoClip(false)
-	toggleAntiVoid(false)
+	fly()
 	overrideCam = false
 end
 
