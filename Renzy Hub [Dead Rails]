@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123831"
+local ScVer = "v1.123832"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1892,7 +1892,10 @@ local function ownChair(targetPos: Vector3?)
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	
 	hum.Sit = true
-	seat:Sit(hum)
+	repeat
+		seat:Sit(hum)
+		wait()
+	until hum.SeatPart
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
 	hum.JumpHeight = 0
 	hum.JumpPower = 0
@@ -1960,7 +1963,6 @@ local function ownChair(targetPos: Vector3?)
 	flying = true
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos) * CFrame.new(0, -6, 0)
-		hum.Sit = false
 	end
 	--overrideCam = false
 end
@@ -2034,6 +2036,7 @@ local function getItem()
 				if Var.getItemVar.cancelGetItem then break end 
 
 				ownChair()
+				local chair = getNearestItem("MaximGun")
 
 				searchItem(selectedItem, path, start, 50)
 				
@@ -2123,9 +2126,19 @@ local function getItem()
 						equipArmorNetwork:FireServer(foundItem)
 					end
 					
+					local seat
+					
+					if chair then
+						seat = chair:FindFirstChildWhichIsA("VehicleSeat")
+					end
+					
 					while foundItem.Parent and tik < 5 do
 						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-						hum.Sit = false
+						if seat then
+							hum.Sit = false
+							wait()
+							seat:Sit(hum)
+						end
 						if selectedMode == "Store" then
 							equipSack()
 							storeNetwork:FireServer(foundItem)
@@ -2151,7 +2164,7 @@ local function getItem()
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
-		local chair = getNearestItem("MaximGun")
+		chair = getNearestItem("MaximGun")
 		if chair then
 			setCanCollide(chair, true)
 		end
