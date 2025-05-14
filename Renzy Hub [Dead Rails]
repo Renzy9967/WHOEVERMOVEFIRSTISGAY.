@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123799"
+local ScVer = "v1.1238"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1786,6 +1786,8 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 	maxAttempts = maxAttempts or 2
 	local attempts = 0
 	local returning = false
+	
+	root.CFrame = root.CFrame * CFrame.new(0, -6, 0)
 
 	while not returning do
 		local found = instancePath:FindFirstChild(itemname)
@@ -1817,7 +1819,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 		
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, -6, -speed)
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
 		newpos = root.Position
 		
 		if found then
