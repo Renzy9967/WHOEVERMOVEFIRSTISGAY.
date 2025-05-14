@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383"
+local ScVer = "v1.123831"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1618,9 +1618,9 @@ local function updateEspUI()
 	for model, info in pairs(EspInstances) do
 		task.spawn(function()
 			local dist = math.floor((model:GetPivot().Position - root.Position).Magnitude)
-			if dist > 2500 then info.ui.Enabled = false highlight.Enabled = false return end
+			if dist > 2500 then info.ui.Enabled = false info.highlight.Enabled = false return end
 			info.ui.Enabled = true
-			highlight.Enabled = true
+			info.highlight.Enabled = true
 			local overrideColor = false
 			if model.Name == "BankCombo" then
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " m | " .. model.BankCombo.SurfaceGui.Textlabel.Text
@@ -1666,7 +1666,8 @@ local function createEsp(model: Model)
 	if EspInstances[model] ~= nil then return end
 	if not model:IsDescendantOf(workspace) then return end
 	
-	local hightlight = Instance.new("Highlight", espFol)
+	local hightlight = Instance.new("Highlight")
+	hightlight.Parent = espFol
 	hightlight.Name = model.Name
 	hightlight.Adornee = model
 	local espUI = BillboardUI:Clone()
