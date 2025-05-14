@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123794"
+local ScVer = "v1.123795"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1856,13 +1856,7 @@ local function ownChair(targetPos: Vector3?)
 
 	local chair = getNearestItem("MaximGun")
 	if not chair then
-		local success, err = pcall(function()
-			searchItem("MaximGun", nil, nil, nil, 3)
-		end)
-		if not success then
-			warn("[ownChair] searchItem failed: ", err)
-			return
-		end
+		searchItem("MaximGun")
 		chair = getNearestItem("MaximGun")
 		if not chair then
 			warn("[ownChair] chair still not found after search")
@@ -1946,7 +1940,7 @@ local function ownChair(targetPos: Vector3?)
 	end)
 	
 	--repeat wait() until done
-	fly()
+	fly(1)
 	flying = true
 	--overrideCam = false
 end
@@ -2123,8 +2117,10 @@ local function getItem()
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
-		unfly()
 		root.CFrame = CFrame.new(lastPos)
+		unfly()
+		hum.JumpHeight = 7.2
+		hum.JumpPower = 50
 
 		teleportDb = false
 		runningConnections.GetItem = nil
