@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123798"
+local ScVer = "v1.123799"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1657,6 +1657,7 @@ end
 
 local function createEsp(model: Model)
 	if EspInstances[model] ~= nil then return end
+	if not model:IsDescendantOf(workspace) then return end
 	
 	local hightlight = Instance.new("Highlight", espFol)
 	hightlight.Name = model.Name
@@ -1816,7 +1817,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 		
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, -6, -speed)
 		newpos = root.Position
 		
 		if found then
@@ -2123,6 +2124,10 @@ local function getItem()
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
+		local chair = getNearestItem("MaximGun")
+		if chair then
+			setCanCollide(chair, true)
+		end
 		flying = false
 		root.CFrame = CFrame.new(lastPos)
 		root.Velocity = Vector3.new(0,0,0)
