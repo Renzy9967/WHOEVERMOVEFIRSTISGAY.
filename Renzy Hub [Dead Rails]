@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12382"
+local ScVer = "v1.12383"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1618,8 +1618,9 @@ local function updateEspUI()
 	for model, info in pairs(EspInstances) do
 		task.spawn(function()
 			local dist = math.floor((model:GetPivot().Position - root.Position).Magnitude)
-			if dist > 10000 then info.ui.Enabled = false return end
+			if dist > 2500 then info.ui.Enabled = false highlight.Enabled = false return end
 			info.ui.Enabled = true
+			highlight.Enabled = true
 			local overrideColor = false
 			if model.Name == "BankCombo" then
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " m | " .. model.BankCombo.SurfaceGui.Textlabel.Text
@@ -1958,6 +1959,7 @@ local function ownChair(targetPos: Vector3?)
 	flying = true
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos) * CFrame.new(0, -6, 0)
+		hum.Sit = false
 	end
 	--overrideCam = false
 end
@@ -2109,8 +2111,20 @@ local function getItem()
 					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 					local tik = 0
 					
+					if selectedMode == "Store" then
+						equipSack()
+						storeNetwork:FireServer(foundItem)
+					elseif selectedMode == "Collect" then
+						collectNetwork:FireServer(foundItem)
+					elseif selectedMode == "PickUp" then
+						pickUpNetwork:FireServer(foundItem)
+					elseif selectedMode == "Equip" then
+						equipArmorNetwork:FireServer(foundItem)
+					end
+					
 					while foundItem.Parent and tik < 5 do
 						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+						hum.Sit = false
 						if selectedMode == "Store" then
 							equipSack()
 							storeNetwork:FireServer(foundItem)
@@ -2148,7 +2162,7 @@ local function getItem()
 		hum.JumpPower = 50
 
 		teleportDb = false
-		runningConnections.humStateConn:Dissconnect()
+		runningConnections.humStateConn:Disconnect()
 		runningConnections.GetItem = nil
 	end)
 
