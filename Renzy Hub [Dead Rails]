@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238"
+local ScVer = "v1.12381"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1344,11 +1344,12 @@ local rareItems = {
 local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip"}
 local Trains = {		"armor",	"cattle",	"default",	"golden"}
 local EspColor = {
+	["Corpse"] = Color3.fromRGB(0, 170, 255),
 	["Item"] = Color3.fromRGB(255, 255, 255),
 	["Mob"] = Color3.fromRGB(255, 0, 0),
 	["Player"] = Color3.fromRGB(0, 255, 0),
 	["BankCombo"] = Color3.fromRGB(255, 255, 0),
-	["RareItem"] = Color3.fromRGB(160, 51, 255),
+	["RareItem"] = Color3.fromRGB(255, 0, 255),
 }
 local allToggleButtons = {ItemEsp, MobEsp, PlayerEsp, Antivoid, Fly, Fullbright, Infinitejump, Instantpp, Noclip}
 local allTextBoxes = {Item, Mode, Amount, Flyspeed}
@@ -1367,6 +1368,7 @@ local runningConnections = {
 	antivoidLoop = nil,
 	noclipLoop = nil,
 	flyLoop = nil,
+	humStateConn = nil,
 }
 local Var = {
 	localPlayer = {antiVoid = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 0},
@@ -1484,6 +1486,7 @@ local function unfly()
 end
 
 local function fly(speed)
+	print("Fly")
 	unfly()
 	speed = speed or 50
 
@@ -1632,7 +1635,13 @@ local function updateEspUI()
 			else
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
 			end
-			if model:HasTag("DraggableObject") then
+			
+			if model:HasTag("Corpse") then
+				if not overrideColor then
+					info.ui.TextLabel.TextColor3 = EspColor.Corpse
+				end
+				info.ui.Enabled = Var.espVar.itemsEsp
+			elseif model:HasTag("DraggableObject") then
 				if not overrideColor then
 					info.ui.TextLabel.TextColor3 = EspColor.Item
 				end
@@ -1779,15 +1788,14 @@ local function moveTo(startPos, targetPos, speed)
 end
 
 local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
+	print("starting search item", itemname)
 	startPos = startPos or start
 	instancePath = instancePath or workspace.RuntimeItems
 	speed = speed or 250
-	local newpos = startPos
+	local newpos = (CFrame.new(startPos) * CFrame.new(0, -6, 0)).Position
 	maxAttempts = maxAttempts or 2
 	local attempts = 0
 	local returning = false
-	
-	root.CFrame = root.CFrame * CFrame.new(0, -6, 0)
 
 	while not returning do
 		local found = instancePath:FindFirstChild(itemname)
@@ -1854,6 +1862,7 @@ local function setCanCollide(instance, bool)
 end
 
 local function ownChair(targetPos: Vector3?)
+	print("starting own chair")
 	if hum.SeatPart and hum.SeatPart.Parent and hum.SeatPart.Parent.Name == "MaximGun" then
 		return
 	end
@@ -1882,7 +1891,6 @@ local function ownChair(targetPos: Vector3?)
 		task.wait(0.2)
 	end
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
-	local humStateConn
 	
 	hum.Sit = true
 	seat:Sit(hum)
@@ -1932,12 +1940,15 @@ local function ownChair(targetPos: Vector3?)
 		hum:ChangeState(Enum.HumanoidStateType.Seated)
 	end]]
 	
-	humStateConn = hum.StateChanged:Connect(function(old, new)
+	if runningConnections.humStateConn then
+		runningConnections.humStateConn:Disconnect()
+	end
+	runningConnections.humStateConn = hum.StateChanged:Connect(function(old, new)
 		if new ~= Enum.HumanoidStateType.Seated then
 			if not flying then
 				setCanCollide(chair, true)
-				if humStateConn then
-					humStateConn:Disconnect()
+				if runningConnections.humStateConn then
+					runningConnections.humStateConn:Disconnect()
 				end
 				return
 			end
@@ -2093,6 +2104,8 @@ local function getItem()
 				end
 				
 				local foundItem = getNearestItem(selectedItem)
+				
+				print("Found item", foundItem)
 
 				if foundItem then
 					foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
