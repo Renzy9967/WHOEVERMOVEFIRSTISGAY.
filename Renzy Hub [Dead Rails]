@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123797"
+local ScVer = "v1.123798"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1945,7 +1945,9 @@ local function ownChair(targetPos: Vector3?)
 	--repeat wait() until done
 	fly(1)
 	flying = true
-	root.CFrame = CFrame.new(targetPos) * CFrame.new(0, -6, 0)
+	if targetPos then
+		root.CFrame = CFrame.new(targetPos) * CFrame.new(0, -6, 0)
+	end
 	--overrideCam = false
 end
 
