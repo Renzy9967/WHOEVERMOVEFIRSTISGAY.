@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123796"
+local ScVer = "v1.123797"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1802,6 +1802,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 
 		if attempts >= maxAttempts then
 			returning = true
+			flying = false
 			task.spawn(function()
 				for i = 1, 3 do
 					root.Velocity = Vector3.new(0,0,0)
@@ -1944,6 +1945,7 @@ local function ownChair(targetPos: Vector3?)
 	--repeat wait() until done
 	fly(1)
 	flying = true
+	root.CFrame = CFrame.new(targetPos) * CFrame.new(0, -6, 0)
 	--overrideCam = false
 end
 
@@ -2017,7 +2019,7 @@ local function getItem()
 
 				ownChair()
 
-				searchItem(selectedItem, path, start, 100)
+				searchItem(selectedItem, path, start, 50)
 				
 				if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
 					local uni = path:FindFirstChild(selectedItem)
@@ -2089,11 +2091,11 @@ local function getItem()
 
 				if foundItem then
 					foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, -6, 0))
+					root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 					local tik = 0
 					
-					while foundItem.Parent and tik < 3 do
-						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, -6, 0))
+					while foundItem.Parent and tik < 5 do
+						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 						if selectedMode == "Store" then
 							equipSack()
 							storeNetwork:FireServer(foundItem)
