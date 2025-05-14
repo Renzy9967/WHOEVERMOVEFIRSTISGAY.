@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123832"
+local ScVer = "v1.123833"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2137,6 +2137,7 @@ local function getItem()
 						if seat then
 							hum.Sit = false
 							wait()
+							hum.Sit = true
 							seat:Sit(hum)
 						end
 						if selectedMode == "Store" then
