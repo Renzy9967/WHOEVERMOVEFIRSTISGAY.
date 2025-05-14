@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123793"
+local ScVer = "v1.123794"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1492,11 +1492,11 @@ local function fly(speed)
 	local v3inf = Vector3.new(infNum, infNum, infNum)
 
 	local controlModule = require(plr.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
-	local bv = Instance.new("BodyPosition")
+	local bv = Instance.new("BodyVelocity")
 	bv.Name = velocityHandlerName
 	bv.Parent = root
 	bv.MaxForce = v3zero
-	bv.Position = root.Position
+	bv.Velocity = v3zero
 	bv.P = infNum
 
 	local bg = Instance.new("BodyGyro")
@@ -1507,11 +1507,11 @@ local function fly(speed)
 	bg.D = 50
 
 	mfly1 = plr.CharacterAdded:Connect(function()
-		local bv = Instance.new("BodyPosition")
+		local bv = Instance.new("BodyVelocity")
 		bv.Name = velocityHandlerName
 		bv.Parent = root
 		bv.MaxForce = v3zero
-		bv.Position = root.Position
+		bv.Velocity = v3zero
 		bv.P = infNum
 
 		local bg = Instance.new("BodyGyro")
@@ -1530,20 +1530,20 @@ local function fly(speed)
 			VelocityHandler.MaxForce = v3inf
 			GyroHandler.MaxTorque = v3inf
 			GyroHandler.CFrame = camera.CFrame
-			VelocityHandler.Position = root.Position
+			VelocityHandler.Velocity = camera.CFrame.LookVector * speed
 
 			local direction = controlModule:GetMoveVector()
 			if direction.X > 0 then
-				VelocityHandler.Position = VelocityHandler.Position + camera.CFrame.RightVector * (direction.X * ((speed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((speed) * 50))
 			end
 			if direction.X < 0 then
-				VelocityHandler.Position = VelocityHandler.Position + camera.CFrame.RightVector * (direction.X * ((speed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((speed) * 50))
 			end
 			if direction.Z > 0 then
-				VelocityHandler.Position = VelocityHandler.Position - camera.CFrame.LookVector * (direction.Z * ((speed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((speed) * 50))
 			end
 			if direction.Z < 0 then
-				VelocityHandler.Position = VelocityHandler.Position - camera.CFrame.LookVector * (direction.Z * ((speed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((speed) * 50))
 			end
 		end
 	end)
@@ -2123,6 +2123,7 @@ local function getItem()
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
+		unfly()
 		root.CFrame = CFrame.new(lastPos)
 
 		teleportDb = false
