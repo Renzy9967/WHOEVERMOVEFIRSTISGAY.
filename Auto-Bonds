@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.221"
+local ScVer = "v2.222"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -601,20 +601,14 @@ local function autoBond()
 			
 			if distance > 8 then
 if not ownerChair then ownChair() end
-				ownedChair:SetPrimaryPartCFrame(CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0)))
-				--[[if firstRun then
-					firstRun = false
-					ownChair(bond.PrimaryPart.Position)
-				end]]
+local tik = 0
 
-				--[[local chair = getNearestItem("MaximGun")
-				if chair and chair:FindFirstChildWhichIsA("VehicleSeat") then
-					local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
-					seat:Sit(hum)
-					hum:ChangeState(Enum.HumanoidStateType.Seated)
-				else
-					ownChair(bond.PrimaryPart.Position)
-				end]]
+		while bond.Parent and tik < 5 do
+ownedChair:SetPrimaryPartCFrame(CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0)))
+root.Velocity = Vector3.new(0,0,0)
+tik += 0.1
+wait(.001)
+end
 			end
 
 			--RunService.Stepped:Wait() -- Let physics catch up
