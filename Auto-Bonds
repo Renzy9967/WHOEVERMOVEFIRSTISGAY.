@@ -33,6 +33,7 @@ local Trains = {
 	"default",
 	"golden",
 }
+local ownedChair = nil
 
 sg.Name = "Skibidi9967"
 local success = pcall(function()
@@ -432,7 +433,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, -6, -speed)
+	  ownedChair:SetPrimaryPartCFrame(CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed))
 		newpos = root.Position
 
 		if found then
@@ -498,6 +499,7 @@ local function ownChair(targetPos: Vector3?)
 	--if Gun then	Gun:Destroy()	end
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	local humStateConn
+ownedChair = chair
 	seat:Sit(hum)
 	hum.JumpHeight = 0
 	hum.JumpPower = 0
@@ -553,10 +555,10 @@ local function ownChair(targetPos: Vector3?)
 
 	wait(.2)
 	
-	fly()
+	--fly()
 
 	if targetPos then
-		root.CFrame = CFrame.new(targetPos)
+		chair:SetPrimaryPartCFrame(CFrame.new(targetPos))
 	end
 	--overrideCam = false
 end
@@ -594,12 +596,12 @@ local function autoBond()
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
 			
 			if distance > 8 then
-				root.CFrame = CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0))
-
-				if firstRun then
+if not ownerChair then ownChair() end
+				ownedChair:SetPrimaryPartCFrame(CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0)))
+				--[[if firstRun then
 					firstRun = false
 					ownChair(bond.PrimaryPart.Position)
-				end
+				end]]
 
 				local chair = getNearestItem("MaximGun")
 				if chair and chair:FindFirstChildWhichIsA("VehicleSeat") then
