@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.21"
+local ScVer = "v2.22"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -393,7 +393,7 @@ local function fly()
 	end)
 end
 
-local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
+local function searchItem(itemname, hasChair, instancePath, startPos, speed, maxAttempts)
 	if searchInProgress then return end
 	searchInProgress = true
 	startPos = startPos or start
@@ -433,7 +433,11 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 
-	  ownedChair:SetPrimaryPartCFrame(CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed))
+	  if hasChair then
+ownedChair:SetPrimaryPartCFrame(CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed))
+else
+root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
+end
 		newpos = root.Position
 
 		if found then
@@ -469,7 +473,7 @@ local function ownChair(targetPos: Vector3?)
 	local chair = getNearestItem("MaximGun")
 	if not chair then
 		local success, err = pcall(function()
-			searchItem("MaximGun", nil, nil, nil, 3)
+			searchItem("MaximGun", false, nil, nil, nil, 3)
 		end)
 		if not success then
 			warn("[ownChair] searchItem failed: ", err)
@@ -586,7 +590,7 @@ end
 
 local function autoBond()
 	local success, msg = pcall(function()
-		searchItem("Bond")
+		searchItem("Bond", true)
 		local bond = getNearestItem("Bond")
 		if bond then
 			if not bond.PrimaryPart then
