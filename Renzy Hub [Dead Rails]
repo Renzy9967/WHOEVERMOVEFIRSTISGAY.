@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352"
+local ScVer = "v1.12383521"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1880,6 +1880,10 @@ local function ownChair(targetPos: Vector3?)
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
 	hum.JumpHeight = 0
 	hum.JumpPower = 0
+local weld = Instance.new("WeldConstraint", root)
+weld.Name = "ChairWeld"
+weld.Part0 = root
+weld.Part1 = seat
 	setCanCollide(chair, false)
 	toggleNoClip(true)
 	toggleAntiVoid(true)
@@ -1940,8 +1944,7 @@ local function ownChair(targetPos: Vector3?)
 	end)
 	
 	--repeat wait() until done
-	fly(1)
-	flying = true
+	fly(50)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos) * CFrame.new(0, -6, 0)
 	end
@@ -2103,10 +2106,10 @@ local function getItem(bring: boolean)
 						equipSack()
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
 						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-						local tik = 0
+						--local tik = 0
 						local seat
 
-						while foundItem.Parent and tik < 5 do
+						while foundItem.Parent do
 							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 							--[[storeNetwork:FireServer(chair)
 							dropItemNetwork:FireServer()
@@ -2128,6 +2131,8 @@ local function getItem(bring: boolean)
 							root.CFrame = lastCF
 							dropItemNetwork:FireServer() -- drop the rest item
 						end
+local weld = root:FindFirstChild("ChairWeld")
+if weld then weld:Destroy() end
 						noMoreItems = true
 					end
 				end
