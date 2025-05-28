@@ -1503,7 +1503,7 @@ local function unfly()
 	pcall(function()
 		mfly2:Disconnect()
 		flying = false
-		toggleAllHumState(nil, true)
+		toggleAllHumState(hum, nil, true)
 	end)
 end
 
@@ -1512,7 +1512,7 @@ local function fly(speed)
 	unfly()
 	flying = true
 	speed = speed or 50
-	toggleAllHumState({Enum.HumanoidStateType.Seated}, false)
+	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated}, false)
 	
 	head.Anchored = true
 
