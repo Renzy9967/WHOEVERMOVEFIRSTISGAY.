@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383523"
+local ScVer = "v1.12383524"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1871,7 +1871,7 @@ local function ownChair(targetPos: Vector3?)
 		task.wait(0.2)
 	end
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
-	
+	root.CFrame = CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 	hum.Sit = true
 	repeat
 		seat:Sit(hum)
