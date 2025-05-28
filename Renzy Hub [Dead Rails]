@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123834"
+local ScVer = "v1.123835"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1491,10 +1491,19 @@ local gyroHandlerName = randomString()
 local mfly1
 local mfly2
 
+local function toggleAllHumState(blacklist: Enum.HumanoidStateType, toggle: boolean)
+	for i, v in Enum.HumanoidStateType:GetEnumItems() do
+		if not table.find({blacklist}, v) then
+			hum:SetStateEnabled(v, toggle)
+		end
+	end
+end
+
 local function unfly()
 	pcall(function()
 		mfly2:Disconnect()
 		flying = false
+		toggleAllHumState(nil, true)
 	end)
 end
 
@@ -1503,8 +1512,9 @@ local function fly(speed)
 	unfly()
 	flying = true
 	speed = speed or 50
+	toggleAllHumState(Enum.HumanoidStateType.Seated, false)
 	
-	head.Anchored = true
+	--head.Anchored = true
 
 	mfly2 = RunService.RenderStepped:Connect(function()
 		local moveDirection = hum.MoveDirection * (CFspeed * deltaTime)
@@ -2005,8 +2015,10 @@ local function getItem(bring: boolean)
 			local loopAmount = Var.getItemVar.itemAmount
 			local path = (selectedItem == "Model_Unicorn") and workspace or workspace.RuntimeItems
 			local count = 0
+			local noMoreItems = false
 			
 			if bring then
+				while not noMoreItems do
 				if count == 10 then
 					root.CFrame = lastCF
 					wait(.2)
@@ -2102,7 +2114,13 @@ local function getItem(bring: boolean)
 						equipSack()
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
 						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-						storeNetwork:FireServer(foundItem)
+							local tik = 0
+							while foundItem.Parent and tik < 5 do
+								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+								storeNetwork:FireServer(foundItem)
+								tik += 0.1
+								wait(0.01)
+							end
 						count += 1
 					end
 				else
@@ -2112,6 +2130,8 @@ local function getItem(bring: boolean)
 						root.CFrame = lastCF
 						dropItemNetwork:FireServer() -- drop the rest item
 					end
+					noMoreItems = true
+				end
 				end
 			else
 				for i = 1, loopAmount do
@@ -2214,12 +2234,6 @@ local function getItem(bring: boolean)
 
 						while foundItem.Parent and tik < 5 do
 							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-							if seat then
-								hum.Sit = false
-								wait()
-								hum.Sit = true
-								seat:Sit(hum)
-							end
 							if selectedMode == "Store" then
 								equipSack()
 								storeNetwork:FireServer(foundItem)
