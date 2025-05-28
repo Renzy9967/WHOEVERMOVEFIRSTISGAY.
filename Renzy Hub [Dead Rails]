@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238351"
+local ScVer = "v1.1238352"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -15,7 +15,7 @@ local Credits = Instance.new("Frame")
 local Renzyyiluvu = Instance.new("TextLabel")
 local text = Instance.new("TextLabel")
 local ExitConfirm = Instance.new("TextButton")
-local Warn = Instance.new("TextLabel")
+local Warn = Instance.new("TextLabel") 
 local Yes = Instance.new("TextButton")
 local No = Instance.new("TextButton")
 local UIScale = Instance.new("UIScale")
@@ -351,7 +351,7 @@ Bring.BorderColor3 = Color3.new(1, 1, 1)
 Bring.Position = UDim2.new(0.174212664, 0, 0.693939745, 0)
 Bring.Size = UDim2.new(0.649208307, 0, 0.0878479332, 0)
 Bring.Font = Enum.Font.TitilliumWeb
-Bring.Text = "Search Item"
+Bring.Text = "Bring Item"
 Bring.TextColor3 = Color3.new(1, 1, 1)
 Bring.TextScaled = true
 Bring.TextSize = 14
@@ -1514,10 +1514,10 @@ local function fly(speed)
 	speed = speed or 50
 	toggleAllHumState(Enum.HumanoidStateType.Seated, false)
 	
-	--head.Anchored = true
+	head.Anchored = true
 
 	mfly2 = RunService.RenderStepped:Connect(function()
-		local moveDirection = hum.MoveDirection * (CFspeed * deltaTime)
+		local moveDirection = hum.MoveDirection * (speed * deltaTime)
 		local headCFrame = head.CFrame
 		local cameraCFrame = camera.CFrame
 		local cameraOffset = headCFrame:ToObjectSpace(cameraCFrame).Position
@@ -2027,113 +2027,100 @@ local function getItem(bring: boolean)
 							dropItemNetwork:FireServer()
 						end
 					end
-					local successScan = pcall(function()
-						searchItem(selectedItem, path, start, 150)
-						local foundItem = getNearestItem(selectedItem)
-						if foundItem then
-							if not collectedItems[foundItem] then
-								return true
-							else
-								return false
-							end
-						end 
-					end)
-					if successScan then
-						ownChair()
-						local chair = getNearestItem("MaximGun")
 
-						searchItem(selectedItem, path, start, 150)
-						local foundItem = getNearestItem(selectedItem)
-						if foundItem and not collectedItems[foundItem] then
-							collectedItems[foundItem] = true
-							if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
-								local uni = path:FindFirstChild(selectedItem)
-								local vehicleSeat = uni:FindFirstChildWhichIsA("VehicleSeat")
-								if vehicleSeat and uni:GetAttribute("Tamed") == true then
-									local params = RaycastParams.new()
-									params.FilterDescendantsInstances = {uni}
-									params.FilterType = Enum.RaycastFilterType.Exclude
+					ownChair()
+					local chair = getNearestItem("MaximGun")
 
-									local result = workspace:Raycast(uni.PrimaryPart.Position+Vector3.new(0,1,0),  Vector3.new(0,5,0), params)
-									if result then
-										local enemyChar = result.Instance.Parent
-										if enemyChar and string.find(string.lower(enemyChar.Name), string.lower("Outlaw")) then
-											local enemyHum = enemyChar:FindFirstChildWhichIsA("Humanoid")
-											if enemyHum then
-												local done = false
-												local newPos = root.Position
-												local conn
+					searchItem(selectedItem, path, start, 150)
+					local foundItem = getNearestItem(selectedItem)
+					if foundItem and not collectedItems[foundItem] then
+						collectedItems[foundItem] = true
+						if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
+							local uni = path:FindFirstChild(selectedItem)
+							local vehicleSeat = uni:FindFirstChildWhichIsA("VehicleSeat")
+							if vehicleSeat and uni:GetAttribute("Tamed") == true then
+								local params = RaycastParams.new()
+								params.FilterDescendantsInstances = {uni}
+								params.FilterType = Enum.RaycastFilterType.Exclude
 
-												hum:UnequipTools()
-												local rifle = plr.Backpack:FindFirstChild("Rifle")
+								local result = workspace:Raycast(uni.PrimaryPart.Position+Vector3.new(0,1,0),  Vector3.new(0,5,0), params)
+								if result then
+									local enemyChar = result.Instance.Parent
+									if enemyChar and string.find(string.lower(enemyChar.Name), string.lower("Outlaw")) then
+										local enemyHum = enemyChar:FindFirstChildWhichIsA("Humanoid")
+										if enemyHum then
+											local done = false
+											local newPos = root.Position
+											local conn
 
-												if not rifle then
-													searchItem("Rifle", workspace.RuntimeItems, start, 250, 1)
-													rifle = getNearestItem("Rifle")
-													if not rifle then return end
-													rifle.PrimaryPart = rifle.PrimaryPart or rifle:FindFirstChildWhichIsA("BasePart")
-													root.CFrame = CFrame.new(rifle.PrimaryPart.Position) * CFrame.new(0, 3, 0)
-													wait(.2)
-													pickUpNetwork:FireServer(rifle)
-													root.CFrame = CFrame.new(newPos)
-												end
+											hum:UnequipTools()
+											local rifle = plr.Backpack:FindFirstChild("Rifle")
 
-												local stateFol = rifle:FindFirstChild("ClientWeaponState")
-												local serverStateFol = rifle:FindFirstChild("ServerWeaponState")
-												local config = rifle:FindFirstChild("WeaponConfiguration")
-												if not stateFol or not serverStateFol or not config then return end
-												local currentAmmo = stateFol:FindFirstChild("CurrentAmmo")
-												local serverCurrentAmmo = stateFol:FindFirstChild("CurrentAmmo")
-												if not currentAmmo then
-													currentAmmo = Instance.new("NumberValue")
-													currentAmmo.Name = "CurrentAmmo"
-													currentAmmo.Value = serverCurrentAmmo and serverCurrentAmmo.Value or 6
-													currentAmmo.Parent = rifle
-												end
-
-												hum:EquipTool(rifle)
-												camera.CameraSubject = enemyHum
-												setCamZoom("Lock")
-												mouse1click()
+											if not rifle then
+												searchItem("Rifle", workspace.RuntimeItems, start, 250, 1)
+												rifle = getNearestItem("Rifle")
+												if not rifle then return end
+												rifle.PrimaryPart = rifle.PrimaryPart or rifle:FindFirstChildWhichIsA("BasePart")
+												root.CFrame = CFrame.new(rifle.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 												wait(.2)
-												conn = RunService.RenderStepped:Connect(function()
-													root.CFrame = CFrame.new(uni.PrimaryPart.Position - Vector3.new(0, -6, 0))
-													camera.CFrame = CFrame.lookAt(camera.CFrame.Position, enemyChar.Head)
-												end)
-												while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
-													mouse1press()
-													wait(.2)
-													mouse1release() 
-												end
-												conn:Disconnect()
+												pickUpNetwork:FireServer(rifle)
+												root.CFrame = CFrame.new(newPos)
 											end
+
+											local stateFol = rifle:FindFirstChild("ClientWeaponState")
+											local serverStateFol = rifle:FindFirstChild("ServerWeaponState")
+											local config = rifle:FindFirstChild("WeaponConfiguration")
+											if not stateFol or not serverStateFol or not config then return end
+											local currentAmmo = stateFol:FindFirstChild("CurrentAmmo")
+											local serverCurrentAmmo = stateFol:FindFirstChild("CurrentAmmo")
+											if not currentAmmo then
+												currentAmmo = Instance.new("NumberValue")
+												currentAmmo.Name = "CurrentAmmo"
+												currentAmmo.Value = serverCurrentAmmo and serverCurrentAmmo.Value or 6
+												currentAmmo.Parent = rifle
+											end
+
+											hum:EquipTool(rifle)
+											camera.CameraSubject = enemyHum
+											setCamZoom("Lock")
+											mouse1click()
+											wait(.2)
+											conn = RunService.RenderStepped:Connect(function()
+												root.CFrame = CFrame.new(uni.PrimaryPart.Position - Vector3.new(0, -6, 0))
+												camera.CFrame = CFrame.lookAt(camera.CFrame.Position, enemyChar.Head)
+											end)
+											while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
+												mouse1press()
+												wait(.2)
+												mouse1release() 
+											end
+											conn:Disconnect()
 										end
 									end
 								end
 							end
-							equipSack()
-							foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-							local tik = 0
-							local seat
-
-							
-							while foundItem.Parent and tik < 5 do
-								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-								storeNetwork:FireServer(chair)
-								dropItemNetwork:FireServer()
-								chair = getNearestItem("MaximGun")
-								if chair then
-									seat = chair:FindFirstChildWhichIsA("VehicleSeat")
-								end
-								seat:Sit(hum)
-								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-								storeNetwork:FireServer(foundItem)
-								tik += 0.1
-								wait(0.01)
-							end
-							count += 1
 						end
+						equipSack()
+						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
+						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+						local tik = 0
+						local seat
+
+						while foundItem.Parent and tik < 5 do
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+							--[[storeNetwork:FireServer(chair)
+							dropItemNetwork:FireServer()
+							chair = getNearestItem("MaximGun")
+							if chair then
+								seat = chair:FindFirstChildWhichIsA("VehicleSeat")
+							end
+							seat:Sit(hum)
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)]]
+							storeNetwork:FireServer(foundItem)
+							tik += 0.1
+							wait(0.01)
+						end
+						count += 1
 					else
 						root.CFrame = lastCF
 						wait(.2)
