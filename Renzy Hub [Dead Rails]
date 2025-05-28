@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383521"
+local ScVer = "v1.12383522"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1491,10 +1491,10 @@ local gyroHandlerName = randomString()
 local mfly1
 local mfly2
 
-local function toggleAllHumState(blacklist: Enum.HumanoidStateType, toggle: boolean)
-	for i, v in Enum.HumanoidStateType:GetEnumItems() do
-		if not table.find({blacklist}, v) then
-			hum:SetStateEnabled(v, toggle)
+local function toggleAllHumState(hum: Humanoid, blacklist: {Enum.HumanoidStateType}?, toggle: boolean)
+	for _, state in Enum.HumanoidStateType:GetEnumItems() do
+		if not blacklist or not table.find(blacklist, state) then
+			hum:SetStateEnabled(state, toggle)
 		end
 	end
 end
@@ -1512,11 +1512,11 @@ local function fly(speed)
 	unfly()
 	flying = true
 	speed = speed or 50
-	toggleAllHumState(Enum.HumanoidStateType.Seated, false)
+	toggleAllHumState({Enum.HumanoidStateType.Seated}, false)
 	
 	head.Anchored = true
 
-	mfly2 = RunService.RenderStepped:Connect(function()
+	mfly2 = RunService.RenderStepped:Connect(function(deltaTime)
 		local moveDirection = hum.MoveDirection * (speed * deltaTime)
 		local headCFrame = head.CFrame
 		local cameraCFrame = camera.CFrame
@@ -2120,7 +2120,6 @@ local function getItem(bring: boolean)
 							seat:Sit(hum)
 							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)]]
 							storeNetwork:FireServer(foundItem)
-							tik += 0.1
 							wait(0.01)
 						end
 						count += 1
