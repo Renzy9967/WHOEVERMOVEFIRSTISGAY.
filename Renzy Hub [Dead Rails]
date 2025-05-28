@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835251"
+local ScVer = "v1.123835252"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1880,10 +1880,10 @@ local function ownChair(targetPos: Vector3?)
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
 	hum.JumpHeight = 0
 	hum.JumpPower = 0
-local weld = Instance.new("WeldConstraint", root)
+--[[local weld = Instance.new("WeldConstraint", root)
 weld.Name = "ChairWeld"
 weld.Part0 = root
-weld.Part1 = seat
+weld.Part1 = seat]]
 	setCanCollide(chair, false)
 	toggleNoClip(true)
 	toggleAntiVoid(true)
@@ -2112,7 +2112,7 @@ local firstRun = true
 						while foundItem.Parent do
 							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
 							
-firstRun = false
+--firstRun = false
 hum:ChangeState(Enum.HumanoidStateType.Jumping)
 wait(.3)
 							chair = getNearestItem("MaximGun")
@@ -2120,6 +2120,8 @@ wait(.3)
 chair:PivotTo(CFrame.new(foundItem.PrimaryPart.Position))
 								seat = chair:FindFirstChildWhichIsA("VehicleSeat")
 if seat then seat:Sit(hum) end
+hum:ChangeState(Enum.HumanoidStateType.Jumping)
+
 							end
 							
 							
@@ -2134,8 +2136,8 @@ if seat then seat:Sit(hum) end
 							root.CFrame = lastCF
 							dropItemNetwork:FireServer() -- drop the rest item
 						end
-local weld = root:FindFirstChild("ChairWeld")
-if weld then weld:Destroy() end
+--[[local weld = root:FindFirstChild("ChairWeld")
+if weld then weld:Destroy() end]]
 						noMoreItems = true
 					end
 				end
