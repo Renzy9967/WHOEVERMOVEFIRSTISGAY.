@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383524"
+local ScVer = "v1.12383525"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1512,7 +1512,7 @@ local function fly(speed)
 	unfly()
 	flying = true
 	speed = speed or 50
-	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated}, false)
+	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated, Enum.HumanoidStateType.Jumping}, false)
 	
 	head.Anchored = true
 
@@ -1872,7 +1872,7 @@ local function ownChair(targetPos: Vector3?)
 	end
 	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
 	root.CFrame = CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-	hum.Sit = true
+	
 	repeat
 		seat:Sit(hum)
 		wait()
@@ -2021,6 +2021,7 @@ local function getItem(bring: boolean)
 			local noMoreItems = false
 			
 			if bring then
+local firstRun = true
 				while not noMoreItems do
 					if count == 10 then
 						root.CFrame = lastCF
@@ -2106,19 +2107,21 @@ local function getItem(bring: boolean)
 						equipSack()
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
 						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-						--local tik = 0
-						local seat
+						
 
 						while foundItem.Parent do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-							--[[storeNetwork:FireServer(chair)
-							dropItemNetwork:FireServer()
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
+							if firstRun then
+firstRun = false
+hum:ChangeState(Enum.HumanoidStateType.Jumping)
+wait(.3)
 							chair = getNearestItem("MaximGun")
 							if chair then
 								seat = chair:FindFirstChildWhichIsA("VehicleSeat")
+if seat then seat:Sit(hum) end
 							end
-							seat:Sit(hum)
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)]]
+							end
+							
 							storeNetwork:FireServer(foundItem)
 							wait(0.01)
 						end
