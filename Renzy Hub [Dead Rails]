@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352555"
+local ScVer = "v1.12383525551"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1823,9 +1823,11 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 					found = nil
 				end
 			else
-				local weld = found.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
-				if weld and weld.Name == "DragWeldConstraint" then
-					found = nil
+				if found.PrimaryPart then
+					local weld = found.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
+					if weld and weld.Name == "DragWeldConstraint" then
+						found = nil
+					end
 				end
 			end
 		end
@@ -2084,7 +2086,11 @@ local function getItem(bring: boolean)
 								tik += 0.1
 								wait(0.01)
 							end
-							count += 1
+							if foundItem.Parent then
+								noMoreItems = true
+							else
+								count += 1
+							end
 						end
 					else
 						root.CFrame = lastCF
@@ -2278,6 +2284,8 @@ local function teleportDestination()
 		end
 		teleportDb = false
 		runningConnections.Teleport = nil
+		hum.JumpHeight = 7.2
+		hum.JumpPower = 50
 	end)
 	runningConnections.Teleport = thread
 	coroutine.resume(thread)
@@ -2670,6 +2678,14 @@ task.spawn(function()
 		Title_6.Text = text
 		crankTimer = i
 		wait(1)
+	end
+end)
+
+hum.StateChanged:Connect(function(old, new)
+	if new ~= Enum.HumanoidStateType.Seated then
+		if not hum.SeatPart then
+			Var.localPlayer.chair = nil
+		end
 	end
 end)
 
