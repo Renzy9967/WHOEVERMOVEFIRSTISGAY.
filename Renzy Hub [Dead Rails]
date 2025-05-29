@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525541"
+local ScVer = "v1.12383525542"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1955,6 +1955,7 @@ local function getItem(bring: boolean)
 	--toggleAntiVoid(true)
 
 	local thread = coroutine.create(function()
+local chair = nil
 		local success, msg = pcall(function()
 			lastPos = root.Position
 			local lastCF = root.CFrame
@@ -1968,11 +1969,12 @@ local function getItem(bring: boolean)
 local sucses, msg = ownChair()
 print(sucses)
 					if not sucses then return msg end
-			
+			chair = getNearestItem("Chair")
 			if bring then
 local firstRun = true
 				while not noMoreItems do
 					if count == 10 then
+setCanCollide(chair, true)
 						root.CFrame = lastCF
 						wait(.2)
 						for i = 1, 10  do
@@ -1984,6 +1986,7 @@ if v.Name == "Bond" and not collectedItems[v] and (root.Position - v.PrimaryPart
 collectedItems[v] = true
 end
 end
+setCanCollide(chair, false)
 					end
 
 					
@@ -2071,6 +2074,7 @@ wait(0.01)
 if foundItem.Parent ~= nil then print("failed") noMoreItems = true end
 						count += 1
 					else
+setCanCollide(chair, true)
 						root.CFrame = lastCF
 						wait(.2)
 						for i = 1, 10  do
@@ -2082,6 +2086,7 @@ if weld then weld:Destroy() end]]
 						noMoreItems = true
 					end
 				end
+setCanCollide(chair, true)
 root.CFrame = lastCF
 						wait(.2)
 						for i = 1, 10  do
@@ -2216,7 +2221,6 @@ if not suces then break end
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
-		chair = getNearestItem("Chair")
 		if chair then
 			setCanCollide(chair, true)
 		end
@@ -2310,7 +2314,7 @@ local function teleportDestination()
 		if not success then
 			warn("Teleport Error:", msg)
 		end
-		
+		setCanCollide(chair, true)
 		teleportDb = false
 		runningConnections.Teleport = nil
 	end)
