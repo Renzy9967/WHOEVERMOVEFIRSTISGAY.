@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352552"
+local ScVer = "v1.12383525521"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1604,7 +1604,7 @@ local function updateEspUI()
 			info.highlight.Enabled = true
 			local overrideColor = false
 			if model.Name == "BankCombo" then
-				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " m | " .. model.BankCombo.SurfaceGui.Textlabel.Text
+				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " m | " .. model.BankCombo.SurfaceGui.TextLabel.Text
 				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
 				overrideColor = true
 			elseif table.find(rareItems, model.Name) then
@@ -1851,6 +1851,8 @@ local function ownChair(targetPos: Vector3?)
 	print("starting own chair")
 equipSack()
 	root.CFrame = workspace.TeslaLab:GetPivot()
+wait(.1)
+root.CFrame = workspace.TeslaLab:GetPivot()
 hum:ChangeState(Enum.HumanoidStateType.Running)
 local chair = getNearestItem("Chair")
 if not chair then
@@ -1882,7 +1884,7 @@ chair = getNearestItem("Chair")
 wait(.1)
 chair.Seat:Sit(hum)
 hum:ChangeState(Enum.HumanoidStateType.Seated)
-	setCanCollide(chair, false)
+	--setCanCollide(chair, false)
 	toggleNoClip(true)
 	toggleAntiVoid(true)
 	if targetPos then
