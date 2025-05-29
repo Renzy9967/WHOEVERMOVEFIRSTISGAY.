@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835254"
+local ScVer = "v1.1238352541"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2111,15 +2111,18 @@ local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
 						
 
 						while foundItem.Parent do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
-							
+							--root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
+							root.CFrame = CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+
 --firstRun = false
 							if chair then
 chair:PivotTo(CFrame.new(foundItem.PrimaryPart.Position))
 								
-if seat then seat:Sit(hum) end
+seat:Sit(hum)
 wait(.2)
 hum:ChangeState(Enum.HumanoidStateType.Jumping)
+wait()
+seat:Sit(hum)
 wait(.5)
 
 							end
