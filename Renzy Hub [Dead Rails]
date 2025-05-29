@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525556"
+local ScVer = "v1.12383525557"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1387,6 +1387,7 @@ local runningConnections = {
 	humStateConn = nil,
 	infJump = nil,
 	instantPP = nil,
+	chairConn = nil,
 }
 local Var = {
 	localPlayer = {chair = nil, antiVoid = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 1},
@@ -1969,6 +1970,16 @@ local function ownChair(targetPos: Vector3?)
 	toggleNoClip(true)
 	toggleAntiVoid(true)
 	Var.localPlayer.chair = newChair
+	if runningConnections.chairConn then
+		runningConnections.chairConn:Disconnect()
+	end
+	runningConnections.chairConn = Var.localPlayer.chair:GetPropertyChangedSignal("Occupant"):Connect(function()
+		if not Var.localPlayer.chair.Occupant then
+			Var.localPlayer.chair = nil
+			runningConnections.chairConn:Disconnect()
+			runningConnections = {}
+		end
+	end)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
 	end
@@ -2330,10 +2341,12 @@ local function teleportDestination()
 				return
 			end
 
-			local suces = ownChair()
-			if not suces then
-				teleportDb = false
-				return
+			if not Var.localPlayer.chair then
+				local suces = ownChair()
+				if not suces then
+					teleportDb = false
+					return
+				end
 			end
 
 			chair = Var.localPlayer.chair
@@ -2736,33 +2749,34 @@ AutoWins.MouseButton1Click:Connect(function()
 	if crankTimer > 0 and crankDB then return end
 	crankDB = true
 	lastPos = root.Position
-	local suces, msg = ownChair()
-	if not suces then
-		crankDB = false
+	if not Var.localPlayer.chair then
+		local suces = ownChair()
+		if not suces then
+			teleportDb = false
+			return
+		end
 	end
-	task.spawn(function()
+	repeat
 		root.CFrame = CFrame.new(crankPos)
 		root.CFrame = CFrame.lookAt(root.Position, crankPos)
-		repeat
-			wait()
-		until Baseplates:FindFirstChild("FinalBaseplate")
-		for _, prompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
-			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
-				if fireproximityprompt then
-					fireproximityprompt(prompt)
-				else
-					prompt.HoldDuration = 0
-					prompt.RequiresLineOfSight = false
-					prompt.MaxActivationDistance = math.huge
-					prompt:InputHoldBegin()
-					wait(.3)
-					prompt:InputHoldEnd()
-				end
-				break
+		wait()
+	until Baseplates:FindFirstChild("FinalBaseplate")
+	for _, prompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
+		if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
+			if fireproximityprompt then
+				fireproximityprompt(prompt)
+			else
+				prompt.HoldDuration = 0
+				prompt.RequiresLineOfSight = false
+				prompt.MaxActivationDistance = math.huge
+				prompt:InputHoldBegin()
+				wait(.3)
+				prompt:InputHoldEnd()
 			end
+			break
 		end
-		root.CFrame = CFrame.new(lastPos)
-	end)
+	end
+	root.CFrame = CFrame.new(lastPos)
 end)
 Fullbright.MouseButton1Click:Connect(function()
 	Var.localPlayer.fullBright = not Var.localPlayer.fullBright
@@ -2770,6 +2784,10 @@ Fullbright.MouseButton1Click:Connect(function()
 		Lighting.Brightness = 1
 		Lighting.Ambient = Color3.fromRGB(255, 255, 255)
 		Lighting.GlobalShadows = false
+		local atmosphere = Lighting:FindFirstChild("Atmosphere")
+		if atmosphere then
+			atmosphere.Density = 0
+		end
 		wait()
 	end
 end)
@@ -2850,15 +2868,6 @@ task.spawn(function()
 		Title_6.Text = text
 		crankTimer = i
 		wait(1)
-	end
-end)
-
-hum.StateChanged:Connect(function(old, new)
-	if old == Enum.HumanoidStateType.Seated then
-		wait()
-		if not hum.Sit and not hum.SeatPart and Var.localPlayer.chair then
-			Var.localPlayer.chair = nil
-		end
 	end
 end)
 
