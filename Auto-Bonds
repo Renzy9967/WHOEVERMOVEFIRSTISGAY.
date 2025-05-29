@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.222"
+local ScVer = "v2.21"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -33,7 +33,6 @@ local Trains = {
 	"default",
 	"golden",
 }
-local ownedChair = nil
 
 sg.Name = "Skibidi9967"
 local success = pcall(function()
@@ -169,6 +168,7 @@ Reset.Visible = false
 local startFlag = false 
 local CD = false
 
+local infNum = 1.7976931348622742e+308
 local root = hum.RootPart
 local lastPos = root.Position
 local start = Vector3.new(42, 3, 30000)
@@ -393,7 +393,7 @@ local function fly()
 	end)
 end
 
-local function searchItem(itemname, hasChair, instancePath, startPos, speed, maxAttempts)
+local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 	if searchInProgress then return end
 	searchInProgress = true
 	startPos = startPos or start
@@ -433,11 +433,7 @@ local function searchItem(itemname, hasChair, instancePath, startPos, speed, max
 			return error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 
-	  if hasChair then
-ownedChair:SetPrimaryPartCFrame(CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed))
-else
-root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
-end
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, -6, -speed)
 		newpos = root.Position
 
 		if found then
@@ -460,111 +456,65 @@ end
 	end
 	
 	searchInProgress = false
+end
 
-	hum.JumpHeight = 7.2
-	hum.JumpPower = 50
+local function equipSack()
+	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+		hum:EquipTool(plr.Backpack.Sack)
+	end
 end
 
 local function ownChair(targetPos: Vector3?)
-	if hum.SeatPart and hum.SeatPart.Parent and hum.SeatPart.Parent.Name == "MaximGun" then
-		return
-	end
-
-	local chair = getNearestItem("MaximGun")
-	if not chair then
-		local success, err = pcall(function()
-			searchItem("MaximGun", false, nil, nil, nil, 3)
-		end)
-		if not success then
-			warn("[ownChair] searchItem failed: ", err)
-			return
-		end
-		chair = getNearestItem("MaximGun")
-		if not chair then
-			warn("[ownChair] chair still not found after search")
-			return
-		end
-	end
-
-	local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
-	if not seat then return end
-	if seat.Occupant == hum then return end
-
-	chair.PrimaryPart = chair.PrimaryPart or chair:FindFirstChildWhichIsA("VehicleSeat") or chair:FindFirstChildWhichIsA("BasePart")
-	local weld = chair.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
-	local Gun = chair:FindFirstChild("Gun")
-	local Tripod = chair:FindFirstChild("Tripod")
-	if weld and weld.Name == "DragWeldConstraint" then
-		seat:Sit(hum)
-		unweldNetwork:FireServer(chair)
-		task.wait(0.2)
-	end
-	--if Tripod then	Tripod:Destroy()	end
-	--if Gun then	Gun:Destroy()	end
-	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
-	local humStateConn
-ownedChair = chair
-	seat:Sit(hum)
-	hum.JumpHeight = 0
-	hum.JumpPower = 0
-	--hum:ChangeState(Enum.HumanoidStateType.Running)
-	setCanCollide(chair, false)
-	toggleNoClip(true)
-	toggleAntiVoid(true)
-
-	--[[local mult = CFrame.new(chair.PrimaryPart.Position - Vector3.new(0, 6, 0))
+	print("starting own chair")
+	equipSack()
 	local tik = 0
-	local done = false
-	--overrideCam = true
-	--[[local camConn
+	while not workspace.RuntimeItems:FindFirstChild("Chair") and tik < 5 do
+		root.CFrame = workspace.TeslaLab:GetPivot()
+		tik += 0.1
+		wait(.1)
+	end
+	local camConn
 	camConn = RunService.RenderStepped:Connect(function()
-		if not overrideCam then
-			if camConn then
-				camConn:Disconnect()
-				return
-			end
-		end
 		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, root.Position - Vector3.new(0, 3, 0))
 	end)
-
+	--root.CFrame = workspace.TeslaLab:GetPivot()
+	hum:ChangeState(Enum.HumanoidStateType.Running)
+	local chair = getNearestItem("Chair")
+	if not chair then
+		searchItem("Chair")
+		chair = getNearestItem("Chair")
+		if not chair then return false, error("couldn't find chair") end
+	end
+	local tik = 0
+	local mult = root.CFrame * CFrame.new(0,100,0)
 	task.spawn(function()
-		for i = 1, 50 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
+		while  tik < 5 do
 			root.CFrame = mult
-			if i >= 25 then
-				chair.PrimaryPart.CFrame = mult
-				hum:ChangeState(Enum.HumanoidStateType.Freefall)
-			end
-			if i >= 40 then
-				seat:Sit(hum)
+			if chair then 
+				chair.Seat:Sit(hum)
 				hum:ChangeState(Enum.HumanoidStateType.Seated)
 			end
 			wait(0.01)
-		end
-		done = true
-	end)
-
-	if chair then
-		wait(.5)
-		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		wait(.6)
-		seat:Sit(hum)
-		hum:ChangeState(Enum.HumanoidStateType.Seated)
-	end]]
-
-	humStateConn = hum.StateChanged:Connect(function(old, new)
-		if new ~= Enum.HumanoidStateType.Seated then
-			seat:Sit(hum)
+			tik += 0.1
 		end
 	end)
-
+	wait(2)
+	root.CFrame = chair.Seat.CFrame
+	Remotes.StoreItem:FireServer(chair)
 	wait(.2)
-	
-	--fly()
-
+	Remotes.DropItem:FireServer()
+	wait(.25)
+	local newChair = getNearestItem("Chair")
+	newChair.Seat:Sit(hum)
+	hum:ChangeState(Enum.HumanoidStateType.Seated)
+	print("owned chair.")
+	camConn:Disconnect()
+	toggleNoClip(true)
+	toggleAntiVoid(true)
 	if targetPos then
-		chair:SetPrimaryPartCFrame(CFrame.new(targetPos))
+		root.CFrame = CFrame.new(targetPos)
 	end
-	--overrideCam = false
+	return true
 end
 
 local function ensureSeated()
@@ -590,7 +540,8 @@ end
 
 local function autoBond()
 	local success, msg = pcall(function()
-		searchItem("Bond", true)
+		ownChair()
+		searchItem("Bond")
 		local bond = getNearestItem("Bond")
 		if bond then
 			if not bond.PrimaryPart then
@@ -598,21 +549,26 @@ local function autoBond()
 			end
 
 			local distance = (bond.PrimaryPart.Position - root.Position).Magnitude
+			local cframe = CFrame.new(bond.PrimaryPart.Position + Vector3.new(0, 3, 0))
 			
 			if distance > 8 then
-if not ownerChair then ownChair() end
-local tik = 0
-
-		while bond.Parent and tik < 5 do
-ownedChair:SetPrimaryPartCFrame(CFrame.new(bond.PrimaryPart.Position - Vector3.new(0, 5, 0)))
-root.Velocity = Vector3.new(0,0,0)
-tik += 0.1
-wait(.001)
-end
+				root.CFrame = cframe
+				local tik = 0
 			end
 
-			--RunService.Stepped:Wait() -- Let physics catch up
-			collectBond(bond)
+			while bond.Parent and tik < 1 do
+				root.CFrame = cframe
+				collectBond(bond)
+				tik += .1
+				wait(.01)
+			end
+			if bond.Parent then
+				hum.Jump = true
+				wait(.2)
+				ownChair()
+				root.CFrame = cframe
+				collectBond(bond)
+			end
 		end
 	end)
 
