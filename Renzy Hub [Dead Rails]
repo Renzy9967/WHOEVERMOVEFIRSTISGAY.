@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255553"
+local ScVer = "v1.123835255555"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1504,6 +1504,14 @@ local function toggleAllHumState(hum: Humanoid, blacklist: {Enum.HumanoidStateTy
 	end
 end
 
+local function setCanCollide(instance, bool)
+	for _, v in pairs(instance:GetDescendants()) do
+		if v:IsA("BasePart") and not v:IsA("Seat") then
+			v.CanCollide = bool
+		end
+	end
+end
+
 local function unfly()
 	pcall(function()
 		root:FindFirstChild(velocityHandlerName):Destroy()
@@ -1599,6 +1607,9 @@ local function toggleAntiVoid(enabled)
 end
 local function toggleNoClip(enabled)
 	if enabled then
+		if Var.localPlayer.chair then
+			setCanCollide(Var.localPlayer.chair, false)
+		end
 		runningConnections.noclipLoop = RunService.Stepped:Connect(function()
 			for _, child in pairs(char:GetDescendants()) do
 				if child:IsA("BasePart") and child.CanCollide == true then
@@ -1607,6 +1618,9 @@ local function toggleNoClip(enabled)
 			end
 		end)
 	else
+		if Var.localPlayer.chair then
+			setCanCollide(Var.localPlayer.chair, true)
+		end
 		if runningConnections.noclipLoop then
 			runningConnections.noclipLoop:Disconnect()
 			runningConnections.noclipLoop = nil
@@ -1897,15 +1911,6 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts, 
 	hum.JumpHeight = 7.2
 	hum.JumpPower = 50
 	return true
-end
-
-
-local function setCanCollide(instance, bool)
-	for _, v in pairs(instance:GetDescendants()) do
-		if v:IsA("BasePart") and not v:IsA("Seat") then
-			v.CanCollide = bool
-		end
-	end
 end
 
 local function equipSack()
@@ -2716,18 +2721,25 @@ AutoWins.MouseButton1Click:Connect(function()
 		crankDB = false
 	end
 	task.spawn(function()
-		root.CFrame = CFrame.lookAt(root.Position, crankPos)
 		root.CFrame = CFrame.new(crankPos)
+		root.CFrame = CFrame.lookAt(root.Position, crankPos)
 		wait(.2)
 		for _, prompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
 			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
-				prompt.HoldDuration = 0
-				prompt:InputHoldBegin()
-				wait(.1)
-				prompt:InputHoldEnd()
-				root.CFrame = CFrame.new(lastPos)
+				if fireproximityprompt then
+					fireproximityprompt(prompt)
+				else
+					prompt.HoldDuration = 0
+					prompt.RequiresLineOfSight = false
+					prompt.MaxActivationDistance = math.huge
+					prompt:InputHoldBegin()
+					wait(.3)
+					prompt:InputHoldEnd()
+				end
+				break
 			end
 		end
+		root.CFrame = CFrame.new(lastPos)
 	end)
 end)
 Fullbright.MouseButton1Click:Connect(function()
@@ -2784,16 +2796,16 @@ Antiafk.MouseButton1Click:Connect(function()
 	antiAfk()
 end)
 Flyspeed:GetPropertyChangedSignal("Text"):Connect(function()
-	Amount.Text = Amount.Text:gsub('%D+', '');
-	local num = tonumber(Amount.Text)
+	Flyspeed.Text = Flyspeed.Text:gsub('%D+', '');
+	local num = tonumber(Flyspeed.Text)
 	if num then
 		if num == 0 then
 			num = 1
 		end
-		Amount.Text = "Speed: " .. num
+		Flyspeed.Text = "Speed: " .. num
 		Var.localPlayer.flySpeed = num
 	else
-		Amount.Text = ""
+		Flyspeed.Text = ""
 	end
 end)
 Fly.MouseButton1Click:Connect(function()
@@ -2817,7 +2829,8 @@ task.spawn(function()
 end)
 
 hum.StateChanged:Connect(function(old, new)
-	if new == Enum.HumanoidStateType.Jumping then
+	if new == Enum.HumanoidStateType.Jumping or
+		new == Enum.HumanoidStateType.Running then
 		if Var.localPlayer.chair then
 			Var.localPlayer.chair = nil
 		end
