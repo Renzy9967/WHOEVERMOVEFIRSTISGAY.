@@ -218,7 +218,7 @@ Renzyyiluvu.BorderSizePixel = 0
 Renzyyiluvu.Position = UDim2.new(0.187174588, 0, 0.152010277, 0)
 Renzyyiluvu.Size = UDim2.new(0.643894553, 0, 0.259067357, 0)
 Renzyyiluvu.Font = Enum.Font.TitilliumWeb
-Renzyyiluvu.Text = "Made by Renzy"
+Renzyyiluvu.Text = "Made by Renzy " .. ScVer
 Renzyyiluvu.TextColor3 = Color3.new(1, 1, 1)
 Renzyyiluvu.TextScaled = true
 Renzyyiluvu.TextSize = 14
@@ -951,9 +951,9 @@ Flyspeed.Position = UDim2.new(0.112159491, 0, 0.872320056, 0)
 Flyspeed.Selectable = false
 Flyspeed.Size = UDim2.new(0.227530211, 0, 0.0919989944, 0)
 Flyspeed.Font = Enum.Font.TitilliumWeb
-Flyspeed.PlaceholderText = "Speed"
+Flyspeed.PlaceholderText = "Enter a Number"
 Flyspeed.ShowNativeInput = false
-Flyspeed.Text = ""
+Flyspeed.Text = "Speed: 1"
 Flyspeed.TextColor3 = Color3.new(1, 1, 1)
 Flyspeed.TextScaled = true
 Flyspeed.TextSize = 14
@@ -1389,7 +1389,7 @@ local runningConnections = {
 	instantPP = nil,
 }
 local Var = {
-	localPlayer = {chair = nil, antiVoid = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 0},
+	localPlayer = {chair = nil, antiVoid = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 1},
 	getItemVar = {selectedItem = nil, itemAmount = 0, selectedMode = "Store", cancelGetItem = false},
 	espVar = {playersEsp = false, itemsEsp = false, mobsEsp = false},
 	teleportVar = {selectedDestination = nil},
@@ -1506,6 +1506,9 @@ end
 
 local function unfly()
 	pcall(function()
+		root:FindFirstChild(velocityHandlerName):Destroy()
+		root:FindFirstChild(gyroHandlerName):Destroy()
+		mfly1:Disconnect()
 		mfly2:Disconnect()
 		flying = false
 		toggleAllHumState(hum, nil, true)
@@ -1515,22 +1518,65 @@ end
 local function fly(speed)
 	unfly()
 	flying = true
-	speed = speed or 50
-	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated, Enum.HumanoidStateType.Jumping}, false)
+	speed = speed or 5
+	local v3none = Vector3.new()
+	local v3zero = Vector3.new(0, 0, 0)
+	local v3inf = Vector3.new(infNum, infNum, infNum)
+	
+	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated}, false)
 
-	head.Anchored = true
+	local controlModule = require(plr.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+	local bv = Instance.new("BodyVelocity")
+	bv.Name = velocityHandlerName
+	bv.Parent = root
+	bv.MaxForce = v3zero
+	bv.Velocity = v3zero
+	bv.P = infNum
 
-	mfly2 = RunService.RenderStepped:Connect(function(deltaTime)
-		local moveDirection = hum.MoveDirection * (speed * deltaTime)
-		local headCFrame = head.CFrame
-		local cameraCFrame = camera.CFrame
-		local cameraOffset = headCFrame:ToObjectSpace(cameraCFrame).Position
-		cameraCFrame = cameraCFrame * CFrame.new(-cameraOffset.X, -cameraOffset.Y, -cameraOffset.Z + 1)
-		local cameraPosition = cameraCFrame.Position
-		local headPosition = headCFrame.Position
+	local bg = Instance.new("BodyGyro")
+	bg.Name = gyroHandlerName
+	bg.Parent = root
+	bg.MaxTorque = v3inf
+	bg.P = 1000
+	bg.D = 50
 
-		local objectSpaceVelocity = CFrame.new(cameraPosition, Vector3.new(headPosition.X, cameraPosition.Y, headPosition.Z)):VectorToObjectSpace(moveDirection)
-		head.CFrame = CFrame.new(headPosition) * (cameraCFrame - cameraPosition) * CFrame.new(objectSpaceVelocity)
+	mfly1 = plr.CharacterAdded:Connect(function()
+		local bv = Instance.new("BodyVelocity")
+		bv.Name = velocityHandlerName
+		bv.Parent = root
+		bv.MaxForce = v3zero
+		bv.Velocity = v3zero
+		bv.P = infNum
+
+		local bg = Instance.new("BodyGyro")
+		bg.Name = gyroHandlerName
+		bg.Parent = root
+		bg.MaxTorque = v3inf
+		bg.P = 1000
+		bg.D = 50
+	end)
+
+	mfly2 = RunService.RenderStepped:Connect(function()
+		if hum and root and root:FindFirstChild(velocityHandlerName) and root:FindFirstChild(gyroHandlerName) then
+			local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+			local GyroHandler = root:FindFirstChild(gyroHandlerName)
+
+			local moveDirection = controlModule:GetMoveVector() -- Vector2
+			local camCF = camera.CFrame
+
+			-- Convert 2D moveVector into 3D camera-relative direction
+			local moveVec3 = (camCF.RightVector * moveDirection.X + camCF.LookVector * moveDirection.Z).Unit
+			if moveVec3.Magnitude > 0 then
+				VelocityHandler.Velocity = moveVec3 * speed
+			else
+				VelocityHandler.Velocity = Vector3.zero
+			end
+
+			-- Lock facing direction to camera
+			GyroHandler.CFrame = CFrame.new(root.Position, root.Position + camCF.LookVector)
+			VelocityHandler.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+			GyroHandler.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+		end
 	end)
 end
 
@@ -1561,6 +1607,11 @@ local function toggleNoClip(enabled)
 		if runningConnections.noclipLoop then
 			runningConnections.noclipLoop:Disconnect()
 			runningConnections.noclipLoop = nil
+		end
+		for _, child in pairs(char:GetDescendants()) do
+			if child:IsA("BasePart") and child.CanCollide == false then
+				child.CanCollide = true
+			end
 		end
 	end
 end
@@ -2311,7 +2362,7 @@ local function teleportDestination()
 			local foundModel = getNearestItem(selectedDestination, path)
 
 			if foundModel then
-				root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -150)
+				root.CFrame = CFrame.new(root.Position, endpos) * CFrame.new(0, 0, -150)
 				wait(1)
 				if selectedDestination == "Farm" then
 					local floor = foundModel:FindFirstChild("Floor")
@@ -2716,6 +2767,38 @@ Instantpp.MouseButton1Click:Connect(function()
 			runningConnections.instantPP:Disconnect()
 			runningConnections.instantPP = nil
 		end
+	end
+end)
+Noclip.MouseButton1Click:Connect(function()
+	Var.localPlayer.noClip = not Var.localPlayer.noClip
+	toggleNoClip(Var.localPlayer.noClip)
+end)
+Antivoid.MouseButton1Click:Connect(function()
+	Var.localPlayer.antiVoid = not Var.localPlayer.antiVoid
+	toggleAntiVoid(Var.localPlayer.antiVoid)
+end)
+Antiafk.MouseButton1Click:Connect(function()
+	antiAfk()
+end)
+Flyspeed:GetPropertyChangedSignal("Text"):Connect(function()
+	Amount.Text = Amount.Text:gsub('%D+', '');
+	local num = tonumber(Amount.Text)
+	if num then
+		if num == 0 then
+			num = 1
+		end
+		Amount.Text = "Speed: " .. num
+		Var.localPlayer.flySpeed = num
+	else
+		Amount.Text = ""
+	end
+end)
+Fly.MouseButton1Click:Connect(function()
+	Var.localPlayer.fly = not Var.localPlayer.fly
+	if Var.localPlayer.fly then
+		fly(Var.localPlayer.flySpeed)
+	else
+		unfly()
 	end
 end)
 
