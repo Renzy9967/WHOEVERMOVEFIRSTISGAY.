@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525552"
+local ScVer = "v1.12383525553"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -351,7 +351,7 @@ Bring.BorderColor3 = Color3.new(1, 1, 1)
 Bring.Position = UDim2.new(0.174212664, 0, 0.693939745, 0)
 Bring.Size = UDim2.new(0.649208307, 0, 0.0878479332, 0)
 Bring.Font = Enum.Font.TitilliumWeb
-Bring.Text = "Bring Item"
+Bring.Text = "Bring All"
 Bring.TextColor3 = Color3.new(1, 1, 1)
 Bring.TextScaled = true
 Bring.TextSize = 14
@@ -1810,7 +1810,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 				hum.JumpHeight = 7.2
 				hum.JumpPower = 50
 			end)
-			return error(itemname .. " not found after max attempts, teleporting back to start")
+			return false, error(itemname .. " not found after max attempts, teleporting back to start")
 		end
 
 		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
@@ -2054,11 +2054,17 @@ local function getItem(bring: boolean)
 
 			local function dropAllItems()
 				root.CFrame = lastCF
-				root.Velocity = Vector3.zero
+				root.Velocity = Vector3.new(0, 0, 0)
 				wait(1)
 				for _ = 1, 10 do
 					root.CFrame = lastCF
+					root.Velocity = Vector3.new(0, 0, 0)
 					dropItemNetwork:FireServer()
+				end
+				for _, item in pairs(workspace.RuntimeItems:GetChildren()) do
+					if v.Name == selectedItem and (v:GetPivot().Position - root.Position).Magnitude < 20 and not collectedItems[foundItem] then
+						collectedItems[foundItem] = true
+					end
 				end
 			end
 			
@@ -2101,9 +2107,14 @@ local function getItem(bring: boolean)
 							count = 0
 						end
 					else
-						-- No more items found
-						dropAllItems()
-						break
+						if count >= 10 then
+							-- No more items found
+							dropAllItems()
+						end
+						local succes = searchItem(selectedItem, path, start, 150)
+						if not succes then
+							break
+						end
 					end
 				end
 
