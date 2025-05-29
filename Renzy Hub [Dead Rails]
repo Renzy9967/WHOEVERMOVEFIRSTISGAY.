@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525544"
+local ScVer = "v1.12383525545"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1892,7 +1892,7 @@ chair = getNearestItem("Chair")
 wait(.1)
 chair.Seat:Sit(hum)
 hum:ChangeState(Enum.HumanoidStateType.Seated)
-	setCanCollide(chair, false)
+	--setCanCollide(chair, false)
 camConn:Disconnect()
 	toggleNoClip(true)
 	toggleAntiVoid(true)
@@ -1976,6 +1976,7 @@ local firstRun = true
 					if count == 10 then
 setCanCollide(chair, true)
 						root.CFrame = lastCF
+root.Velocity = Vector3.new(0,0,0)
 						wait(.2)
 						for i = 1, 10  do
 							root.CFrame = lastCF
@@ -2075,6 +2076,7 @@ wait(0.01)
 					else
 setCanCollide(chair, true)
 						root.CFrame = lastCF
+root.Velocity = Vector3.new(0,0,0)
 						wait(.2)
 						for i = 1, 10  do
 							root.CFrame = lastCF
@@ -2087,6 +2089,7 @@ if weld then weld:Destroy() end]]
 				end
 setCanCollide(chair, true)
 root.CFrame = lastCF
+root.Velocity = Vector3.new(0,0,0)
 						wait(.2)
 						for i = 1, 10  do
 							root.CFrame = lastCF
