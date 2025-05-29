@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525543"
+local ScVer = "v1.12383525544"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2193,7 +2193,7 @@ if not suces then break end
 						end]]
 
 						while foundItem.Parent and tik < 5 do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
 							if selectedMode == "Store" then
 								equipSack()
 								storeNetwork:FireServer(foundItem)
@@ -2229,7 +2229,9 @@ if not suces then break end
 		--unfly()
 		hum.JumpHeight = 7.2
 		hum.JumpPower = 50
-hum.Jump = true
+hum:ChangeState(Enum.HumanoidStateType.Running)
+root.CFrame = lastCF
+		root.Velocity = Vector3.new(0,0,0)
 
 		teleportDb = false
 		--runningConnections.humStateConn:Disconnect()
