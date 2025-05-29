@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835252"
+local ScVer = "v1.123835253"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2113,14 +2113,14 @@ local firstRun = true
 							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
 							
 --firstRun = false
-hum:ChangeState(Enum.HumanoidStateType.Jumping)
-wait(.3)
 							chair = getNearestItem("MaximGun")
 							if chair then
 chair:PivotTo(CFrame.new(foundItem.PrimaryPart.Position))
 								seat = chair:FindFirstChildWhichIsA("VehicleSeat")
 if seat then seat:Sit(hum) end
+wait(.2)
 hum:ChangeState(Enum.HumanoidStateType.Jumping)
+wait(.5)
 
 							end
 							
@@ -2272,7 +2272,7 @@ if weld then weld:Destroy() end]]
 		if chair then
 			setCanCollide(chair, true)
 		end
-		flying = false
+		
 		root.CFrame = CFrame.new(lastPos)
 		root.Velocity = Vector3.new(0,0,0)
 		unfly()
