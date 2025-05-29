@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525555"
+local ScVer = "v1.123835255551"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2048,7 +2048,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 			break
 		end
 
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -150)
 		newpos = root.Position
 
 		task.wait(0.01)
