@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525545"
+local ScVer = "v1.12383525546"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1977,7 +1977,7 @@ local firstRun = true
 setCanCollide(chair, true)
 						root.CFrame = lastCF
 root.Velocity = Vector3.new(0,0,0)
-						wait(.2)
+						wait(1)
 						for i = 1, 10  do
 							root.CFrame = lastCF
 							dropItemNetwork:FireServer()
@@ -1987,7 +1987,7 @@ if v.Name == "Bond" and not collectedItems[v] and (root.Position - v.PrimaryPart
 collectedItems[v] = true
 end
 end
-setCanCollide(chair, false)
+count = 0
 					end
 
 					
@@ -2067,7 +2067,7 @@ setCanCollide(chair, false)
 						local tik = 0
 
 						while foundItem.Parent and tik < 10 do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position)
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 							storeNetwork:FireServer(foundItem)
 							tik += 0.1
 wait(0.01)
@@ -2082,8 +2082,7 @@ root.Velocity = Vector3.new(0,0,0)
 							root.CFrame = lastCF
 							dropItemNetwork:FireServer() -- drop the rest item
 						end
---[[local weld = root:FindFirstChild("ChairWeld")
-if weld then weld:Destroy() end]]
+count = 0
 						noMoreItems = true
 					end
 				end
@@ -2095,6 +2094,7 @@ root.Velocity = Vector3.new(0,0,0)
 							root.CFrame = lastCF
 							dropItemNetwork:FireServer() -- drop the rest item
 						end
+count = 0
 			else
 				for i = 1, loopAmount do
 					if Var.getItemVar.cancelGetItem then break end 
