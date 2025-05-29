@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255555"
+local ScVer = "v1.123835255556"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1672,13 +1672,9 @@ local function updateEspUI()
 		task.spawn(function()
 			local overrideColor = false
 			local dist = math.floor((model:GetPivot().Position - root.Position).Magnitude)
-			if Players:GetPlayerFromCharacter(model) then
-				if not overrideColor then
-					info.ui.TextLabel.TextColor3 = EspColor.Player
-				end
-				info.ui.Enabled = Var.espVar.playersEsp
+			if not Players:GetPlayerFromCharacter(model) then
+				if dist > 2500 then info.ui.Enabled = false info.highlight.Enabled = false return end
 			end
-			if dist > 2500 then info.ui.Enabled = false info.highlight.Enabled = false return end
 			info.ui.Enabled = true
 			info.highlight.Enabled = true
 			if model.Name == "BankCombo" then
@@ -1703,6 +1699,11 @@ local function updateEspUI()
 					info.ui.TextLabel.TextColor3 = EspColor.Item
 				end
 				info.ui.Enabled = Var.espVar.itemsEsp
+			elseif Players:GetPlayerFromCharacter(model) then
+				if not overrideColor then
+					info.ui.TextLabel.TextColor3 = EspColor.Player
+				end
+				info.ui.Enabled = Var.espVar.playersEsp
 			elseif model:HasTag("Enemy") then
 				if not overrideColor then
 					info.ui.TextLabel.TextColor3 = EspColor.Mob
@@ -2083,10 +2084,41 @@ local function scanForItems(itemName, instancePath): {Instances}
 	local foundItems = {}
 	local newpos = (CFrame.new(start) * CFrame.new(0, -6, 0)).Position
 	local returning = false
+	local maxAttempts = 2
+	local attempts = 0
+	
+	for _, obj in pairs(instancePath:GetChildren()) do
+		if obj.Name == itemName and not table.find(foundItems, obj) then
+			-- Validate availability
+			local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+			if primary then
+				local weld = primary:FindFirstChildWhichIsA("WeldConstraint")
+				if not weld or weld.Name ~= "DragWeldConstraint" then
+					table.insert(foundItems, obj)
+				end
+			end
+		end
+	end
 
 	while not returning do
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
+
+		local currentDistance = (newpos - start).Magnitude
+		local totalDistance = (endpos - start).Magnitude
+
+		if attempts >= maxAttempts then
+			break
+		end
+
+		if currentDistance >= totalDistance then
+			attempts += 1
+			newpos = start
+		end
+
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -150)
+		newpos = root.Position
+		
 		for _, obj in pairs(instancePath:GetChildren()) do
 			if obj.Name == itemName and not table.find(foundItems, obj) then
 				-- Validate availability
@@ -2099,16 +2131,6 @@ local function scanForItems(itemName, instancePath): {Instances}
 				end
 			end
 		end
-
-		local currentDistance = (newpos - start).Magnitude
-		local totalDistance = (endpos - start).Magnitude
-
-		if currentDistance >= totalDistance then
-			break
-		end
-
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -150)
-		newpos = root.Position
 
 		task.wait(0.01)
 	end
@@ -2146,10 +2168,12 @@ local function getItem(bring: boolean)
 			local count = 0
 			local noMoreItems = false
 
-			local suces = ownChair()
-			if not suces then
-				teleportDb = false
-				return
+			if not Var.localPlayer.chair then
+				local suces = ownChair()
+				if not suces then
+					teleportDb = false
+					return
+				end
 			end
 
 			chair = Var.localPlayer.chair
@@ -2218,6 +2242,7 @@ local function getItem(bring: boolean)
 				setCanCollide(chair, true)
 				dropAllItems()
 			else
+				print("Getting ", selectedItem)
 				for i = 1, loopAmount do
 					if Var.getItemVar.cancelGetItem then break end 
 
@@ -2577,6 +2602,7 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 		task.defer(function()
 			wait(.2)
 			ScrollingFrame.Visible = false
+			wait(.2)
 			for _, v in pairs(ScrollingFrame:GetChildren()) do
 				if v:IsA("TextButton") then
 					v.Visible = true
@@ -2723,7 +2749,9 @@ AutoWins.MouseButton1Click:Connect(function()
 	task.spawn(function()
 		root.CFrame = CFrame.new(crankPos)
 		root.CFrame = CFrame.lookAt(root.Position, crankPos)
-		wait(.2)
+		repeat
+			wait()
+		until Baseplates:FindFirstChild("FinalBaseplate")
 		for _, prompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
 			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
 				if fireproximityprompt then
@@ -2795,19 +2823,22 @@ end)
 Antiafk.MouseButton1Click:Connect(function()
 	antiAfk()
 end)
-Flyspeed:GetPropertyChangedSignal("Text"):Connect(function()
-	Flyspeed.Text = Flyspeed.Text:gsub('%D+', '');
-	local num = tonumber(Flyspeed.Text)
-	if num then
-		if num == 0 then
-			num = 1
-		end
+Flyspeed.FocusLost:Connect(function(enterPressed)
+	if not enterPressed then return end
+
+	local clean = Flyspeed.Text:gsub('%D+', '')
+	local num = tonumber(clean)
+	if num and num > 0 then
 		Flyspeed.Text = "Speed: " .. num
 		Var.localPlayer.flySpeed = num
+		if Var.localPlayer.fly then
+			fly(num)
+		end
 	else
 		Flyspeed.Text = ""
 	end
 end)
+
 Fly.MouseButton1Click:Connect(function()
 	Var.localPlayer.fly = not Var.localPlayer.fly
 	if Var.localPlayer.fly then
@@ -2829,9 +2860,9 @@ task.spawn(function()
 end)
 
 hum.StateChanged:Connect(function(old, new)
-	if new == Enum.HumanoidStateType.Jumping or
-		new == Enum.HumanoidStateType.Running then
-		if Var.localPlayer.chair then
+	if old == Enum.HumanoidStateType.Seated then
+		wait()
+		if not hum.Sit and not hum.SeatPart and Var.localPlayer.chair then
 			Var.localPlayer.chair = nil
 		end
 	end
