@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255536"
+local ScVer = "v1.123835255537"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1839,6 +1839,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 
 	hum.JumpHeight = 7.2
 	hum.JumpPower = 50
+	return true
 end
 
 local function setCanCollide(instance, bool)
@@ -2067,8 +2068,8 @@ local function getItem(bring: boolean)
 			end
 			
 			if bring then
+				print("bringing ", selectedItem)
 				while true do
-
 					local succes = searchItem(selectedItem, path, start, 150, 2)
 					if not succes then
 						break
@@ -2687,7 +2688,7 @@ task.spawn(function()
 end)
 
 hum.StateChanged:Connect(function(old, new)
-	if new ~= Enum.HumanoidStateType.Seated then
+	if new == Enum.HumanoidStateType.Jumping then
 		if Var.localPlayer.chair then
 			Var.localPlayer.chair = nil
 		end
