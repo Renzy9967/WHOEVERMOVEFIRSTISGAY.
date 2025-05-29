@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525546"
+local ScVer = "v1.12383525547"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1956,9 +1956,10 @@ local function getItem(bring: boolean)
 
 	local thread = coroutine.create(function()
 local chair = nil
+local lastCF = root.CFrame
 		local success, msg = pcall(function()
 			lastPos = root.Position
-			local lastCF = root.CFrame
+			
 			local selectedItem = Var.getItemVar.selectedItem
 			local selectedMode = Var.getItemVar.selectedMode
 			local loopAmount = Var.getItemVar.itemAmount
@@ -2063,11 +2064,10 @@ count = 0
 						end
 						equipSack()
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 						local tik = 0
 
 						while foundItem.Parent and tik < 10 do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position + Vector3.new(0,3,0))
 							storeNetwork:FireServer(foundItem)
 							tik += 0.1
 wait(0.01)
