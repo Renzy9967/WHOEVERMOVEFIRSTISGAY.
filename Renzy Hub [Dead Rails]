@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255531"
+local ScVer = "v1.123835255532"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2070,9 +2070,11 @@ local function getItem(bring: boolean)
 			
 			if bring then
 				while true do
-					if Var.getItemVar.cancelGetItem then break end
 
-					searchItem(selectedItem, path, start, 150)
+					local succes = searchItem(selectedItem, path, start, 150, 2)
+					if not succes then
+						break
+					end
 					local foundItem = getNearestItem(selectedItem)
 
 					if foundItem and not collectedItems[foundItem] then
@@ -2096,8 +2098,10 @@ local function getItem(bring: boolean)
 						end
 
 						if foundItem.Parent then
-							-- Failed to collect
-							break
+							if count == 0 then
+								-- Failed to collect
+								break
+							end
 						else
 							count += 1
 						end
@@ -2105,15 +2109,6 @@ local function getItem(bring: boolean)
 						if count >= 10 then
 							dropAllItems()
 							count = 0
-						end
-					else
-						if count >= 10 then
-							-- No more items found
-							dropAllItems()
-						end
-						local succes = searchItem(selectedItem, path, start, 150)
-						if not succes then
-							break
 						end
 					end
 				end
