@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835253"
+local ScVer = "v1.123835254"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2034,6 +2034,7 @@ local firstRun = true
 
 					ownChair()
 					local chair = getNearestItem("MaximGun")
+local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
 
 					searchItem(selectedItem, path, start, 150)
 					local foundItem = getNearestItem(selectedItem)
@@ -2113,10 +2114,9 @@ local firstRun = true
 							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
 							
 --firstRun = false
-							chair = getNearestItem("MaximGun")
 							if chair then
 chair:PivotTo(CFrame.new(foundItem.PrimaryPart.Position))
-								seat = chair:FindFirstChildWhichIsA("VehicleSeat")
+								
 if seat then seat:Sit(hum) end
 wait(.2)
 hum:ChangeState(Enum.HumanoidStateType.Jumping)
