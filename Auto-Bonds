@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.221"
+local ScVer = "v2.222"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -596,6 +596,9 @@ toggleAntiVoid(true)
 toggleNoClip(true)
 ownChair()
 autoBond()
+
+hum.JumpHeight = 7.2
+hum.JumpPower = 50
 
 local AutoDeath = _G.AutoDeath
 local AutoExecute = _G.AutoExecute
