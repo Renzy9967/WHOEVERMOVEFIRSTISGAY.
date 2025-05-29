@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525554"
+local ScVer = "v1.12383525555"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2019,6 +2019,47 @@ local function handleUnicorn()
 	end
 end
 
+local function scanForItems(itemName, instancePath): {Instances}
+	instancePath = instancePath or workspace.RuntimeItems
+	local foundItems = {}
+	local newpos = (CFrame.new(start) * CFrame.new(0, -6, 0)).Position
+	local returning = false
+
+	while not returning do
+		hum.JumpHeight = 0
+		hum.JumpPower = 0
+		for _, obj in pairs(instancePath:GetChildren()) do
+			if obj.Name == itemName and not table.find(foundItems, obj) then
+				-- Validate availability
+				local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+				if primary then
+					local weld = primary:FindFirstChildWhichIsA("WeldConstraint")
+					if not weld or weld.Name ~= "DragWeldConstraint" then
+						table.insert(foundItems, obj)
+					end
+				end
+			end
+		end
+
+		local currentDistance = (newpos - start).Magnitude
+		local totalDistance = (endpos - start).Magnitude
+
+		if currentDistance >= totalDistance then
+			break
+		end
+
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
+		newpos = root.Position
+
+		task.wait(0.01)
+	end
+
+	hum.JumpHeight = 7.2
+	hum.JumpPower = 50
+	print("Total ", itemName, ": ", #foundItems)
+	return foundItems
+end
+
 local function getItem(bring: boolean)
 	if not table.find(ItemModes, Var.getItemVar.selectedMode) or
 		not table.find(Items, Var.getItemVar.selectedItem) or
@@ -2054,7 +2095,6 @@ local function getItem(bring: boolean)
 
 			chair = Var.localPlayer.chair
 			local count = 0
-			local newPos = start
 
 			local function dropAllItems()
 				root.CFrame = lastCF
@@ -2077,16 +2117,12 @@ local function getItem(bring: boolean)
 			end
 			
 			if bring then
+				local scannedItems = scanForItems(selectedItem, workspace.RuntimeItems)
 				print("bringing ", selectedItem)
-				while true do
-					root.CFrame = CFrame.new(newPos)
-					wait(1)
-					local success = searchItem(selectedItem, path, newPos, 150, 2, collectedItems)
-					if not success then
-						break
-					end
+				for i = 1, #scannedItems do
+					root.CFrame = scannedItems[i]:GetPivot()
 
-					local foundItem = getNearestItem(selectedItem)
+					local foundItem = scannedItems[i]
 					if foundItem and not collectedItems[foundItem] then
 						collectedItems[foundItem] = true
 
@@ -2097,7 +2133,7 @@ local function getItem(bring: boolean)
 						equipSack()
 
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-						if not foundItem.PrimaryPart then continue end
+						if not foundItem.PrimaryPart then wait(1) end
 
 						local tik = 0
 						while foundItem.Parent and tik < 10 do
@@ -2112,7 +2148,6 @@ local function getItem(bring: boolean)
 						end
 
 						if count >= 10 then
-							newPos = root.Position
 							dropAllItems()
 							count = 0
 							wait(0.1)
