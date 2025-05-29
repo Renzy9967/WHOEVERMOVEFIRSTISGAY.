@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255552"
+local ScVer = "v1.123835255553"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1954,12 +1954,12 @@ local function ownChair(targetPos: Vector3?)
 	Remotes.StoreItem:FireServer(chair)
 	wait(.2)
 	Remotes.DropItem:FireServer()
-	wait(.25)
+	wait(.3)
+	camConn:Disconnect()
 	local newChair = getNearestItem("Chair")
 	newChair.Seat:Sit(hum)
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
 	print("owned chair.")
-	camConn:Disconnect()
 	toggleNoClip(true)
 	toggleAntiVoid(true)
 	Var.localPlayer.chair = newChair
