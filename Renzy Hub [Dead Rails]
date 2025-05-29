@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255532"
+local ScVer = "v1.123835255533"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2690,7 +2690,7 @@ end)
 
 hum.StateChanged:Connect(function(old, new)
 	if new ~= Enum.HumanoidStateType.Seated then
-		if not hum.SeatPart then
+		if Var.localPlayer.chair and not hum.SeatPart then
 			Var.localPlayer.chair = nil
 		end
 	end
