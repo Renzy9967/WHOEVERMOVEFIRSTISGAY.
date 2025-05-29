@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.22"
+local ScVer = "v2.222"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -552,7 +552,6 @@ end
 
 local function autoBond()
 	local success, msg = pcall(function()
-		ownChair()
 		searchItem("Bond")
 		local bond = getNearestItem("Bond")
 		if bond then
