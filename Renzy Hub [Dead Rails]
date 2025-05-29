@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255538"
+local ScVer = "v1.123835255539"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2054,6 +2054,7 @@ local function getItem(bring: boolean)
 
 			chair = Var.localPlayer.chair
 			local count = 0
+			local newCF = CFrame.new(start)
 
 			local function dropAllItems()
 				root.CFrame = lastCF
@@ -2078,7 +2079,9 @@ local function getItem(bring: boolean)
 			if bring then
 				print("bringing ", selectedItem)
 				while true do
-					local success = searchItem(selectedItem, path, start, 150, 2, collectedItems)
+					root.CFrame = newCF
+					wait(1)
+					local success = searchItem(selectedItem, path, newCF, 150, 2, collectedItems)
 					if not success then
 						break
 					end
@@ -2109,6 +2112,7 @@ local function getItem(bring: boolean)
 						end
 
 						if count >= 10 then
+							newCF = root.CFrame
 							dropAllItems()
 							count = 0
 							wait(0.1)
