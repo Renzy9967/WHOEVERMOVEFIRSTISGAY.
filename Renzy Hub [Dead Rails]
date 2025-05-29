@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255"
+local ScVer = "v1.1238352551"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1940,8 +1940,8 @@ local function getItem(bring: boolean)
 	local collectedItems = {}
 
 	Var.getItemVar.cancelGetItem = false
-	toggleNoClip(true)
-	toggleAntiVoid(true)
+	--toggleNoClip(true)
+	--toggleAntiVoid(true)
 
 	local thread = coroutine.create(function()
 		local success, msg = pcall(function()
@@ -1967,6 +1967,7 @@ local firstRun = true
 					end
 
 					local sucses = ownChair()
+print(sucses)
 					if not sucses then break end
 
 					searchItem(selectedItem, path, start, 150)
@@ -2191,19 +2192,19 @@ if not suces then break end
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
-		chair = getNearestItem("MaximGun")
+		--[[chair = getNearestItem("MaximGun")
 		if chair then
 			setCanCollide(chair, true)
-		end
+		end]]
 		
 		root.CFrame = CFrame.new(lastPos)
 		root.Velocity = Vector3.new(0,0,0)
-		unfly()
+		--unfly()
 		hum.JumpHeight = 7.2
 		hum.JumpPower = 50
 
 		teleportDb = false
-		runningConnections.humStateConn:Disconnect()
+		--runningConnections.humStateConn:Disconnect()
 		runningConnections.GetItem = nil
 	end)
 
