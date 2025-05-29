@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525521"
+local ScVer = "v1.1238352553"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1850,9 +1850,23 @@ end
 local function ownChair(targetPos: Vector3?)
 	print("starting own chair")
 equipSack()
+local tik = 0
+while tik < 1 do
 	root.CFrame = workspace.TeslaLab:GetPivot()
+tik += 0.1
 wait(.1)
-root.CFrame = workspace.TeslaLab:GetPivot()
+end
+local camConn
+	camConn = RunService.RenderStepped:Connect(function()
+		if not overrideCam then
+			if camConn then
+				camConn:Disconnect()
+				return
+			end
+		end
+		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, root.Position - Vector3.new(0, 3, 0))
+	end)
+--root.CFrame = workspace.TeslaLab:GetPivot()
 hum:ChangeState(Enum.HumanoidStateType.Running)
 local chair = getNearestItem("Chair")
 if not chair then
@@ -1885,6 +1899,7 @@ wait(.1)
 chair.Seat:Sit(hum)
 hum:ChangeState(Enum.HumanoidStateType.Seated)
 	--setCanCollide(chair, false)
+camConn:Disconnect()
 	toggleNoClip(true)
 	toggleAntiVoid(true)
 	if targetPos then
@@ -1969,6 +1984,15 @@ local firstRun = true
 						for i = 1, 10  do
 							root.CFrame = lastCF
 							dropItemNetwork:FireServer()
+local droppedBond = nil
+while not droppedBond do
+local nearest = getNearestItem("Bond")
+if not collectedItems[nearest] then
+collectedItems[nearest] = true
+droppedBond = nearest
+break
+end
+end
 						end
 					end
 
@@ -2068,6 +2092,12 @@ if weld then weld:Destroy() end]]
 						noMoreItems = true
 					end
 				end
+root.CFrame = lastCF
+						wait(.2)
+						for i = 1, 10  do
+							root.CFrame = lastCF
+							dropItemNetwork:FireServer() -- drop the rest item
+						end
 			else
 				for i = 1, loopAmount do
 					if Var.getItemVar.cancelGetItem then break end 
