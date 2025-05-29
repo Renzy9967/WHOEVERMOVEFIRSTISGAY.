@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255533"
+local ScVer = "v1.123835255534"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1891,17 +1891,18 @@ local function ownChair(targetPos: Vector3?)
 		end
 	end)
 	wait(2)
-	print("owned chair.")
 	root.CFrame = chair.Seat.CFrame
 	Remotes.StoreItem:FireServer(chair)
 	wait(.2)
 	Remotes.DropItem:FireServer()
 	wait(.25)
 	chair = getNearestItem("Chair")
-	wait(.1)
-	chair.Seat:Sit(hum)
+	local seat = chair:WaitForChild("Seat", 5)
+	if seat then
+		seat:Sit(hum)
+	end
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
-	--setCanCollide(chair, false)
+	print("owned chair.")
 	camConn:Disconnect()
 	toggleNoClip(true)
 	toggleAntiVoid(true)
@@ -2690,7 +2691,7 @@ end)
 
 hum.StateChanged:Connect(function(old, new)
 	if new ~= Enum.HumanoidStateType.Seated then
-		if Var.localPlayer.chair and not hum.SeatPart then
+		if Var.localPlayer.chair then
 			Var.localPlayer.chair = nil
 		end
 	end
