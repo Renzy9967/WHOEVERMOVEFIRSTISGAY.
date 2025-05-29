@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255551"
+local ScVer = "v1.123835255552"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1561,21 +1561,24 @@ local function fly(speed)
 			local VelocityHandler = root:FindFirstChild(velocityHandlerName)
 			local GyroHandler = root:FindFirstChild(gyroHandlerName)
 
-			local moveDirection = controlModule:GetMoveVector() -- Vector2
-			local camCF = camera.CFrame
+			VelocityHandler.MaxForce = v3inf
+			GyroHandler.MaxTorque = v3inf
+			GyroHandler.CFrame = camera.CoordinateFrame
+			VelocityHandler.Velocity = v3none
 
-			-- Convert 2D moveVector into 3D camera-relative direction
-			local moveVec3 = (camCF.RightVector * moveDirection.X + camCF.LookVector * moveDirection.Z).Unit
-			if moveVec3.Magnitude > 0 then
-				VelocityHandler.Velocity = moveVec3 * speed
-			else
-				VelocityHandler.Velocity = Vector3.zero
+			local direction = controlModule:GetMoveVector()
+			if direction.X > 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * (speed * 50))
 			end
-
-			-- Lock facing direction to camera
-			GyroHandler.CFrame = CFrame.new(root.Position, root.Position + camCF.LookVector)
-			VelocityHandler.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-			GyroHandler.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+			if direction.X < 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * (speed * 50))
+			end
+			if direction.Z > 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * (speed * 50))
+			end
+			if direction.Z < 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * (speed * 50))
+			end
 		end
 	end)
 end
