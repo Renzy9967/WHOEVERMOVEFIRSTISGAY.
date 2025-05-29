@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352554"
+local ScVer = "v1.12383525541"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2063,7 +2063,7 @@ end
 						local tik = 0
 
 						while foundItem.Parent and tik < 10 do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -3, 0)
 							storeNetwork:FireServer(foundItem)
 							tik += 0.1
 wait(0.01)
@@ -2216,10 +2216,10 @@ if not suces then break end
 		
 		toggleNoClip(false)
 		toggleAntiVoid(false)
-		--[[chair = getNearestItem("MaximGun")
+		chair = getNearestItem("Chair")
 		if chair then
 			setCanCollide(chair, true)
-		end]]
+		end
 		
 		root.CFrame = CFrame.new(lastPos)
 		root.Velocity = Vector3.new(0,0,0)
