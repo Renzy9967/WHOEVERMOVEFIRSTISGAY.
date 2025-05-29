@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255556"
+local ScVer = "v1.123835255557"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2182,21 +2182,14 @@ local function getItem(bring: boolean)
 			local function dropAllItems()
 				root.CFrame = lastCF
 				root.Velocity = Vector3.new(0, 0, 0)
+				root.Anchored = true
 				wait(1)
 				for _ = 1, 10 do
 					root.CFrame = lastCF
 					root.Velocity = Vector3.new(0, 0, 0)
 					dropItemNetwork:FireServer()
 				end
-				for _, item in pairs(workspace.RuntimeItems:GetChildren()) do
-					task.spawn(function()
-						if item.Name == selectedItem then
-							if (item:GetPivot().Position - root.Position).Magnitude < 20 and not collectedItems[item] then
-								collectedItems[item] = true
-							end
-						end
-					end)
-				end
+				root.Anchored = false
 			end
 			
 			if bring then
