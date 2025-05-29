@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255557"
+local ScVer = "v1.123835255559"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2084,7 +2084,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 	local foundItems = {}
 	local newpos = (CFrame.new(start) * CFrame.new(0, -6, 0)).Position
 	local returning = false
-	local maxAttempts = 2
+	local maxAttempts = 0
 	local attempts = 0
 	
 	for _, obj in pairs(instancePath:GetChildren()) do
@@ -2107,15 +2107,6 @@ local function scanForItems(itemName, instancePath): {Instances}
 		local currentDistance = (newpos - start).Magnitude
 		local totalDistance = (endpos - start).Magnitude
 
-		if attempts >= maxAttempts then
-			break
-		end
-
-		if currentDistance >= totalDistance then
-			attempts += 1
-			newpos = start
-		end
-
 		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -150)
 		newpos = root.Position
 		
@@ -2130,6 +2121,15 @@ local function scanForItems(itemName, instancePath): {Instances}
 					end
 				end
 			end
+		end
+
+		if attempts >= maxAttempts then
+			break
+		end
+
+		if currentDistance >= totalDistance then
+			attempts += 1
+			newpos = start
 		end
 
 		task.wait(0.01)
@@ -2182,11 +2182,12 @@ local function getItem(bring: boolean)
 			local function dropAllItems()
 				root.CFrame = lastCF
 				root.Velocity = Vector3.new(0, 0, 0)
-				root.Anchored = true
+				root.AssemblyLinearVelocity = Vector3.new(0,0,0)
 				wait(1)
 				for _ = 1, 10 do
 					root.CFrame = lastCF
-					root.Velocity = Vector3.new(0, 0, 0)
+					root.Velocity = Vector3.new(0,0,0)
+					root.AssemblyLinearVelocity = Vector3.new(0,0,0)
 					dropItemNetwork:FireServer()
 				end
 				root.Anchored = false
@@ -2213,7 +2214,7 @@ local function getItem(bring: boolean)
 
 						local tik = 0
 						while foundItem.Parent and tik < 10 do
-							root.CFrame = foundItem.PrimaryPart.CFrame + Vector3.new(0, 3, 0)
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
 							storeNetwork:FireServer(foundItem)
 							tik += 0.1
 							wait(0.01)
