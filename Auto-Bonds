@@ -1,5 +1,5 @@
 local PlaceId = 70876832253163
-local ScVer = "v2.222"
+local ScVer = "v2.221"
 if game.PlaceId ~= PlaceId then warn("Auto Bond " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9967") or game.Players.LocalPlayer.PlayerGui:FindFirstChild("Skibidi9967") then warn("Script is already running!") return end
 game.StarterGui:SetCore("SendNotification", {
@@ -515,12 +515,12 @@ local function ownChair(targetPos: Vector3?)
 	Remotes.StoreItem:FireServer(chair)
 	wait(.2)
 	Remotes.DropItem:FireServer()
-	wait(.25)
+	wait(.3)
+	camConn:Disconnect()
 	local newChair = getNearestItem("Chair")
 	newChair.Seat:Sit(hum)
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
 	print("owned chair.")
-	camConn:Disconnect()
 	toggleNoClip(true)
 	toggleAntiVoid(true)
 	if targetPos then
@@ -564,6 +564,7 @@ local function autoBond()
 			
 			if distance > 8 then
 				root.CFrame = cframe
+				root.Velocity = Vector3.new(0,0,0)
 				local tik = 0
 			end
 			
