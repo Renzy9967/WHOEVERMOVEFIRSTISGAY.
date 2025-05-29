@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352541"
+local ScVer = "v1.123835255"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1841,114 +1841,54 @@ local function setCanCollide(instance, bool)
 	end
 end
 
+local function equipSack()
+	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
+		hum:EquipTool(plr.Backpack.Sack)
+	end
+end
+
 local function ownChair(targetPos: Vector3?)
 	print("starting own chair")
-	if hum.SeatPart and hum.SeatPart.Parent and hum.SeatPart.Parent.Name == "MaximGun" then
-		return
-	end
-
-	local chair = getNearestItem("MaximGun")
-	if not chair then
-		searchItem("MaximGun")
-		chair = getNearestItem("MaximGun")
-		if not chair then
-			warn("[ownChair] chair still not found after search")
-			return
-		end
-	end
-
-	local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
-	if not seat then return end
-	if seat.Occupant == hum then return end
-
-	chair.PrimaryPart = chair.PrimaryPart or chair:FindFirstChildWhichIsA("VehicleSeat") or chair:FindFirstChildWhichIsA("BasePart")
-	local weld = chair.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
-	local Gun = chair:FindFirstChild("Gun")
-	local Tripod = chair:FindFirstChild("Tripod")
-	if weld and weld.Name == "DragWeldConstraint" then
-		seat:Sit(hum)
-		unweldNetwork:FireServer(chair)
-		task.wait(0.2)
-	end
-	--targetPos = targetPos or (CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)).Position
-	root.CFrame = CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-	
-	repeat
-		seat:Sit(hum)
-		wait()
-	until hum.SeatPart
-	hum:ChangeState(Enum.HumanoidStateType.Seated)
-	hum.JumpHeight = 0
-	hum.JumpPower = 0
---[[local weld = Instance.new("WeldConstraint", root)
-weld.Name = "ChairWeld"
-weld.Part0 = root
-weld.Part1 = seat]]
+equipSack()
+	root.CFrame = workspace.TeslaLab:GetPivot()
+hum:ChangeState(Enum.HumanoidStateType.Running)
+local chair = getNearestItem("Chair")
+if not chair then
+searchItem("Chair")
+chair = getNearestItem("Chair")
+if not chair then return false, error("couldn't find chair") end
+end
+local tik = 0
+local mult = root.CFrame * CFrame.new(0,100,0)
+task.spawn(function()
+while  tik < 5 do
+root.CFrame = mult
+if chair then 
+chair.Seat:Sit(hum)
+hum:ChangeState(Enum.HumanoidStateType.Seated)
+end
+wait(0.01)
+tik += 0.1
+end
+end)
+wait(2)
+print("owned chair.")
+root.CFrame = chair.Seat.CFrame
+Remotes.StoreItem:FireServer(chair)
+wait(.2)
+Remotes.DropItem:FireServer()
+wait(.25)
+chair = getNearestItem("Chair")
+wait(.1)
+chair.Seat:Sit(hum)
+hum:ChangeState(Enum.HumanoidStateType.Seated)
 	setCanCollide(chair, false)
 	toggleNoClip(true)
 	toggleAntiVoid(true)
-
-	--[[local mult = CFrame.new(chair.PrimaryPart.Position - Vector3.new(0, 6, 0))
-	local tik = 0
-	local done = false
-	overrideCam = true
-	local camConn
-	local humStateConn
-	camConn = RunService.RenderStepped:Connect(function()
-		if not overrideCam then
-			if camConn then
-				camConn:Disconnect()
-				return
-			end
-		end
-		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, root.Position - Vector3.new(0, 3, 0))
-	end)
-
-	task.spawn(function()
-		for i = 1, 50 do -- 0.01s * 50 = 0.5s (same as tik < 5 with tik += 0.1)
-			root.CFrame = mult
-			if i >= 25 then
-				chair.PrimaryPart.CFrame = mult
-				hum:ChangeState(Enum.HumanoidStateType.Freefall)
-			end
-			if i >= 40 then
-				seat:Sit(hum)
-				hum:ChangeState(Enum.HumanoidStateType.Seated)
-			end
-			wait(0.01)
-		end
-		done = true
-	end)
-
-	if chair then
-		wait(.5)
-		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		wait(.6)
-		seat:Sit(hum)
-		hum:ChangeState(Enum.HumanoidStateType.Seated)
-	end]]
-	
-	if runningConnections.humStateConn then
-		runningConnections.humStateConn:Disconnect()
-	end
-	runningConnections.humStateConn = hum.StateChanged:Connect(function(old, new)
-		if new ~= Enum.HumanoidStateType.Seated then
-			if not flying then
-				if runningConnections.humStateConn then
-					runningConnections.humStateConn:Disconnect()
-				end
-				return
-			end
-			seat:Sit(hum)
-		end
-	end)
-	
-	--repeat wait() until done
-	fly(50)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos) * CFrame.new(0, -6, 0)
 	end
-	--overrideCam = false
+	return true
 end
 
 local function teleportToTrain()
@@ -1976,12 +1916,6 @@ local function teleportToTrain()
 			
 		end
 		return false
-	end
-end
-
-local function equipSack()
-	if not char:FindFirstChild("Sack") and plr.Backpack:FindFirstChild("Sack") then
-		hum:EquipTool(plr.Backpack.Sack)
 	end
 end
 
@@ -2032,9 +1966,8 @@ local firstRun = true
 						end
 					end
 
-					ownChair()
-					local chair = getNearestItem("MaximGun")
-local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
+					local sucses = ownChair()
+					if not sucses then break end
 
 					searchItem(selectedItem, path, start, 150)
 					local foundItem = getNearestItem(selectedItem)
@@ -2108,29 +2041,15 @@ local seat = chair:FindFirstChildWhichIsA("VehicleSeat")
 						equipSack()
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
 						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-						
+						local tik = 0
 
-						while foundItem.Parent do
-							--root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) --* CFrame.new(0, -6, 0)
-							root.CFrame = CFrame.new(chair.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-
---firstRun = false
-							if chair then
-chair:PivotTo(CFrame.new(foundItem.PrimaryPart.Position))
-								
-seat:Sit(hum)
-wait(.2)
-hum:ChangeState(Enum.HumanoidStateType.Jumping)
-wait()
-seat:Sit(hum)
-wait(.5)
-
-							end
-							
-							
+						while foundItem.Parent and tik < 10 do
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
 							storeNetwork:FireServer(foundItem)
-							wait(0.01)
+							tik += 0.1
+wait(0.01)
 						end
+if foundItem.Parent ~= nil then print("failed") noMoreItems = true end
 						count += 1
 					else
 						root.CFrame = lastCF
@@ -2148,7 +2067,8 @@ if weld then weld:Destroy() end]]
 				for i = 1, loopAmount do
 					if Var.getItemVar.cancelGetItem then break end 
 
-					ownChair()
+					local suces = ownChair()
+if not suces then break end
 					local chair = getNearestItem("MaximGun")
 
 					searchItem(selectedItem, path, start, 150)
