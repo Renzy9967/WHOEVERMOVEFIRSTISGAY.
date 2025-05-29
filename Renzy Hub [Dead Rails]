@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525551"
+local ScVer = "v1.12383525552"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1856,7 +1856,7 @@ local function equipSack()
 end
 
 local function ownChair(targetPos: Vector3?)
-	if Var.localPlayer.chair ~= nil then return true end
+	if Var.localPlayer.chair then return true end
 	print("starting own chair")
 	equipSack()
 	local tik = 0
@@ -2043,76 +2043,73 @@ local function getItem(bring: boolean)
 			local count = 0
 			local noMoreItems = false
 
-			local sucses, msg = ownChair()
-			print(sucses)
-			if not sucses then return msg end
+			local suces = ownChair()
+			if not suces then
+				teleportDb = false
+				return
+			end
+
 			chair = Var.localPlayer.chair
+			local count = 0
+
+			local function dropAllItems()
+				root.CFrame = lastCF
+				root.Velocity = Vector3.zero
+				wait(1)
+				for _ = 1, 10 do
+					root.CFrame = lastCF
+					dropItemNetwork:FireServer()
+				end
+			end
+			
 			if bring then
-				local firstRun = true
-				while not noMoreItems do
-					if count == 10 then
-						root.CFrame = lastCF
-						root.Velocity = Vector3.new(0,0,0)
-						wait(1)
-						for i = 1, 10  do
-							root.CFrame = lastCF
-							dropItemNetwork:FireServer()
-						end
-						wait(.1)
-						for i, v in pairs(workspace.RuntimeItems:GetChildren()) do
-							if v.Name == "Bond" and not collectedItems[v] and (v:GetPivot().Position - root.Position).Magnitude < 10 then
-								collectedItems[v] = true
-							end
-						end
-						count = 0
-					end
+				while true do
+					if Var.getItemVar.cancelGetItem then break end
 
 					searchItem(selectedItem, path, start, 150)
 					local foundItem = getNearestItem(selectedItem)
-					if foundItem then
-						if not collectedItems[foundItem] then
-							collectedItems[foundItem] = true
-							if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
-								handleUnicorn()
-							end
-							equipSack()
-							foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-							local tik = 0
 
-							while foundItem.Parent and tik < 10 do
-								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position + Vector3.new(0,3,0))
-								storeNetwork:FireServer(foundItem)
-								tik += 0.1
-								wait(0.01)
-							end
-							if foundItem.Parent then
-								noMoreItems = true
-							else
-								count += 1
-							end
+					if foundItem and not collectedItems[foundItem] then
+						collectedItems[foundItem] = true
+
+						if selectedItem == "Model_Unicorn" then
+							handleUnicorn()
+						end
+
+						equipSack()
+
+						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
+						if not foundItem.PrimaryPart then continue end
+
+						local tik = 0
+						while foundItem.Parent and tik < 10 do
+							root.CFrame = foundItem.PrimaryPart.CFrame + Vector3.new(0, 3, 0)
+							storeNetwork:FireServer(foundItem)
+							tik += 0.1
+							wait(0.01)
+						end
+
+						if foundItem.Parent then
+							-- Failed to collect
+							break
+						else
+							count += 1
+						end
+
+						if count >= 10 then
+							dropAllItems()
+							count = 0
 						end
 					else
-						root.CFrame = lastCF
-						root.Velocity = Vector3.new(0,0,0)
-						wait(.2)
-						for i = 1, 10  do
-							root.CFrame = lastCF
-							dropItemNetwork:FireServer() -- drop the rest item
-						end
-						count = 0
-						noMoreItems = true
+						-- No more items found
+						dropAllItems()
+						break
 					end
 				end
+
+				-- Reset position and chair
 				setCanCollide(chair, true)
-				root.CFrame = lastCF
-				root.Velocity = Vector3.new(0,0,0)
-				wait(.2)
-				for i = 1, 10  do
-					root.CFrame = lastCF
-					dropItemNetwork:FireServer() -- drop the rest item
-				end
-				count = 0
+				dropAllItems()
 			else
 				for i = 1, loopAmount do
 					if Var.getItemVar.cancelGetItem then break end 
@@ -2207,8 +2204,12 @@ local function teleportDestination()
 				return
 			end
 
-			local sucses, msg = ownChair()
-			if not sucses then return msg end
+			local suces = ownChair()
+			if not suces then
+				teleportDb = false
+				return
+			end
+
 			chair = Var.localPlayer.chair
 
 			if selectedDestination == "79km" then
