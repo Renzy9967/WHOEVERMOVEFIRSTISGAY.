@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255537"
+local ScVer = "v1.123835255538"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1513,7 +1513,6 @@ local function unfly()
 end
 
 local function fly(speed)
-	print("Fly")
 	unfly()
 	flying = true
 	speed = speed or 50
@@ -1773,7 +1772,7 @@ local function moveTo(startPos, targetPos, speed)
 	print("Arrived at destination.")
 end
 
-local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
+local function searchItem(itemname, instancePath, startPos, speed, maxAttempts, blacklist)
 	print("starting search item", itemname)
 	startPos = startPos or start
 	instancePath = instancePath or workspace.RuntimeItems
@@ -1784,7 +1783,28 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 	local returning = false
 
 	while not returning do
-		local found = instancePath:FindFirstChild(itemname)
+		local found = nil
+		for _, obj in pairs(instancePath:GetChildren()) do
+			if obj.Name == itemname and (not blacklist or not blacklist[obj]) then
+				-- Validate availability
+				if itemname == "Chair" then
+					local seat = obj:FindFirstChildWhichIsA("Seat")
+					if seat and not seat.Occupant then
+						found = obj
+						break
+					end
+				else
+					local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+					if primary then
+						local weld = primary:FindFirstChildWhichIsA("WeldConstraint")
+						if not weld or weld.Name ~= "DragWeldConstraint" then
+							found = obj
+							break
+						end
+					end
+				end
+			end
+		end
 
 		hum.JumpHeight = 0
 		hum.JumpPower = 0
@@ -1794,7 +1814,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 
 		if currentDistance >= totalDistance then
 			attempts += 1
-			newpos = start -- double check
+			newpos = start
 		end
 
 		if attempts >= maxAttempts then
@@ -1816,24 +1836,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -speed)
 		newpos = root.Position
 
-		if found then
-			if itemname == "Chair" then
-				local seat = found:FindFirstChildWhichIsA("Seat")
-				if seat and seat.Occupant then
-					found = nil
-				end
-			else
-				if found.PrimaryPart then
-					local weld = found.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
-					if weld and weld.Name == "DragWeldConstraint" then
-						found = nil
-					end
-				end
-			end
-		end
-
 		if found then break end
-
 		task.wait(0.01)
 	end
 
@@ -1841,6 +1844,7 @@ local function searchItem(itemname, instancePath, startPos, speed, maxAttempts)
 	hum.JumpPower = 50
 	return true
 end
+
 
 local function setCanCollide(instance, bool)
 	for _, v in pairs(instance:GetDescendants()) do
@@ -2061,21 +2065,25 @@ local function getItem(bring: boolean)
 					dropItemNetwork:FireServer()
 				end
 				for _, item in pairs(workspace.RuntimeItems:GetChildren()) do
-					if item.Name == selectedItem and (item:GetPivot().Position - root.Position).Magnitude < 20 and not collectedItems[item] then
-						collectedItems[item] = true
-					end
+					task.spawn(function()
+						if item.Name == selectedItem then
+							if (item:GetPivot().Position - root.Position).Magnitude < 20 and not collectedItems[item] then
+								collectedItems[item] = true
+							end
+						end
+					end)
 				end
 			end
 			
 			if bring then
 				print("bringing ", selectedItem)
 				while true do
-					local succes = searchItem(selectedItem, path, start, 150, 2)
-					if not succes then
+					local success = searchItem(selectedItem, path, start, 150, 2, collectedItems)
+					if not success then
 						break
 					end
-					local foundItem = getNearestItem(selectedItem)
 
+					local foundItem = getNearestItem(selectedItem)
 					if foundItem and not collectedItems[foundItem] then
 						collectedItems[foundItem] = true
 
@@ -2096,18 +2104,14 @@ local function getItem(bring: boolean)
 							wait(0.01)
 						end
 
-						if foundItem.Parent then
-							if count == 0 then
-								-- Failed to collect
-								break
-							end
-						else
+						if not foundItem.Parent then
 							count += 1
 						end
 
 						if count >= 10 then
 							dropAllItems()
 							count = 0
+							wait(0.1)
 						end
 					end
 				end
