@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835255559"
+local ScVer = "v1.12383525556"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2084,7 +2084,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 	local foundItems = {}
 	local newpos = (CFrame.new(start) * CFrame.new(0, -6, 0)).Position
 	local returning = false
-	local maxAttempts = 0
+	local maxAttempts = 1
 	local attempts = 0
 	
 	for _, obj in pairs(instancePath:GetChildren()) do
