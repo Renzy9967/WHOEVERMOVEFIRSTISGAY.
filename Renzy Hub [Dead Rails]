@@ -1,6 +1,6 @@
 --local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352551"
+local ScVer = "v1.1238352552"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1953,6 +1953,10 @@ local function getItem(bring: boolean)
 			local path = (selectedItem == "Model_Unicorn") and workspace or workspace.RuntimeItems
 			local count = 0
 			local noMoreItems = false
+
+local sucses, msg = ownChair()
+print(sucses)
+					if not sucses then return msg end
 			
 			if bring then
 local firstRun = true
@@ -1966,9 +1970,7 @@ local firstRun = true
 						end
 					end
 
-					local sucses = ownChair()
-print(sucses)
-					if not sucses then break end
+					
 
 					searchItem(selectedItem, path, start, 150)
 					local foundItem = getNearestItem(selectedItem)
@@ -2068,9 +2070,9 @@ if weld then weld:Destroy() end]]
 				for i = 1, loopAmount do
 					if Var.getItemVar.cancelGetItem then break end 
 
-					local suces = ownChair()
+					--[[local suces = ownChair()
 if not suces then break end
-					local chair = getNearestItem("MaximGun")
+					local chair = getNearestItem("MaximGun")]]
 
 					searchItem(selectedItem, path, start, 150)
 
@@ -2158,11 +2160,11 @@ if not suces then break end
 							equipArmorNetwork:FireServer(foundItem)
 						end
 
-						local seat
+						--[[local seat
 
 						if chair then
 							seat = chair:FindFirstChildWhichIsA("VehicleSeat")
-						end
+						end]]
 
 						while foundItem.Parent and tik < 5 do
 							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
