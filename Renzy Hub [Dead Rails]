@@ -2246,7 +2246,7 @@ local function teleportDestination()
 		return
 	end
 	teleportDb = true
-	
+	local chair = nil
 	local thread = coroutine.create(function()
 		lastPos = root.Position
 		local selectedDestination = Var.teleportVar.selectedDestination
@@ -2260,7 +2260,9 @@ local function teleportDestination()
 				return
 			end
 			
-			ownChair()
+			local sucses, msg = ownChair()
+if not sucses then return msg end
+			chair = getNearestItem("Chair")
 			
 			if selectedDestination == "79km" then
 				local targetPosition = Vector3.new(-348.684, 3, -48436.215)
@@ -2300,6 +2302,7 @@ local function teleportDestination()
 			local foundModel = getNearestItem(selectedDestination, path)
 
 			if foundModel then
+wait(1)
 				if selectedDestination == "Farm" then
 					local floor = foundModel:FindFirstChild("Floor")
 					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
@@ -2315,7 +2318,9 @@ local function teleportDestination()
 		if not success then
 			warn("Teleport Error:", msg)
 		end
+if chair then
 		setCanCollide(chair, true)
+end
 		teleportDb = false
 		runningConnections.Teleport = nil
 	end)
