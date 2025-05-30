@@ -1,12 +1,24 @@
---local PlaceId = 116495829188952
+local PlaceId = 116495829188952
 local GameId = 70876832253163
 local ScVer = "v1.12383525557"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
 local plr = Players.LocalPlayer
-if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
+if game.PlaceId ~= GameId and game.PlaceId ~= PlaceId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9960") or plr.PlayerGui:FindFirstChild("Skibidi9960") then warn("Script is already running!") return end
+
+queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+
+local TeleportCheck = false
+plr.OnTeleport:Connect(function(State)
+	if (not TeleportCheck) and queueteleport and AutoExecute then
+		TeleportCheck = true
+		queueteleport(readfile("Renzy9967.txt"))
+else
+		warn('Incompatible Exploit','Your exploit does not support this command (missing queue_on_teleport)')
+	end
+end)
 
 local DRMenu = Instance.new("ScreenGui")
 local Holder = Instance.new("Frame")
