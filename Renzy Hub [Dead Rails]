@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352556"
+local ScVer = "v1.1238352557"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2684,7 +2684,6 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 			new.Parent = ScrollingFrame
 			new.MouseButton1Click:Connect(function()
 				if not new.Active then return end
-				enableOtherButton(new, false)
 				if frameName == "ItemList" then
 					Var.getItemVar.selectedItem = v
 				elseif frameName == "ModeList" then
@@ -2707,16 +2706,14 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 	end)
 
 	Box.FocusLost:Connect(function(Enter)
-		task.defer(function()
-			wait(.2)
-			ScrollingFrame.Visible = false
-			wait(.4)
-			for _, v in pairs(ScrollingFrame:GetChildren()) do
-				if v:IsA("TextButton") then
-					v.Visible = true
-				end
+		wait(.2)
+		ScrollingFrame.Visible = false
+		wait(.5)
+		for _, v in pairs(ScrollingFrame:GetChildren()) do
+			if v:IsA("TextButton") then
+				v.Visible = true
 			end
-		end)
+		end
 
 		local typed = string.lower(Box.Text)
 		local function findAndAssign(matchingList, targetVar, targetField)
