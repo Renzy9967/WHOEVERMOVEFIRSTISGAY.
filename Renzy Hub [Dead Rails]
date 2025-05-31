@@ -1,21 +1,21 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525557"
+local ScVer = "v1.12383525559"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
 local plr = Players.LocalPlayer
-if game.PlaceId ~= GameId and game.PlaceId ~= PlaceId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
+if game.PlaceId ~= GameId then warn("Renzy Hub [Dead Rails] " .. ScVer .." doesn't work in this place!") return end
 if game.CoreGui:FindFirstChild("Skibidi9960") or plr.PlayerGui:FindFirstChild("Skibidi9960") then warn("Script is already running!") return end
 
 queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
 
 local TeleportCheck = false
 plr.OnTeleport:Connect(function(State)
-	if (not TeleportCheck) and queueteleport and AutoExecute then
+	if (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport(readfile("Renzy9967.txt"))
-else
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Renzy%20Hub%20%5BDead%20Rails%5D'))()")
+	else
 		warn('Incompatible Exploit','Your exploit does not support this command (missing queue_on_teleport)')
 	end
 end)
@@ -104,6 +104,8 @@ local UIGradient = Instance.new("UIGradient")
 local Transition = Instance.new("ImageLabel")
 local Toggle = Instance.new("TextButton")
 local Bg_2 = Instance.new("ImageLabel")
+local AimbotToggle = Instance.new("TextButton")
+local Bg_3 = Instance.new("ImageLabel")
 local BillboardUI = Instance.new("BillboardGui")
 local espInfo = Instance.new("TextLabel")
 local espFol = Instance.new("Folder")
@@ -1237,6 +1239,33 @@ Bg_2.Size = UDim2.new(1.25, 0, 1.25, 0)
 Bg_2.ZIndex = 0
 Bg_2.Image = "rbxassetid://139342256927542"
 
+AimbotToggle.Name = "AimbotToggle"
+AimbotToggle.Parent = game.StarterGui.DRMenu
+AimbotToggle.BackgroundColor3 = Color3.new(1, 0, 0)
+AimbotToggle.BorderColor3 = Color3.new(1, 1, 1)
+AimbotToggle.Position = UDim2.new(0.00987713784, 0, 0.22199592, 0)
+AimbotToggle.Size = UDim2.new(0.0741222352, 0, 0.0570264719, 0)
+AimbotToggle.Font = Enum.Font.Unknown
+AimbotToggle.Text = "Aimbot: Off"
+AimbotToggle.TextColor3 = Color3.new(1, 1, 1)
+AimbotToggle.TextScaled = true
+AimbotToggle.TextSize = 14
+AimbotToggle.TextWrapped = true
+AimbotToggle.Visible = false
+CreateUIConstraint(AimbotToggle, 2.057)
+
+Bg_3.Name = "Bg"
+Bg_3.Parent = AimbotToggle
+Bg_3.AnchorPoint = Vector2.new(0.5, 0.5)
+Bg_3.BackgroundColor3 = Color3.new(1, 1, 1) 
+Bg_3.BackgroundTransparency = 1
+Bg_3.BorderColor3 = Color3.new(0, 0, 0)
+Bg_3.BorderSizePixel = 0
+Bg_3.Position = UDim2.new(0.5, 0, 0.5, 0)
+Bg_3.Size = UDim2.new(1.25, 0, 1.5, 0)
+Bg_3.ZIndex = 0
+Bg_3.Image = "rbxassetid://139342256927542"
+
 ExitConfirm.Name = "ExitConfirm"
 ExitConfirm.Parent = Frames
 ExitConfirm.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1400,9 +1429,10 @@ local runningConnections = {
 	infJump = nil,
 	instantPP = nil,
 	chairConn = nil,
+	fullBright = nil
 }
 local Var = {
-	localPlayer = {chair = nil, antiVoid = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 1},
+	localPlayer = {chair = nil, antiVoid = false, aimbotTarget = nil, aimbotToggle = false, aimbot = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 1},
 	getItemVar = {selectedItem = nil, itemAmount = 0, selectedMode = "Store", cancelGetItem = false},
 	espVar = {playersEsp = false, itemsEsp = false, mobsEsp = false},
 	teleportVar = {selectedDestination = nil},
@@ -1439,6 +1469,7 @@ local dropItemNetwork = Remotes.DropItem
 local reloadNetwork = Remotes.Weapon.Reload
 local unweldNetwork = RemoteEvent.RequestUnweld
 local crankTimer = 600
+local winTimer = 300
 local crankDB = false
 
 local camera = workspace.CurrentCamera
@@ -1543,7 +1574,7 @@ local function fly(speed)
 	local v3none = Vector3.new()
 	local v3zero = Vector3.new(0, 0, 0)
 	local v3inf = Vector3.new(infNum, infNum, infNum)
-	
+
 	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated}, false)
 
 	local controlModule = require(plr.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
@@ -1687,6 +1718,13 @@ local function updateEspUI()
 			local dist = math.floor((model:GetPivot().Position - root.Position).Magnitude)
 			if not Players:GetPlayerFromCharacter(model) then
 				if dist > 2500 then info.ui.Enabled = false info.highlight.Enabled = false return end
+			elseif Players:GetPlayerFromCharacter(model) then
+				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
+				if not overrideColor then
+					info.ui.TextLabel.TextColor3 = EspColor.Player
+				end
+				info.ui.Enabled = Var.espVar.playersEsp
+				return
 			end
 			info.ui.Enabled = true
 			info.highlight.Enabled = true
@@ -1712,11 +1750,6 @@ local function updateEspUI()
 					info.ui.TextLabel.TextColor3 = EspColor.Item
 				end
 				info.ui.Enabled = Var.espVar.itemsEsp
-			elseif Players:GetPlayerFromCharacter(model) then
-				if not overrideColor then
-					info.ui.TextLabel.TextColor3 = EspColor.Player
-				end
-				info.ui.Enabled = Var.espVar.playersEsp
 			elseif model:HasTag("Enemy") then
 				if not overrideColor then
 					info.ui.TextLabel.TextColor3 = EspColor.Mob
@@ -1936,6 +1969,8 @@ end
 local function ownChair(targetPos: Vector3?)
 	if Var.localPlayer.chair then return true end
 	print("starting own chair")
+	if hum.Sit then hum.Sit = false end
+	lastPos = root.Position
 	equipSack()
 	local tik = 0
 	while not workspace.RuntimeItems:FindFirstChild("Chair") and tik < 5 do
@@ -1985,8 +2020,8 @@ local function ownChair(targetPos: Vector3?)
 	if runningConnections.chairConn then
 		runningConnections.chairConn:Disconnect()
 	end
-	runningConnections.chairConn = Var.localPlayer.chair:GetPropertyChangedSignal("Occupant"):Connect(function()
-		if not Var.localPlayer.chair.Occupant then
+	runningConnections.chairConn = RunService.Stepped:Connect(function()
+		if not hum.SeatPart then
 			Var.localPlayer.chair = nil
 			runningConnections.chairConn:Disconnect()
 			runningConnections = {}
@@ -1994,6 +2029,8 @@ local function ownChair(targetPos: Vector3?)
 	end)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
+	else
+		root.CFrame = CFrame.new(lastPos)
 	end
 	return true
 end
@@ -2052,7 +2089,6 @@ local function handleUnicorn()
 				if enemyHum then
 					local done = false
 					local newPos = root.Position
-					local conn
 
 					hum:UnequipTools()
 					local rifle = plr.Backpack:FindFirstChild("Rifle")
@@ -2082,23 +2118,77 @@ local function handleUnicorn()
 					end
 
 					hum:EquipTool(rifle)
-					camera.CameraSubject = enemyHum
-					setCamZoom("Lock")
 					mouse1click()
 					wait(.2)
-					conn = RunService.RenderStepped:Connect(function()
-						root.CFrame = CFrame.new(uni.PrimaryPart.Position - Vector3.new(0, -6, 0))
-						camera.CFrame = CFrame.lookAt(camera.CFrame.Position, enemyChar.Head)
-					end)
+					if Var.localPlayer.aimbot then
+						Var.localPlayer.aimbotTarget = enemyHum
+					else
+						camera.CameraSubject = enemyHum
+						setCamZoom("Lock")
+						runningConnections.cameraConnection = RunService.RenderStepped:Connect(function()
+							camera.CFrame = CFrame.lookAt(camera.CFrame.Position, enemyChar.Head)
+						end)
+					end
+					
 					while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
+						task.spawn(function()
+							root.CFrame = CFrame.new(uni.PrimaryPart.Position - Vector3.new(0, -6, 0))
+						end)
 						mouse1press()
 						wait(.2)
 						mouse1release() 
 					end
-					conn:Disconnect()
+					if not Var.localPlayer.aimbot and runningConnections.cameraConnection then
+						runningConnections.cameraConnection:Disconnect()
+						runningConnections.cameraConnection = nil
+						setCamZoom("Normal")
+					end
 				end
 			end
 		end
+	end
+end
+
+local function findNearestEnemy(pos: Vector3, radius: number): Model
+	local nearestEnemy = nil
+	local nearestDistance = radius
+	for _, enemy in pairs(CS:GetTagged("Enemy")) do
+		if not enemy:IsDescendantOf(workspace) then return end
+		if enemy and enemy:FindFirstChildWhichIsA("Humanoid") and enemy.Name ~= plr.Name then
+			local enemyHum = enemy:FindFirstChildWhichIsA("Humanoid")
+			local distance = (enemyHum.RootPart.Position - pos).Magnitude
+			if distance < nearestDistance then
+				nearestEnemy = enemy
+				nearestDistance = distance
+			end
+		end
+	end
+	return nearestEnemy
+end
+
+local function aimbot(toggle: boolean)
+	if toggle then
+		Var.localPlayer.aimbot = true
+		Var.localPlayer.aimbotTarget = nil
+		setCamZoom("Lock")
+		runningConnections.aimbotConnection = RunService.RenderStepped:Connect(function()
+			if Var.localPlayer.aimbotTarget then
+				camera.CameraSubject = Var.localPlayer.aimbotTarget
+			else
+				local nearest = findNearestHum(root.Position, 250)
+				if nearest then
+					camera.CameraSubject = nearest
+				end
+			end
+		end)
+	else
+		Var.localPlayer.aimbot = false
+		Var.localPlayer.aimbotTarget = nil
+		if runningConnections.aimbotConnection then
+			runningConnections.aimbotConnection:Disconnect()
+			runningConnections.aimbotConnection = nil
+		end
+		setCamZoom("Normal")
 	end
 end
 
@@ -2109,7 +2199,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 	local returning = false
 	local maxAttempts = 1
 	local attempts = 0
-	
+
 	for _, obj in pairs(instancePath:GetChildren()) do
 		if obj.Name == itemName and not table.find(foundItems, obj) then
 			-- Validate availability
@@ -2132,7 +2222,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 
 		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -150)
 		newpos = root.Position
-		
+
 		for _, obj in pairs(instancePath:GetChildren()) do
 			if obj.Name == itemName and not table.find(foundItems, obj) then
 				-- Validate availability
@@ -2213,9 +2303,8 @@ local function getItem(bring: boolean)
 					root.AssemblyLinearVelocity = Vector3.new(0,0,0)
 					dropItemNetwork:FireServer()
 				end
-				root.Anchored = false
 			end
-			
+
 			if bring then
 				local scannedItems = scanForItems(selectedItem, workspace.RuntimeItems)
 				print("bringing ", selectedItem)
@@ -2233,11 +2322,12 @@ local function getItem(bring: boolean)
 						equipSack()
 
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-						if not foundItem.PrimaryPart then wait(1) end
 
 						local tik = 0
 						while foundItem.Parent and tik < 10 do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
+							task.spawn(function()
+								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
+							end)
 							storeNetwork:FireServer(foundItem)
 							tik += 0.1
 							wait(0.01)
@@ -2288,7 +2378,9 @@ local function getItem(bring: boolean)
 						end
 
 						while foundItem.Parent and tik < 5 do
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position + Vector3.new(0, 3, 0)) --* CFrame.new(0, -6, 0)
+							task.spawn(function()
+								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
+							end)
 							if selectedMode == "Store" then
 								equipSack()
 								storeNetwork:FireServer(foundItem)
@@ -2303,7 +2395,6 @@ local function getItem(bring: boolean)
 							wait(0.01)
 						end
 
-						wait(.2)
 					end
 				end
 			end
@@ -2315,7 +2406,7 @@ local function getItem(bring: boolean)
 
 		toggleNoClip(false)
 		toggleAntiVoid(false)
-		
+
 		if chair then
 			setCanCollide(chair, true)
 		end
@@ -2603,8 +2694,6 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 				end
 				Box.Text = v
 				Box:ReleaseFocus()
-				wait(.4)
-				enableOtherButton(new, true)
 			end)
 			updateCanvasSize()
 		end
@@ -2621,7 +2710,7 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 		task.defer(function()
 			wait(.2)
 			ScrollingFrame.Visible = false
-			wait(.2)
+			wait(.4)
 			for _, v in pairs(ScrollingFrame:GetChildren()) do
 				if v:IsA("TextButton") then
 					v.Visible = true
@@ -2758,8 +2847,9 @@ AutoBonds.MouseButton1Click:Connect(function()
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()
 end)
 AutoWins.MouseButton1Click:Connect(function()
-	if crankTimer > 0 and crankDB then return end
+	if crankTimer > 0 and crankDB and teleportDb then return end
 	crankDB = true
+	teleportDb = true
 	lastPos = root.Position
 	if not Var.localPlayer.chair then
 		local suces = ownChair()
@@ -2772,35 +2862,68 @@ AutoWins.MouseButton1Click:Connect(function()
 		root.CFrame = CFrame.new(crankPos)
 		root.CFrame = CFrame.lookAt(root.Position, crankPos)
 		wait()
-	until Baseplates:FindFirstChild("FinalBaseplate")
-	for _, prompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
-		if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
-			if fireproximityprompt then
-				fireproximityprompt(prompt)
+	until Baseplates:FindFirstChild("FinalBasePlate")
+	local attempts = 0
+	local maxAttempts = 10
+	local function fireCrank()
+		for _, prompt: ProximityPrompt in pairs(Baseplates.FinalBasePlate:GetDescendants()) do
+			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
+				if fireproximityprompt then
+					fireproximityprompt(prompt)
+				else
+					prompt.HoldDuration = 0
+					prompt.RequiresLineOfSight = false
+					prompt.MaxActivationDistance = math.huge
+					prompt:InputHoldBegin()
+					wait(.3)
+					prompt:InputHoldEnd()
+				end
+				break
 			else
-				prompt.HoldDuration = 0
-				prompt.RequiresLineOfSight = false
-				prompt.MaxActivationDistance = math.huge
-				prompt:InputHoldBegin()
-				wait(.3)
-				prompt:InputHoldEnd()
+				if attempts >= maxAttempts then
+					break
+				end
+				attempts += 1
+				fireCrank()
 			end
-			break
 		end
 	end
 	root.CFrame = CFrame.new(lastPos)
+	root.Velocity = Vector3.new(0,0,0)
+	root.AssemblyLinearVelocity = Vector3.new(0,0,0)
+	teleportDb = false
+	task.spawn(function()
+		for i = winTimer, 0, -1 do
+			local minutes = math.floor(i / 60)
+			local seconds = i % 60
+			local text = string.format("%02d:%02d", minutes, seconds)
+			Title_6.Text = text
+			Title_6.TextColor3 = Color3.fromRGB(0, 255, 0)
+			winTimer = i
+			wait(1)
+		end
+	end)
 end)
 Fullbright.MouseButton1Click:Connect(function()
 	Var.localPlayer.fullBright = not Var.localPlayer.fullBright
-	while Var.localPlayer.fullBright do
-		Lighting.Brightness = 1
-		Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-		Lighting.GlobalShadows = false
-		local atmosphere = Lighting:FindFirstChild("Atmosphere")
-		if atmosphere then
-			atmosphere.Density = 0
+	if Var.localPlayer.fullBright then
+		runningConnections.fullBright = game:GetService("RunService").RenderStepped:Connect(function()
+			while Var.localPlayer.fullBright do
+				Lighting.Brightness = 1
+				Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+				Lighting.GlobalShadows = false
+				local atmosphere = Lighting:FindFirstChild("Atmosphere")
+				if atmosphere then
+					atmosphere.Density = 0
+				end
+				wait()
+			end
+		end)
+	else
+		if runningConnections.fullBright then
+			runningConnections.fullBright:Disconnect()
+			runningConnections.fullBright = nil
 		end
-		wait()
 	end
 end)
 Infinitejump.MouseButton1Click:Connect(function()
@@ -2862,15 +2985,37 @@ Flyspeed.FocusLost:Connect(function(enterPressed)
 		Flyspeed.Text = ""
 	end
 end)
-
 Fly.MouseButton1Click:Connect(function()
 	Var.localPlayer.fly = not Var.localPlayer.fly
 	if Var.localPlayer.fly then
+		if Var.localPlayer.chair and not teleportDb then 
+			ownChair()
+		end
+		
 		fly(Var.localPlayer.flySpeed)
 	else
 		unfly()
 	end
 end)
+Aimbot.MouseButton1Click:Connect(function()
+	if Var.localPlayer.aimbotToggle then return end
+	Var.localPlayer.aimbotToggle = true
+	AimbotToggle.Visible = true
+end)
+AimbotToggle.MouseButton1Click:Connect(function()
+	Var.localPlayer.aimbot = not Var.localPlayer.aimbot
+	if Var.localPlayer.aimbot then
+		aimbot(true)
+		AimbotToggle.Text = "Aimbot: On"
+		AimbotToggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+	else
+		aimbot(false)
+		AimbotToggle.Text = "Aimbot: Off"
+		AimbotToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+	end
+end)
+
+-- OTHER FUNCTIONS --
 
 task.spawn(function()
 	for i = crankTimer, 0, -1 do
