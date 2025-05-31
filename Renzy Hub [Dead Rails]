@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352559"
+local ScVer = "v1.123835256"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2157,9 +2157,8 @@ local function findNearestEnemy(pos: Vector3, radius: number): Model
 	local nearestDistance = radius
 	for _, enemy in pairs(CS:GetTagged("Enemy")) do
 		if not enemy:IsDescendantOf(workspace) then return end
-		if enemy and enemy:FindFirstChildWhichIsA("Humanoid") and enemy.Name ~= plr.Name then
-			local enemyHum = enemy:FindFirstChildWhichIsA("Humanoid")
-			local distance = (enemyHum.RootPart.Position - pos).Magnitude
+		if enemy and enemy.PrimaryPart and enemy.Name ~= plr.Name then
+			local distance = (enemyHum:GetPivot().Position - pos).Magnitude
 			if distance < nearestDistance then
 				nearestEnemy = enemy
 				nearestDistance = distance
@@ -2180,7 +2179,12 @@ local function aimbot(toggle: boolean)
 			else
 				local enemyModel = findNearestEnemy(root.Position, 250)
 				if enemyModel then
-					camera.CameraSubject = enemyModel.PrimaryPart
+enemy.PrimaryPart = enemy.PrimaryPart or enemy.Head or enemy:FindFirstChildWichIsA("BasePart")
+if not enemy.PrimaryPart then return end
+Var.localPlayer.aimbotTarget = enemy.PrimaryPart
+					camera.CameraSubject = Var.localPlayer.aimbotTarget
+else
+setCamZoom("Normal")
 				end
 			end
 		end)
@@ -2196,8 +2200,22 @@ local function aimbot(toggle: boolean)
 end
 
 local function scanForItems(itemName, instancePath): {Instances}
-	instancePath = instancePath or workspace.RuntimeItems
-	local foundItems = {}
+        local foundItems = {}
+        for _, obj in pairs(CS:GetTagged("DraggableObject")) do
+                if not obj:IsDescendantOf(workspace) then return end
+		if obj.Name == itemName and not table.find(foundItems, obj) then
+			-- Validate availability
+			local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+			if primary then
+				local weld = primary:FindFirstChildWhichIsA("WeldConstraint")
+				if weld and weld.Name ~= "DragWeldConstraint" then
+				   unweldNetwork:FireServer(obj)
+				end
+			end
+                        table.insert(foundItems, obj)
+		end
+	end
+--[[instancePath = instancePath or workspace.RuntimeItems
 	local newpos = (CFrame.new(start) * CFrame.new(0, -6, 0)).Position
 	local returning = false
 	local maxAttempts = 1
@@ -2223,7 +2241,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 		local currentDistance = (newpos - start).Magnitude
 		local totalDistance = (endpos - start).Magnitude
 
-		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -150)
+		root.CFrame = CFrame.new(newpos, endpos) * CFrame.new(0, 0, -100)
 		newpos = root.Position
 
 		for _, obj in pairs(instancePath:GetChildren()) do
@@ -2252,7 +2270,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 	end
 
 	hum.JumpHeight = 7.2
-	hum.JumpPower = 50
+	hum.JumpPower = 50]]
 	print("Total ", itemName, ": ", #foundItems)
 	return foundItems
 end
@@ -2826,9 +2844,9 @@ Stop.MouseButton1Click:Connect(function()
 	if runningConnections.GetItem then
 		Var.getItemVar.cancelGetItem = true
 		coroutine.close(runningConnections.GetItem)
-		teleportDb = false
-		runningConnections.GetItem = nil
+                runningConnections.GetItem = nil
 		overrideCam = false
+		teleportDb = false
 		root.CFrame = CFrame.new(lastPos)
 	end
 end)
