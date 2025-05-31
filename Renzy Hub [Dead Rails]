@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383525559"
+local ScVer = "v1.1238352556"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1240,7 +1240,7 @@ Bg_2.ZIndex = 0
 Bg_2.Image = "rbxassetid://139342256927542"
 
 AimbotToggle.Name = "AimbotToggle"
-AimbotToggle.Parent = game.StarterGui.DRMenu
+AimbotToggle.Parent = DRMenu
 AimbotToggle.BackgroundColor3 = Color3.new(1, 0, 0)
 AimbotToggle.BorderColor3 = Color3.new(1, 1, 1)
 AimbotToggle.Position = UDim2.new(0.00987713784, 0, 0.22199592, 0)
