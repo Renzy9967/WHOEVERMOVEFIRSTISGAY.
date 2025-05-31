@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352558"
+local ScVer = "v1.1238352559"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1558,6 +1558,9 @@ end
 
 local function unfly()
 	pcall(function()
+		if Var.localPlayer.chair then
+			setCanCollide(Var.localPlayer.chair, true)
+		end
 		root:FindFirstChild(velocityHandlerName):Destroy()
 		root:FindFirstChild(gyroHandlerName):Destroy()
 		mfly1:Disconnect()
@@ -1576,6 +1579,10 @@ local function fly(speed)
 	local v3inf = Vector3.new(infNum, infNum, infNum)
 
 	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated}, false)
+	
+	if Var.localPlayer.chair then
+		setCanCollide(Var.localPlayer.chair, false)
+	end
 
 	local controlModule = require(plr.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
 	local bv = Instance.new("BodyVelocity")
@@ -1651,9 +1658,6 @@ local function toggleAntiVoid(enabled)
 end
 local function toggleNoClip(enabled)
 	if enabled then
-		if Var.localPlayer.chair then
-			setCanCollide(Var.localPlayer.chair, false)
-		end
 		runningConnections.noclipLoop = RunService.Stepped:Connect(function()
 			for _, child in pairs(char:GetDescendants()) do
 				if child:IsA("BasePart") and child.CanCollide == true then
@@ -1662,9 +1666,6 @@ local function toggleNoClip(enabled)
 			end
 		end)
 	else
-		if Var.localPlayer.chair then
-			setCanCollide(Var.localPlayer.chair, true)
-		end
 		if runningConnections.noclipLoop then
 			runningConnections.noclipLoop:Disconnect()
 			runningConnections.noclipLoop = nil
@@ -2010,7 +2011,7 @@ local function ownChair(targetPos: Vector3?)
 	Remotes.StoreItem:FireServer(chair)
 	wait(.2)
 	Remotes.DropItem:FireServer()
-	wait(.3)
+	task.wait(.5)
 	camConn:Disconnect()
 	local newChair = getNearestItem("Chair")
 	newChair.Seat:Sit(hum)
@@ -2337,6 +2338,11 @@ local function getItem(bring: boolean)
 
 						if not foundItem.Parent then
 							count += 1
+						else
+							if count == 0 then
+								root.CFrame = lastCF
+								break
+							end
 						end
 
 						if count >= 10 then
@@ -2352,22 +2358,36 @@ local function getItem(bring: boolean)
 				dropAllItems()
 			else
 				print("Getting ", selectedItem)
-				while Var.getItemVar.cancelGetItem do
-					for i = 1, loopAmount do
+				for i = 1, loopAmount do
 
-						searchItem(selectedItem, path, start, 150)
+					searchItem(selectedItem, path, start, 150)
 
-						if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
-							handleUnicorn()
+					if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
+						handleUnicorn()
+					end
+
+					local foundItem = getNearestItem(selectedItem)
+
+					if foundItem then
+						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
+						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+						local tik = 0
+
+						if selectedMode == "Store" then
+							equipSack()
+							storeNetwork:FireServer(foundItem)
+						elseif selectedMode == "Collect" then
+							collectNetwork:FireServer(foundItem)
+						elseif selectedMode == "PickUp" then
+							pickUpNetwork:FireServer(foundItem)
+						elseif selectedMode == "Equip" then
+							equipArmorNetwork:FireServer(foundItem)
 						end
 
-						local foundItem = getNearestItem(selectedItem)
-
-						if foundItem then
-							foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-							local tik = 0
-
+						while foundItem.Parent and tik < 5 do
+							task.spawn(function()
+								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
+							end)
 							if selectedMode == "Store" then
 								equipSack()
 								storeNetwork:FireServer(foundItem)
@@ -2378,28 +2398,11 @@ local function getItem(bring: boolean)
 							elseif selectedMode == "Equip" then
 								equipArmorNetwork:FireServer(foundItem)
 							end
-
-							while foundItem.Parent and tik < 5 do
-								task.spawn(function()
-									root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
-								end)
-								if selectedMode == "Store" then
-									equipSack()
-									storeNetwork:FireServer(foundItem)
-								elseif selectedMode == "Collect" then
-									collectNetwork:FireServer(foundItem)
-								elseif selectedMode == "PickUp" then
-									pickUpNetwork:FireServer(foundItem)
-								elseif selectedMode == "Equip" then
-									equipArmorNetwork:FireServer(foundItem)
-								end
-								tik += 0.1
-								wait(0.01)
-							end
-
+							tik += 0.1
+							wait(0.01)
 						end
+
 					end
-					Var.getItemVar.cancelGetItem = true
 				end
 			end
 		end)
@@ -2820,7 +2823,7 @@ Bring.MouseButton1Click:Connect(function()
 	getItem(true)
 end)
 Stop.MouseButton1Click:Connect(function()
-	if runningConnections.GetItem and teleportDb then
+	if runningConnections.GetItem then
 		Var.getItemVar.cancelGetItem = true
 		coroutine.close(runningConnections.GetItem)
 		teleportDb = false
