@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.1238352557"
+local ScVer = "v1.1238352558"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1969,7 +1969,9 @@ end
 local function ownChair(targetPos: Vector3?)
 	if Var.localPlayer.chair then return true end
 	print("starting own chair")
-	if hum.Sit then hum.Sit = false end
+	if hum.SeatPart and hum.SeatPart:IsA("VehicleSeat") then
+		if hum.Sit then hum.Sit = false end
+	end
 	lastPos = root.Position
 	equipSack()
 	local tik = 0
@@ -2175,9 +2177,9 @@ local function aimbot(toggle: boolean)
 			if Var.localPlayer.aimbotTarget then
 				camera.CameraSubject = Var.localPlayer.aimbotTarget
 			else
-				local nearest = findNearestHum(root.Position, 250)
-				if nearest then
-					camera.CameraSubject = nearest
+				local enemyModel = findNearestEnemy(root.Position, 250)
+				if enemyModel then
+					camera.CameraSubject = enemyModel.PrimaryPart
 				end
 			end
 		end)
@@ -2350,37 +2352,22 @@ local function getItem(bring: boolean)
 				dropAllItems()
 			else
 				print("Getting ", selectedItem)
-				for i = 1, loopAmount do
-					if Var.getItemVar.cancelGetItem then break end 
+				while Var.getItemVar.cancelGetItem do
+					for i = 1, loopAmount do
 
-					searchItem(selectedItem, path, start, 150)
+						searchItem(selectedItem, path, start, 150)
 
-					if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
-						handleUnicorn()
-					end
-
-					local foundItem = getNearestItem(selectedItem)
-
-					if foundItem then
-						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
-						local tik = 0
-
-						if selectedMode == "Store" then
-							equipSack()
-							storeNetwork:FireServer(foundItem)
-						elseif selectedMode == "Collect" then
-							collectNetwork:FireServer(foundItem)
-						elseif selectedMode == "PickUp" then
-							pickUpNetwork:FireServer(foundItem)
-						elseif selectedMode == "Equip" then
-							equipArmorNetwork:FireServer(foundItem)
+						if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
+							handleUnicorn()
 						end
 
-						while foundItem.Parent and tik < 5 do
-							task.spawn(function()
-								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
-							end)
+						local foundItem = getNearestItem(selectedItem)
+
+						if foundItem then
+							foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
+							root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+							local tik = 0
+
 							if selectedMode == "Store" then
 								equipSack()
 								storeNetwork:FireServer(foundItem)
@@ -2391,11 +2378,28 @@ local function getItem(bring: boolean)
 							elseif selectedMode == "Equip" then
 								equipArmorNetwork:FireServer(foundItem)
 							end
-							tik += 0.1
-							wait(0.01)
-						end
 
+							while foundItem.Parent and tik < 5 do
+								task.spawn(function()
+									root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
+								end)
+								if selectedMode == "Store" then
+									equipSack()
+									storeNetwork:FireServer(foundItem)
+								elseif selectedMode == "Collect" then
+									collectNetwork:FireServer(foundItem)
+								elseif selectedMode == "PickUp" then
+									pickUpNetwork:FireServer(foundItem)
+								elseif selectedMode == "Equip" then
+									equipArmorNetwork:FireServer(foundItem)
+								end
+								tik += 0.1
+								wait(0.01)
+							end
+
+						end
 					end
+					Var.getItemVar.cancelGetItem = true
 				end
 			end
 		end)
@@ -2816,7 +2820,7 @@ Bring.MouseButton1Click:Connect(function()
 	getItem(true)
 end)
 Stop.MouseButton1Click:Connect(function()
-	if runningConnections.GetItem and typeof(runningConnections.GetItem) == "thread" and teleportDb then
+	if runningConnections.GetItem and teleportDb then
 		Var.getItemVar.cancelGetItem = true
 		coroutine.close(runningConnections.GetItem)
 		teleportDb = false
@@ -2857,11 +2861,11 @@ AutoWins.MouseButton1Click:Connect(function()
 	end
 	repeat
 		root.CFrame = CFrame.new(crankPos)
-		root.CFrame = CFrame.lookAt(root.Position, crankPos)
+		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, crankPos)
 		wait()
 	until Baseplates:FindFirstChild("FinalBasePlate")
 	local attempts = 0
-	local maxAttempts = 10
+	local maxAttempts = 3
 	local function fireCrank()
 		for _, prompt: ProximityPrompt in pairs(Baseplates.FinalBasePlate:GetDescendants()) do
 			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
