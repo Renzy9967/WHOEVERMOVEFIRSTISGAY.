@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.12383526"
+local ScVer = "v1.123835261"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2100,7 +2100,7 @@ local function setCamZoom(mode: "Normal" | "Lock")
 	end
 end
 
-local function handleUnicorn()
+local function handleUnicorn(path)
 	local uni = path:FindFirstChild("Model_Unicorn")
 	local vehicleSeat = uni:FindFirstChildWhichIsA("VehicleSeat")
 	if vehicleSeat and uni:GetAttribute("Tamed") == true then
@@ -2202,10 +2202,13 @@ local function aimbot(toggle: boolean)
 		end
 		
 		runningConnections.aimbotConnection = RunService.RenderStepped:Connect(function()
-			local enemyModel = findNearestEnemy(root.Position, 250)
+			local enemyModel = findNearestEnemy(root.Position, 500)
 			if enemyModel then
-				enemyModel.PrimaryPart = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart")
-				if not enemyModel.PrimaryPart then return end
+				local head = enemyModel:FindFirstChild("Head")
+				if not head then 
+					enemyModel.PrimaryPart = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart") 
+					head = enemyModel.PrimaryPart 
+				end
 				Var.localPlayer.aimbotTarget = enemyModel.PrimaryPart
 				camera.CameraSubject = Var.localPlayer.aimbotTarget
 				setCamZoom("Lock")
@@ -2364,7 +2367,7 @@ local function getItem(bring: boolean)
 						collectedItems[foundItem] = true
 
 						if selectedItem == "Model_Unicorn" then
-							handleUnicorn()
+							handleUnicorn(workspace)
 						end
 
 						equipSack()
@@ -2409,7 +2412,7 @@ local function getItem(bring: boolean)
 					searchItem(selectedItem, path, start, 150)
 
 					if selectedItem == "Model_Unicorn" and path:FindFirstChild(selectedItem) then
-						handleUnicorn()
+						handleUnicorn(workspace)
 					end
 
 					local foundItem = getNearestItem(selectedItem)
@@ -2962,17 +2965,14 @@ end)
 Fullbright.MouseButton1Click:Connect(function()
 	Var.localPlayer.fullBright = not Var.localPlayer.fullBright
 	if Var.localPlayer.fullBright then
+		local atmosphere = Lighting:FindFirstChild("Atmosphere")
+		if atmosphere then
+			atmosphere.Density = 0
+		end
 		runningConnections.fullBright = game:GetService("RunService").RenderStepped:Connect(function()
-			while Var.localPlayer.fullBright do
-				Lighting.Brightness = 1
-				Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-				Lighting.GlobalShadows = false
-				local atmosphere = Lighting:FindFirstChild("Atmosphere")
-				if atmosphere then
-					atmosphere.Density = 0
-				end
-				wait()
-			end
+			Lighting.Brightness = 1
+			Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+			Lighting.GlobalShadows = false
 		end)
 	else
 		if runningConnections.fullBright then
