@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835261"
+local ScVer = "v1.123835262"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1447,8 +1447,8 @@ local head = char:WaitForChild("Head")
 
 local infNum = 1.7976931348622742e+308
 local lastPos = root.Position
-local start = Vector3.new(42, 3, 30000)
-local endpos = Vector3.new(-506.865, 0.75, -49221.016)
+local start = Vector3.new(42, -3, 30000) 
+local endpos = Vector3.new(-506.865, -3, -49221.016)
 local crankPos = Vector3.new(-351.3, 3.5, -49041.695)
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -2668,10 +2668,11 @@ local function setupToggleBtn()
 		task.spawn(function()
 			local toggled = false
 			Button.MouseButton1Click:Connect(function()
+				toggled = not toggled
 				Button.Active = false
 				Button.BackgroundTransparency = 0.5
-				Button.BackgroundColor3 = not toggled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
-				wait(0.1)
+				Button.BackgroundColor3 = toggled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+				wait(0.2)
 				Button.Active = true
 			end)
 		end)
@@ -2926,16 +2927,21 @@ AutoWins.MouseButton1Click:Connect(function()
 	local function fireCrank()
 		for _, prompt: ProximityPrompt in pairs(Baseplates.FinalBasePlate:GetDescendants()) do
 			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
-				if fireproximityprompt then
-					fireproximityprompt(prompt)
-				else
-					prompt.HoldDuration = 0
-					prompt.RequiresLineOfSight = false
-					prompt.MaxActivationDistance = math.huge
-					prompt:InputHoldBegin()
-					wait(.3)
-					prompt:InputHoldEnd()
-				end
+				prompt.RequiresLineOfSight = false
+				prompt.HoldDuration = 0
+				prompt.MaxActivationDistance = math.huge
+				
+				prompt.PromptButtonHoldBegan:Once(function()
+					if fireproximityprompt then
+						fireproximityprompt(prompt)
+					else
+						prompt:InputHoldBegin()
+						wait(.1)
+						prompt:InputHoldEnd()
+					end
+				end)
+				
+				prompt:InputHoldBegin()
 				break
 			else
 				if attempts >= maxAttempts then
@@ -3001,6 +3007,7 @@ Instantpp.MouseButton1Click:Connect(function()
 			if fireproximityprompt then
 				fireproximityprompt(prompt)
 			else
+				prompt.RequiresLineOfSight = false
 				prompt.HoldDuration = 0
 				prompt:InputHoldBegin()
 				wait(.1)
