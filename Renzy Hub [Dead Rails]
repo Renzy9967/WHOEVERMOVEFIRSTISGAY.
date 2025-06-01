@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835259"
+local ScVer = "v1.12383526"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1391,6 +1391,7 @@ local Items = {
 	"ShotgunAmmo",
 	"JadeTablet3",
 	"JadeTablet4",
+	"OpenableCrate",
 }
 local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km"}
 local rareItems = {
@@ -2005,13 +2006,14 @@ local function ownChair(targetPos: Vector3?)
 		chair = getNearestItem("Chair")
 		if not chair then return false, error("couldn't find chair") end
 	end
-	local camConn
+	--[[local camConn
 	camConn = RunService.RenderStepped:Connect(function()
 		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, root.Position - Vector3.new(0, 3, 0))
-	end)
+	end)]]
 	hum:ChangeState(Enum.HumanoidStateType.Running)
 	local tik = 0
 	local mult = root.CFrame * CFrame.new(0,100,0)
+	
 	task.spawn(function()
 		while  tik < 5 do
 			root.CFrame = mult
@@ -2030,12 +2032,15 @@ local function ownChair(targetPos: Vector3?)
 	wait(.2)
 	Remotes.DropItem:FireServer()
 	wait(.25)
-	local newChair = getNearestItem("Chair")
+	chair = getNearestItem("Chair")
 	wait(.1)
-	newChair.Seat:Sit(hum)
+	local seat = chair:WaitForChild("Seat", 3)
+	if seat then
+		seat:Sit(hum)
+	end
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
 	toggleAntiVoid(true)
-	Var.localPlayer.chair = newChair
+	Var.localPlayer.chair = chair
 	if runningConnections.chairConn then
 		runningConnections.chairConn:Disconnect()
 	end
@@ -2087,9 +2092,11 @@ local function setCamZoom(mode: "Normal" | "Lock")
 		plr.CameraMaxZoomDistance = 128
 		plr.CameraMinZoomDistance = 0.5
 		camera.CameraSubject = hum
+		plr.CameraMode = Enum.CameraMode.LockFirstPerson
 	elseif mode == "Lock" then
 		plr.CameraMaxZoomDistance = 5
 		plr.CameraMinZoomDistance = 5
+		plr.CameraMode = Enum.CameraMode.Classic
 	end
 end
 
@@ -2175,8 +2182,9 @@ local function findNearestEnemy(pos: Vector3, radius: number): Model
 	for _, enemy in pairs(CS:GetTagged("Enemy")) do
 		if not enemy:IsDescendantOf(workspace) then continue end
 		if enemy and enemy.PrimaryPart and enemy.Name ~= plr.Name then
+			local enemyHum = enemy:FindFirstChildWhichIsA("Humanoid")
 			local distance = (enemy:GetPivot().Position - pos).Magnitude
-			if distance < nearestDistance then
+			if enemyHum.Health > 0 and distance < nearestDistance then
 				nearestEnemy = enemy
 				nearestDistance = distance
 			end
@@ -2194,19 +2202,16 @@ local function aimbot(toggle: boolean)
 		end
 		
 		runningConnections.aimbotConnection = RunService.RenderStepped:Connect(function()
-			if Var.localPlayer.aimbotTarget ~= nil then
-				setCamZoom("Lock")
+			local enemyModel = findNearestEnemy(root.Position, 250)
+			if enemyModel then
+				enemyModel.PrimaryPart = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart")
+				if not enemyModel.PrimaryPart then return end
+				Var.localPlayer.aimbotTarget = enemyModel.PrimaryPart
 				camera.CameraSubject = Var.localPlayer.aimbotTarget
+				setCamZoom("Lock")
 			else
-				local enemyModel = findNearestEnemy(root.Position, 250)
-				if enemyModel then
-					enemyModel.PrimaryPart = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart")
-					if not enemyModel.PrimaryPart then return end
-					Var.localPlayer.aimbotTarget = enemyModel.PrimaryPart
-					camera.CameraSubject = Var.localPlayer.aimbotTarget
-				else
-					setCamZoom("Normal")
-				end
+				Var.localPlayer.aimbotTarget = nil
+				setCamZoom("Normal")
 			end
 		end)
 	else
@@ -2896,7 +2901,8 @@ AutoBonds.MouseButton1Click:Connect(function()
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()
 end)
 AutoWins.MouseButton1Click:Connect(function()
-	if crankTimer > 0 and crankDB and teleportDb then return end
+	if crankTimer > 0 and crankDB then return end
+	if teleportDb then return end
 	crankDB = true
 	teleportDb = true
 	lastPos = root.Position
