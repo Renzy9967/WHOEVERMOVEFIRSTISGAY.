@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835258"
+local ScVer = "v1.123835259"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2024,16 +2024,16 @@ local function ownChair(targetPos: Vector3?)
 		end
 	end)
 	wait(2)
-	camConn:Disconnect()
+	print("owned chair.")
 	root.CFrame = chair.Seat.CFrame
 	Remotes.StoreItem:FireServer(chair)
-	wait()
-	Remotes.DropItem:FireServer()
 	wait(.2)
+	Remotes.DropItem:FireServer()
+	wait(.25)
 	local newChair = getNearestItem("Chair")
+	wait(.1)
 	newChair.Seat:Sit(hum)
 	hum:ChangeState(Enum.HumanoidStateType.Seated)
-	print("owned chair.")
 	toggleAntiVoid(true)
 	Var.localPlayer.chair = newChair
 	if runningConnections.chairConn then
@@ -2200,9 +2200,9 @@ local function aimbot(toggle: boolean)
 			else
 				local enemyModel = findNearestEnemy(root.Position, 250)
 				if enemyModel then
-					enemy.PrimaryPart = enemy.PrimaryPart or enemy.Head or enemy:FindFirstChildWichIsA("BasePart")
-					if not enemy.PrimaryPart then return end
-					Var.localPlayer.aimbotTarget = enemy.PrimaryPart
+					enemyModel.PrimaryPart = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart")
+					if not enemyModel.PrimaryPart then return end
+					Var.localPlayer.aimbotTarget = enemyModel.PrimaryPart
 					camera.CameraSubject = Var.localPlayer.aimbotTarget
 				else
 					setCamZoom("Normal")
@@ -2222,7 +2222,7 @@ end
 
 local function scanForItems(itemName, instancePath): {Instances}
 	local foundItems = {}
-	for _, obj in pairs(CS:GetTagged("DraggableObject")) do
+	--[[for _, obj in pairs(CS:GetTagged("DraggableObject")) do
 		if not obj:IsDescendantOf(workspace) then continue end
 		if obj.Name == itemName and not table.find(foundItems, obj) then
 			-- Validate availability
@@ -2235,8 +2235,8 @@ local function scanForItems(itemName, instancePath): {Instances}
 			end
 			table.insert(foundItems, obj)
 		end
-	end
---[[instancePath = instancePath or workspace.RuntimeItems
+	end]]
+	instancePath = instancePath or workspace.RuntimeItems
 	local newpos = (CFrame.new(start) * CFrame.new(0, -6, 0)).Position
 	local returning = false
 	local maxAttempts = 1
@@ -2291,7 +2291,7 @@ local function scanForItems(itemName, instancePath): {Instances}
 	end
 
 	hum.JumpHeight = 7.2
-	hum.JumpPower = 50]]
+	hum.JumpPower = 50
 	print("Total ", itemName, ": ", #foundItems)
 	return foundItems
 end
@@ -2758,9 +2758,9 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 	end)
 
 	Box.FocusLost:Connect(function(Enter)
-		wait(.2)
+		wait(.1)
 		ScrollingFrame.Visible = false
-		wait(.5)
+		wait(.1)
 		for _, v in pairs(ScrollingFrame:GetChildren()) do
 			if v:IsA("TextButton") then
 				v.Visible = true
