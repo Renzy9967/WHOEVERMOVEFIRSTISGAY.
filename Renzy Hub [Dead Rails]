@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835262"
+local ScVer = "v1.123835263"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1433,7 +1433,7 @@ local runningConnections = {
 	fullBright = nil
 }
 local Var = {
-	localPlayer = {chair = nil, antiVoid = false, aimbotTarget = nil, aimbotToggle = false, aimbot = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 1},
+	localPlayer = {chair = nil, antiVoid = false, customPos = nil, aimbotTarget = nil, aimbotToggle = false, aimbot = false, noClip = false, instantPP = false, infJump = false, fly = false, antiAfk = false, fullBright = false, flySpeed = 1},
 	getItemVar = {selectedItem = nil, itemAmount = 0, selectedMode = "Store", cancelGetItem = false},
 	espVar = {playersEsp = false, itemsEsp = false, mobsEsp = false},
 	teleportVar = {selectedDestination = nil},
@@ -2202,6 +2202,11 @@ local function aimbot(toggle: boolean)
 		end
 		
 		runningConnections.aimbotConnection = RunService.RenderStepped:Connect(function()
+			if Var.localPlayer.customPos then
+				camera.CFrame = CFrame.lookAt(camera.CFrame.Position, Var.localPlayer.customPos)
+				setCamZoom("Normal")
+				return
+			end
 			local enemyModel = findNearestEnemy(root.Position, 500)
 			if enemyModel then
 				local head = enemyModel:FindFirstChild("Head")
@@ -2209,8 +2214,8 @@ local function aimbot(toggle: boolean)
 					enemyModel.PrimaryPart = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart") 
 					head = enemyModel.PrimaryPart 
 				end
-				Var.localPlayer.aimbotTarget = enemyModel.PrimaryPart
-				camera.CameraSubject = Var.localPlayer.aimbotTarget
+				Var.localPlayer.aimbotTarget = head
+				camera.CameraSubject = head
 				setCamZoom("Lock")
 			else
 				Var.localPlayer.aimbotTarget = nil
@@ -2373,12 +2378,15 @@ local function getItem(bring: boolean)
 						equipSack()
 
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-
 						local tik = 0
-						while foundItem.Parent and tik < 10 do
-							task.spawn(function()
+						
+						task.spawn(function()
+							while foundItem.Parent and tik < 5 do
 								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
-							end)
+							end
+						end)
+						
+						while foundItem.Parent and tik < 10 do
 							storeNetwork:FireServer(foundItem)
 							tik += 0.1
 							wait(0.01)
@@ -2432,11 +2440,14 @@ local function getItem(bring: boolean)
 						elseif selectedMode == "Equip" then
 							equipArmorNetwork:FireServer(foundItem)
 						end
+						
+						task.spawn(function()
+							while foundItem.Parent and tik < 5 do
+								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
+							end
+						end)
 
 						while foundItem.Parent and tik < 5 do
-							task.spawn(function()
-								root.CFrame = CFrame.new(foundItem.PrimaryPart.Position - Vector3.new(0, 4, 0))
-							end)
 							if selectedMode == "Store" then
 								equipSack()
 								storeNetwork:FireServer(foundItem)
@@ -2766,7 +2777,7 @@ local function handleTextBox(Box: TextBox, ScrollingFrame: ScrollingFrame, Lists
 		ScrollingFrame.Visible = true
 	end)
 
-	Box.FocusLost:Connect(function(Enter)
+	Box.FocusLost:Connect(function(Enter )
 		wait(.1)
 		ScrollingFrame.Visible = false
 		wait(.1)
@@ -2919,7 +2930,6 @@ AutoWins.MouseButton1Click:Connect(function()
 	end
 	repeat
 		root.CFrame = CFrame.new(crankPos)
-		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, crankPos)
 		wait()
 	until Baseplates:FindFirstChild("FinalBasePlate")
 	local attempts = 0
@@ -2927,11 +2937,21 @@ AutoWins.MouseButton1Click:Connect(function()
 	local function fireCrank()
 		for _, prompt: ProximityPrompt in pairs(Baseplates.FinalBasePlate:GetDescendants()) do
 			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
+				local parent = prompt.Parent
+				local turned = false
+				local conn
 				prompt.RequiresLineOfSight = false
 				prompt.HoldDuration = 0
 				prompt.MaxActivationDistance = math.huge
-				
-				prompt.PromptButtonHoldBegan:Once(function()
+				Var.localPlayer.customPos = parent.Position
+				if not Var.localPlayer.aimbot then
+					conn = RunService.RenderStepped:Connect(function()
+						if not Var.localPlayer.aimbot then
+							camera.CFrame = CFrame.lookAt(camera.CFrame.Position, Var.localPlayer.customPos)
+						end
+					end)
+				end 
+				prompt.PromptShown:Once(function()
 					if fireproximityprompt then
 						fireproximityprompt(prompt)
 					else
@@ -2939,9 +2959,15 @@ AutoWins.MouseButton1Click:Connect(function()
 						wait(.1)
 						prompt:InputHoldEnd()
 					end
+					turned = true
 				end)
-				
-				prompt:InputHoldBegin()
+				repeat
+					wait()
+				until turned
+				if conn then
+					conn:Disconnect()
+				end
+				Var.localPlayer.customPos = nil
 				break
 			else
 				if attempts >= maxAttempts then
@@ -3033,8 +3059,6 @@ Antiafk.MouseButton1Click:Connect(function()
 	antiAfk()
 end)
 Flyspeed.FocusLost:Connect(function(enterPressed)
-	if not enterPressed then return end
-
 	local clean = Flyspeed.Text:gsub('%D+', '')
 	local num = tonumber(clean)
 	if num and num > 0 then
