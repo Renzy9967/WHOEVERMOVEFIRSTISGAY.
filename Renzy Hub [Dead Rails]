@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.123835257"
+local ScVer = "v1.123835258"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1541,9 +1541,16 @@ local mfly1
 local mfly2
 
 local function toggleAllHumState(hum: Humanoid, blacklist: {Enum.HumanoidStateType}?, toggle: boolean)
+	-- Known non-toggleable states (source: devforum/tests)
+	local nonToggleable = {
+		[Enum.HumanoidStateType.None] = true,
+	}
+
 	for _, state in Enum.HumanoidStateType:GetEnumItems() do
-		if not blacklist or not table.find(blacklist, state) then
-			hum:SetStateEnabled(state, toggle)
+		if not nonToggleable[state] and (not blacklist or not table.find(blacklist, state)) then
+			pcall(function()
+				hum:SetStateEnabled(state, toggle)
+			end)
 		end
 	end
 end
@@ -1566,7 +1573,7 @@ local function unfly()
 		mfly1:Disconnect()
 		mfly2:Disconnect()
 		flying = false
-		toggleAllHumState(hum, nil, true)
+		--toggleAllHumState(hum, nil, true)
 	end)
 end
 
@@ -1578,8 +1585,8 @@ local function fly(speed)
 	local v3zero = Vector3.new(0, 0, 0)
 	local v3inf = Vector3.new(infNum, infNum, infNum)
 
-	toggleAllHumState(hum, {Enum.HumanoidStateType.Seated}, false)
-	
+	--toggleAllHumState(hum, {Enum.HumanoidStateType.Seated}, false)
+
 	if Var.localPlayer.chair then
 		setCanCollide(Var.localPlayer.chair, false)
 	end
@@ -1815,39 +1822,43 @@ local function getNearestItem(itemName, instancePath)
 	instancePath = instancePath or workspace.RuntimeItems
 	local item, lastDist = nil, math.huge
 	for _, v in pairs(instancePath:GetChildren()) do
-		if v.Name == itemName and v:IsA("Model") then
-			if not v.PrimaryPart then
-				local base = v:FindFirstChildWhichIsA("BasePart")
-				local posTemp = base and base.Position or v:GetPivot().Position
-
-				local tik = 0
-				while tik < 3 and not v.PrimaryPart do
-					root.CFrame = CFrame.new(posTemp)
-					tik += 1
-					wait(1)
-				end
-				if not v.PrimaryPart then
-					error("Couldn't find PrimaryPart inside: " .. v.Name)
-				end
-			end
-
+		if v.Name == itemName and v:IsA("Model") and v.PrimaryPart then
+			-- Chair specific checks
 			if itemName == "Chair" then
 				local seat = v:FindFirstChildWhichIsA("Seat")
 				local weld = v.PrimaryPart:FindFirstChildWhichIsA("WeldConstraint")
 
-				if seat and seat.Occupant then
-					continue
-				end
+				if seat and seat.Occupant then continue end
 				if weld and weld.Name == "DragWeldConstraint" then
 					root.CFrame = v.PrimaryPart.CFrame
-					unweldNetwork:FireServer(chair)
+					unweldNetwork:FireServer(v)
 					task.wait(0.2)
 				end
 			end
+
 			local dist = (v.PrimaryPart.Position - root.Position).Magnitude
 			if dist < lastDist then
 				item = v
 				lastDist = dist
+			end
+		else
+			if Destinations[itemName] then
+				if not v.PrimaryPart then
+					local base = v:FindFirstChildWhichIsA("BasePart")
+					local posTemp = base and base.Position or v:GetPivot().Position
+
+					local tik = 0
+					while tik < 3 and not v.PrimaryPart do
+						root.CFrame = CFrame.new(posTemp)
+						tik += 1
+						wait(1)
+					end
+					if not v.PrimaryPart then
+						error("Couldn't find PrimaryPart inside: " .. v.Name)
+						return
+					end
+					Item = v
+				end
 			end
 		end
 	end
@@ -1968,8 +1979,11 @@ local function equipSack()
 end
 
 local function ownChair(targetPos: Vector3?)
-        unfly()
-	if hum.SeatPart and Var.localPlayer.chair then return true end
+	unfly()
+	if hum.SeatPart and hum.SeatPart:IsDescendantOf(workspace.RuntimeItems) and hum.SeatPart.Name == "Seat" then
+		Var.localPlayer.chair = hum.SeatPart.Parent
+		return true
+	end
 	print("starting own chair")
 	if hum.SeatPart and hum.SeatPart:IsA("VehicleSeat") then
 		if hum.Sit then hum.Sit = false end
@@ -1982,20 +1996,20 @@ local function ownChair(targetPos: Vector3?)
 		tik += 0.1
 		wait(.1)
 	end
-	
+
 	--root.CFrame = workspace.TeslaLab:GetPivot()
-	
+
 	local chair = getNearestItem("Chair")
 	if not chair then
 		searchItem("Chair")
 		chair = getNearestItem("Chair")
 		if not chair then return false, error("couldn't find chair") end
 	end
-        local camConn
+	local camConn
 	camConn = RunService.RenderStepped:Connect(function()
 		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, root.Position - Vector3.new(0, 3, 0))
 	end)
-        hum:ChangeState(Enum.HumanoidStateType.Running)
+	hum:ChangeState(Enum.HumanoidStateType.Running)
 	local tik = 0
 	local mult = root.CFrame * CFrame.new(0,100,0)
 	task.spawn(function()
@@ -2010,10 +2024,10 @@ local function ownChair(targetPos: Vector3?)
 		end
 	end)
 	wait(2)
-        camConn:Disconnect()
+	camConn:Disconnect()
 	root.CFrame = chair.Seat.CFrame
 	Remotes.StoreItem:FireServer(chair)
-wait()
+	wait()
 	Remotes.DropItem:FireServer()
 	wait(.2)
 	local newChair = getNearestItem("Chair")
@@ -2072,7 +2086,7 @@ local function setCamZoom(mode: "Normal" | "Lock")
 	if mode == "Normal" then
 		plr.CameraMaxZoomDistance = 128
 		plr.CameraMinZoomDistance = 0.5
-                camera.CameraSubject = hum
+		camera.CameraSubject = hum
 	elseif mode == "Lock" then
 		plr.CameraMaxZoomDistance = 5
 		plr.CameraMinZoomDistance = 5
@@ -2135,7 +2149,7 @@ local function handleUnicorn()
 							camera.CFrame = CFrame.lookAt(camera.CFrame.Position, enemyChar.Head)
 						end)
 					end
-					
+
 					while currentAmmo.Value >= 0 and enemyHum.Health > 0 do
 						task.spawn(function()
 							root.CFrame = CFrame.new(uni.PrimaryPart.Position - Vector3.new(0, -6, 0))
@@ -2159,7 +2173,7 @@ local function findNearestEnemy(pos: Vector3, radius: number): Model
 	local nearestEnemy = nil
 	local nearestDistance = radius
 	for _, enemy in pairs(CS:GetTagged("Enemy")) do
-		if not enemy:IsDescendantOf(workspace) then return end
+		if not enemy:IsDescendantOf(workspace) then continue end
 		if enemy and enemy.PrimaryPart and enemy.Name ~= plr.Name then
 			local distance = (enemy:GetPivot().Position - pos).Magnitude
 			if distance < nearestDistance then
@@ -2175,19 +2189,23 @@ local function aimbot(toggle: boolean)
 	if toggle then
 		Var.localPlayer.aimbot = true
 		Var.localPlayer.aimbotTarget = nil
-		setCamZoom("Lock")
+		if runningConnections.aimbotConnection then
+			runningConnections.aimbotConnection:Disconnect()
+		end
+		
 		runningConnections.aimbotConnection = RunService.RenderStepped:Connect(function()
-			if Var.localPlayer.aimbotTarget then
+			if Var.localPlayer.aimbotTarget ~= nil then
+				setCamZoom("Lock")
 				camera.CameraSubject = Var.localPlayer.aimbotTarget
 			else
 				local enemyModel = findNearestEnemy(root.Position, 250)
 				if enemyModel then
-enemy.PrimaryPart = enemy.PrimaryPart or enemy.Head or enemy:FindFirstChildWichIsA("BasePart")
-if not enemy.PrimaryPart then return end
-Var.localPlayer.aimbotTarget = enemy.PrimaryPart
+					enemy.PrimaryPart = enemy.PrimaryPart or enemy.Head or enemy:FindFirstChildWichIsA("BasePart")
+					if not enemy.PrimaryPart then return end
+					Var.localPlayer.aimbotTarget = enemy.PrimaryPart
 					camera.CameraSubject = Var.localPlayer.aimbotTarget
-else
-setCamZoom("Normal")
+				else
+					setCamZoom("Normal")
 				end
 			end
 		end)
@@ -2203,19 +2221,19 @@ setCamZoom("Normal")
 end
 
 local function scanForItems(itemName, instancePath): {Instances}
-        local foundItems = {}
-        for _, obj in pairs(CS:GetTagged("DraggableObject")) do
-                if not obj:IsDescendantOf(workspace) then return end
+	local foundItems = {}
+	for _, obj in pairs(CS:GetTagged("DraggableObject")) do
+		if not obj:IsDescendantOf(workspace) then continue end
 		if obj.Name == itemName and not table.find(foundItems, obj) then
 			-- Validate availability
-			--[[local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+			local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
 			if primary then
 				local weld = primary:FindFirstChildWhichIsA("WeldConstraint")
 				if weld and weld.Name ~= "DragWeldConstraint" then
 				   unweldNetwork:FireServer(obj)
 				end
-			end]]
-                        table.insert(foundItems, obj)
+			end
+			table.insert(foundItems, obj)
 		end
 	end
 --[[instancePath = instancePath or workspace.RuntimeItems
@@ -2333,6 +2351,7 @@ local function getItem(bring: boolean)
 				local scannedItems = scanForItems(selectedItem, workspace.RuntimeItems)
 				print("bringing ", selectedItem)
 				for i = 1, #scannedItems do
+					if Var.getItemVar.cancelGetItem then break end
 					root.CFrame = scannedItems[i]:GetPivot()
 
 					local foundItem = scannedItems[i]
@@ -2380,6 +2399,7 @@ local function getItem(bring: boolean)
 			else
 				print("Getting ", selectedItem)
 				for i = 1, loopAmount do
+					if Var.getItemVar.cancelGetItem then break end
 
 					searchItem(selectedItem, path, start, 150)
 
@@ -2612,13 +2632,17 @@ local function closeExit()
 	exitDb = false
 end
 local function safeExit()
+	local keysToRemove = {}
 	for key, connection in pairs(runningConnections) do
 		if typeof(connection) == "RBXScriptConnection" and connection.Connected then
 			connection:Disconnect()
-			runningConnections[key] = nil
+			table.insert(keysToRemove, key)
 		elseif typeof(connection) == "boolean" then
-			runningConnections[key] = nil
+			table.insert(keysToRemove, key)
 		end
+	end
+	for _, key in ipairs(keysToRemove) do
+		runningConnections[key] = nil
 	end
 end
 
@@ -2847,7 +2871,7 @@ Stop.MouseButton1Click:Connect(function()
 	if runningConnections.GetItem then
 		Var.getItemVar.cancelGetItem = true
 		coroutine.close(runningConnections.GetItem)
-                runningConnections.GetItem = nil
+		runningConnections.GetItem = nil
 		overrideCam = false
 		teleportDb = false
 		root.CFrame = CFrame.new(lastPos)
@@ -3016,7 +3040,7 @@ Fly.MouseButton1Click:Connect(function()
 		if Var.localPlayer.chair and not teleportDb then 
 			ownChair()
 		end
-		
+
 		fly(Var.localPlayer.flySpeed)
 	else
 		unfly()
