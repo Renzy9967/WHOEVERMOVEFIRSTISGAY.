@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.2"
+local ScVer = "v1.21"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1377,8 +1377,8 @@ local Items = {
 	"GoldCup",
 	"GoldBar",
 	"SilverBar",
-"WoodenPainting",
-"StoneStatue",
+	"WoodenPainting",
+	"StoneStatue",
 	"Banjo",
 	"Torso_Armor",
 	"Right Arm_Armor",
@@ -1394,19 +1394,19 @@ local Items = {
 	"JadeTablet3",
 	"JadeTablet4",
 	"OpenableCrate",
-"Camera",
-"Lantern",
-"GlassBottle",
-"Ladder",
-"Vase",
-"Book",
-"Wheel",
-"Rope",
-"Newspaper",
-"Excalibur",
-"Spear",
-"Sword",
-"Landmine",
+	"Camera",
+	"Lantern",
+	"GlassBottle",
+	"Ladder",
+	"Vase",
+	"Book",
+	"Wheel",
+	"Rope",
+	"Newspaper",
+	"Excalibur",
+	"Spear",
+	"Sword",
+	"Landmine",
 }
 local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km"}
 local rareItems = {
@@ -1996,150 +1996,6 @@ local function equipSack()
 	end
 end
 
-local function teleportDestination(Destination)
-assert(typeof(Destination) == "string", "Destination must be string!")
-local selected = Destination ~= nil and Destination or Var.teleportVar.selectedDestination
-	if not table.find(Destinations, selected) or
-		teleportDb then
-		return
-	end
-	teleportDb = true
-	local chair = nil
-	local thread = coroutine.create(function()
-		lastPos = root.Position
-		local selectedDestination = Var.teleportVar.selectedDestination
-		local path = (selectedDestination == "Farm") and workspace.RandomBuildings or workspace
-
-		local success, msg = pcall(function()
-			if selectedDestination == "Train" then
-				teleportToTrain()
-				teleportDb = false
-				runningConnections.Teleport = nil
-				return
-			end
-
-			if not Memory.Seat then
-				local suces = ownChair()
-				if not suces then
-					teleportDb = false
-					return
-				end
-			end
-
-			chair = Memory.Seat
-
-			if selectedDestination == "79km" then
-				local targetPosition = Vector3.new(-348.684, 3, -48436.215)
-				hum.JumpHeight = 0
-				hum.JumpPower = 0
-				for i = 1, 2 do
-					root.Velocity = Vector3.new(0,0,0)
-					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
-					wait(1)
-				end
-				wait(1)
-				hum.JumpHeight = 7.2
-				hum.JumpPower = 50
-				teleportDb = false
-				runningConnections.Teleport = nil
-				return
-			elseif selectedDestination == "StrangePyramid" then
-				local targetPosition = Vector3.new(901.7, 12, -39467)
-				hum.JumpHeight = 0
-				hum.JumpPower = 0
-				for i = 1, 2 do
-					root.Velocity = Vector3.new(0,0,0)
-					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
-					wait(1)
-				end
-				wait(1)
-				hum.JumpHeight = 7.2
-				hum.JumpPower = 50
-				teleportDb = false
-				runningConnections.Teleport = nil
-				return
-			elseif selectedDestination == "TeslaLab" then
-				local targetCF = workspace.TeslaLab:GetPivot()
-				hum.JumpHeight = 0
-				hum.JumpPower = 0
-				for i = 1, 2 do
-					root.Velocity = Vector3.new(0,0,0)
-					root.CFrame = targetCF 
-					wait(1)
-				end
-				wait(1)
-				hum.JumpHeight = 7.2
-				hum.JumpPower = 50
-				teleportDb = false
-				runningConnections.Teleport = nil
-				return
-			end
-
-			searchItem(selectedDestination, path, start, 150)
-			local foundModel = getNearestItem(selectedDestination, path)
-
-			if foundModel then
-				root.CFrame = CFrame.new(root.Position, endpos) * CFrame.new(0, 0, -150)
-				wait(1)
-				if selectedDestination == "Farm" then
-					local floor = foundModel:FindFirstChild("Floor")
-					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
-				elseif selectedDestination == "VampireCastle" then
-					local floor = foundModel.House:FindFirstChild("MainFloor")
-					root.CFrame = floor.CFrame * CFrame.new(0, 0, -80)
-				else
-					root.CFrame = CFrame.new(foundModel.PrimaryPart.Position) * CFrame.new(0, 3, 0)
-				end
-			end
-		end)
-
-		if not success then
-			warn("Teleport Error:", msg)
-		end
-		if chair then
-			setCanCollide(chair, true)
-		end
-		teleportDb = false
-		runningConnections.Teleport = nil
-		hum.JumpHeight = 7.2
-		hum.JumpPower = 50
-	end)
-	runningConnections.Teleport = thread
-	coroutine.resume(thread)
-end
-
-local function ownChair(targetPos: Vector3?)
-if Memory.Seat ~= nil then Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
-	unfly()
-	hum.Sit = false
-hum:ChangeState(Enum.HumanoidStateType.Running)
-if not Memory.Sterling then
-teleportDestination("Sterling")
-else
-root.CFrame = CFrame.new(Memory.Sterling)
-end
-local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 5)
-if not MaximGun then
-MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start + Vector3.new(0,0,, 250, 1)
-end
-local seat = nil
-for _, v in pairs(MaximGun:GetDescendants()) do
-if v:IsA("VehicleSeat") then
-seat = v
-local weld = seat:FindFirstChildWichIsA("WeldConstraint")
-if weld then weld:Destroy() end
-end
-end
-seat:Sit(hum)
-fly(Var.localPlayer.flySpeed)
-	if targetPos then
-		root.CFrame = CFrame.new(targetPos)
-	else
-		root.CFrame = CFrame.new(lastPos)
-	end
-	return true
-end
-
 local function teleportToTrain()
 	if hum.Sit then
 		hum.Sit = false
@@ -2166,6 +2022,152 @@ local function teleportToTrain()
 		end
 		return false
 	end
+end
+
+local function teleportDestination(Destination)
+	assert(typeof(Destination) == "string", "Destination must be string!")
+	local selected = Destination ~= nil and Destination or Var.teleportVar.selectedDestination
+	if not table.find(Destinations, selected) or
+		teleportDb then
+		return
+	end
+	teleportDb = true
+	local chair = nil
+	local thread = coroutine.create(function()
+		lastPos = root.Position
+		local selectedDestination = selected
+		local path = (selectedDestination == "Farm") and workspace.RandomBuildings or workspace
+
+		local success, msg = pcall(function()
+			if selectedDestination == "Train" then
+				teleportToTrain()
+				teleportDb = false
+				runningConnections.Teleport = nil
+				return
+			end
+
+			if selectedDestination == "79km" then
+				local targetPosition = Vector3.new(-348.684, 3, -48436.215)
+				hum.JumpHeight = 0
+				hum.JumpPower = 0
+				for i = 1, 2 do
+					root.Velocity = Vector3.new(0,0,0)
+					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
+					wait(1)
+				end
+				wait(1)
+				hum.JumpHeight = 7.2
+				hum.JumpPower = 50
+				teleportDb = false
+				runningConnections.Teleport = nil
+				if not Memory["79km"] then
+					Memory["79km"] = targetPosition
+				end
+				return
+			elseif selectedDestination == "StrangePyramid" then
+				local targetPosition = Vector3.new(901.7, 12, -39467)
+				hum.JumpHeight = 0
+				hum.JumpPower = 0
+				for i = 1, 2 do
+					root.Velocity = Vector3.new(0,0,0)
+					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
+					wait(1)
+				end
+				wait(1)
+				hum.JumpHeight = 7.2
+				hum.JumpPower = 50
+				teleportDb = false
+				runningConnections.Teleport = nil
+				if not Memory.StrangePyramid then
+					Memory.StrangePyramid = targetPosition
+				end
+				return
+			elseif selectedDestination == "TeslaLab" then
+				local targetCF = workspace.TeslaLab:GetPivot()
+				hum.JumpHeight = 0
+				hum.JumpPower = 0
+				for i = 1, 2 do
+					root.Velocity = Vector3.new(0,0,0)
+					root.CFrame = targetCF 
+					wait(1)
+				end
+				wait(1)
+				hum.JumpHeight = 7.2
+				hum.JumpPower = 50
+				teleportDb = false
+				runningConnections.Teleport = nil
+				if not Memory.TeslaLab then
+					Memory.TeslaLab = targetCF.Position
+				end
+				return
+			end
+
+			searchItem(selectedDestination, path, start, 150)
+			local foundModel = getNearestItem(selectedDestination, path)
+
+			if foundModel then
+				root.CFrame = CFrame.new(root.Position, endpos) * CFrame.new(0, 0, -150)
+				wait(1)
+				if selectedDestination == "Farm" then
+					local floor = foundModel:FindFirstChild("Floor")
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
+					if not Memory.Farm then
+						Memory.Farm = floor.Position
+					end
+				elseif selectedDestination == "VampireCastle" then
+					local floor = foundModel.House:FindFirstChild("MainFloor")
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, -80)
+					if not Memory.VampireCastle then
+						Memory.VampireCastle = floor.Position
+					end
+				else
+					local goalCF = CFrame.new(foundModel.PrimaryPart.Position) * CFrame.new(0, 3, 0)
+					root.CFrame = goalCF
+					if not Memory.Farm then
+						Memory.Farm = goalCF.Position
+					end
+				end
+			end
+		end)
+
+		if not success then
+			warn("Teleport Error:", msg)
+		end
+		if chair then
+			setCanCollide(chair, true)
+		end
+		teleportDb = false
+		runningConnections.Teleport = nil
+		hum.JumpHeight = 7.2
+		hum.JumpPower = 50
+	end)
+	runningConnections.Teleport = thread
+	coroutine.resume(thread)
+end
+
+local function ownChair(targetPos: Vector3?)
+	if Memory.Seat ~= nil then Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
+	unfly()
+	hum.Sit = false
+	hum:ChangeState(Enum.HumanoidStateType.Running)
+	if not Memory.Sterling then
+		teleportDestination("Sterling")
+	else
+		root.CFrame = CFrame.new(Memory.Sterling)
+	end
+	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 5)
+	if not MaximGun then
+		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250, 1)
+	end
+	local seat = MaximGun.VehicleSeat
+	seat:Sit(hum)
+	fly(Var.localPlayer.flySpeed)
+	if targetPos then
+		root.CFrame = CFrame.new(targetPos)
+	else
+		root.CFrame = CFrame.new(lastPos)
+	end
+	return true
 end
 
 local function setCamZoom(mode: "Normal" | "Lock")
@@ -2281,7 +2283,7 @@ local function aimbot(toggle: boolean)
 		if runningConnections.aimbotConnection then
 			runningConnections.aimbotConnection:Disconnect()
 		end
-		
+
 		runningConnections.aimbotConnection = RunService.RenderStepped:Connect(function()
 			local enemyModel = findNearestEnemy(root.Position, 500)
 			if enemyModel then
@@ -2902,7 +2904,7 @@ AutoWins.MouseButton1Click:Connect(function()
 				prompt.RequiresLineOfSight = false
 				prompt.HoldDuration = 0
 				prompt.MaxActivationDistance = math.huge
-				
+
 				prompt.PromptButtonHoldBegan:Once(function()
 					if fireproximityprompt then
 						fireproximityprompt(prompt)
@@ -2912,7 +2914,7 @@ AutoWins.MouseButton1Click:Connect(function()
 						prompt:InputHoldEnd()
 					end
 				end)
-				
+
 				prompt:InputHoldBegin()
 				break
 			else
