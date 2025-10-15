@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.213"
+local ScVer = "v1.214"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2155,9 +2155,9 @@ local function ownChair(targetPos: Vector3?)
 	else
 		root.CFrame = CFrame.new(Memory.Sterling)
 	end
-	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 15)
-	if not MaximGun then
-		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250, 1)
+	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 5)
+	if MaximGun == nil then
+		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
 	end
 	local seat = MaximGun.VehicleSeat
 	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
