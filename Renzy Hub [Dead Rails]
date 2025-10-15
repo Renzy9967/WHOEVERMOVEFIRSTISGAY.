@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.21"
+local ScVer = "v1.212"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2146,7 +2146,7 @@ local function teleportDestination(Destination)
 end
 
 local function ownChair(targetPos: Vector3?)
-	if Memory.Seat ~= nil then Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
+	if Memory.Seat ~= nil then if Memory.Seat.Anchored then Memory.Seat.Anchored = false end Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
 	unfly()
 	hum.Sit = false
 	hum:ChangeState(Enum.HumanoidStateType.Running)
@@ -2160,8 +2160,13 @@ local function ownChair(targetPos: Vector3?)
 		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250, 1)
 	end
 	local seat = MaximGun.VehicleSeat
+	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
+	if weldConstraint then
+		weldConstraint:Destroy()
+	end
 	seat:Sit(hum)
 	fly(Var.localPlayer.flySpeed)
+	Memory.Seat = seat
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
 	else
@@ -3027,10 +3032,20 @@ Fly.MouseButton1Click:Connect(function()
 		if not Memory.Seat and not teleportDb then 
 			ownChair()
 		end
+		
+		if Memory.Seat.Anchored then
+			Memory.Seat.Anchored = false
+		end
+		
+		if not hum.Sit then
+			Memory.Seat:Sit(hum)
+		end
 
 		fly(Var.localPlayer.flySpeed)
 	else
 		unfly()
+		hum.Sit = false
+		Memory.Seat.Anchored = true
 	end
 end)
 Aimbot.MouseButton1Click:Connect(function()
