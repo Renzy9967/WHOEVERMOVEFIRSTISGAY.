@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.24"
+local ScVer = "v1.241"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2225,13 +2225,14 @@ end
 
 local function ownChair(targetPos: Vector3?)
 	if Memory.Seat ~= nil then if Memory.Seat.Anchored then Memory.Seat.Anchored = false end Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
-	unfly()
 	hum.Sit = false
-	hum:ChangeState(Enum.HumanoidStateType.Running)
+	--hum:ChangeState(Enum.HumanoidStateType.Running)
 	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 0.5)
 	if MaximGun == nil then
 		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
 	end
+	root.CFrame = MaximGun:GetPivot()
+	wait()
 	local seat = MaximGun.VehicleSeat
 	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
 	if weldConstraint then
@@ -2240,11 +2241,11 @@ local function ownChair(targetPos: Vector3?)
 	Memory.Seat = seat
 	seat:Sit(hum)
 	seat.HeadsUpDisplay = false
-	wait(.25)
 	hum.Sit = false
 	hum:ChangeState(Enum.HumanoidStateType.Running)
-	wait(.25)
+	wait(.1)
 	Memory.Seat:Sit(hum)
+	wait()
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
 	else
@@ -2960,7 +2961,7 @@ AutoWins.MouseButton1Click:Connect(function()
 			return
 		end
 	end
-	while not Baseplates:FindFirstChild("FinalBasePlate") do
+	while not Baseplates:FindFirstChild("Baseplate39") do
 		root.CFrame = CFrame.new(crankPos)
 		wait(.1)
 	end
@@ -2968,7 +2969,7 @@ AutoWins.MouseButton1Click:Connect(function()
 	local maxAttempts = 10
 	local prompt : ProximityPrompt = nil 
 	
-	for _, endprompt: ProximityPrompt in pairs(Baseplates.FinalBasePlate:GetDescendants()) do
+	for _, endprompt: ProximityPrompt in pairs(Baseplates.Baseplate39:GetDescendants()) do
 		if endprompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
 			prompt = endprompt
 		end
@@ -3091,7 +3092,7 @@ end)
 Fly.MouseButton1Click:Connect(function()
 	Var.localPlayer.fly = not Var.localPlayer.fly
 	if Var.localPlayer.fly then
-		
+		fly(Var.localPlayer.flySpeed)
 		if not Memory.Seat and not teleportDb then 
 			lastPos = root.Position
 			ownChair(lastPos)
@@ -3101,20 +3102,18 @@ Fly.MouseButton1Click:Connect(function()
 			Memory.Seat.Anchored = false
 		end
 
-		if not hum.Sit then
+		if not hum.Sit and Memory.Seat ~= nil then
 			Memory.Seat.CFrame = root.CFrame
 			Memory.Seat:Sit(hum)
 		end
 		wait()
-		hum.Sit = false
-		wait()
-		Memory.Seat:Sit(hum)
 		setCamZoom("Normal")
-		fly(Var.localPlayer.flySpeed)
 	else
 		unfly()
 		hum.Sit = false
-		Memory.Seat.Anchored = true
+		if Memory.Seat ~= nil and not Memory.Seat.Anchored then
+			Memory.Seat.Anchored = true
+		end
 	end
 end)
 Aimbot.MouseButton1Click:Connect(function()
