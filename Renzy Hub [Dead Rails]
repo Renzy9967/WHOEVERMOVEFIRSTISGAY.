@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.23"
+local ScVer = "v1.24"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1415,7 +1415,7 @@ local Items = {
 	"Teapot",
 	"LonginusSpear",
 }
-local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km", "EvilChurch", "OutlawCamp", "StillwaterPrison", "AbandonedMine"}
+local Destinations = {	"Train", "0km",	 "79km", "FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",	 "EvilChurch", "OutlawCamp", "StillwaterPrison", "AbandonedMine"}
 local rareItems = {
 	"Model_Unicorn",
 	"Model_Tesla"
@@ -1766,7 +1766,9 @@ local function updateEspUI()
 				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
 				overrideColor = true
 			elseif model.Name == "Bank" or model.Name == "BankDestroyed" then
-				info.ui.TextLabel.Text = model.Name .. " | " .. "Combo: " .. tostring(model.Vault.Combination.Value)
+				local vault = model:FindFirstChild("Vault")
+				if not vault then return end
+				info.ui.TextLabel.Text = model.Name .. " | " .. "Combo: " .. tostring(vault.Combination.Value)
 				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
 				overrideColor = true
 			elseif table.find(rareItems, model.Name) then
@@ -2021,31 +2023,38 @@ local function equipSack()
 end
 
 local function teleportToTrain()
-	if hum.Sit then
-		hum.Sit = false
-		wait(.2)
+	if not workspace:FindFirstChild(train.Name) then
+		root.CFrame = train:GetPivot() * CFrame.new(0,20,0)
 	end
 	if trainSeat.Occupant == nil then
+		if Var.localPlayer.fly and Memory.Seat then
+			Var.localPlayer.fly = false
+			Memory.Seat.Anchored = true
+			if hum.Sit then
+				hum.Sit = false
+				wait(.2)
+			end
+			unfly()
+		end
 		trainSeat:Sit(hum)
 		return true
 	else
-		if train.Name == "armor" then
-			for _, Turret in pairs(train.Weapons:GetChildren()) do
-				if Turret:IsA("Model") and Turret.Name == "MaximGun" then
-					if trainSeat.Occupant == nil then
-						Turret:FindFirstChildWhichIsA("VehicleSeat")
-					end
+		if not Var.localPlayer.fly then
+			for _, seat in pairs(train:GetDescendants()) do
+				if seat:IsA("VehicleSeat") and seat.Occupant == nil then
+					seat:Sit(hum)
 				end
 			end
-			if hum.Sit then
+			if not hum.Sit then
+				return false
+			else
 				return true
 			end
+		else
+			root.CFrame = train:GetPivot() * CFrame.new(0,20,0)
 		end
-		if not hum.Sit then
-
-		end
-		return false
 	end
+	return false
 end
 
 local function teleportDestination(Destinationarg)
@@ -2087,6 +2096,24 @@ local function teleportDestination(Destinationarg)
 				runningConnections.Teleport = nil
 				if not Memory["79km"] then
 					Memory["79km"] = targetPosition
+				end
+				return
+			elseif selectedDestination == "0km" then
+				local targetPosition = start
+				hum.JumpHeight = 0
+				hum.JumpPower = 0
+				for i = 1, 2 do
+					root.Velocity = Vector3.new(0,0,0)
+					root.CFrame = CFrame.new(targetPosition) * CFrame.new(0,3,0)
+					wait(1)
+				end
+				wait(1)
+				hum.JumpHeight = 7.2
+				hum.JumpPower = 50
+				teleportDb = false
+				runningConnections.Teleport = nil
+				if not Memory["0km"] then
+					Memory["0km"] = targetPosition
 				end
 				return
 			elseif selectedDestination == "StrangePyramid" then
@@ -2132,14 +2159,11 @@ local function teleportDestination(Destinationarg)
 			local foundModel = getNearestItem(selectedDestination, path)
 
 			if foundModel then
-				root.CFrame = CFrame.new(root.Position, endpos) * CFrame.new(0, 0, -150)
-				wait(1)
+				root.CFrame = foundModel:GetPivot()
+				wait(.1)
 				if selectedDestination == "Farm" then
 					local floor = foundModel:FindFirstChild("Floor")
 					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
-					if not Memory.Farm then
-						Memory.Farm = floor.Position
-					end
 				elseif selectedDestination == "VampireCastle" then
 					local floor = foundModel.House:FindFirstChild("MainFloor")
 					root.CFrame = floor.CFrame * CFrame.new(0, 0, -80)
@@ -2149,15 +2173,9 @@ local function teleportDestination(Destinationarg)
 				elseif selectedDestination == "EvilChurch" then
 					local floor = foundModel:FindFirstChild("Floor")
 					root.CFrame = floor.CFrame * CFrame.new(60, 0, 0)
-					if not Memory.EvilChurch then
-						Memory.EvilChurch = floor.Position
-					end
 				elseif selectedDestination == "OutlawCamp" then
 					local floor = foundModel:FindFirstChild("Floor")
 					root.CFrame = floor.CFrame * CFrame.new(90, 0, -90)
-					if not Memory.OutlawCamp then
-						Memory.OutlawCamp = floor.Position
-					end
 				elseif selectedDestination == "StillwaterPrison" then
 					local floor = foundModel:FindFirstChild("OutsideSpawnNode")
 					root.CFrame = floor.CFrame * CFrame.new(0, 0, 500)
@@ -2167,9 +2185,6 @@ local function teleportDestination(Destinationarg)
 				elseif selectedDestination == "AbandonedMine" then
 					local floor = foundModel:FindFirstChild("PorchFloor")
 					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
-					if not Memory.AbandonedMine then
-						Memory.AbandonedMine = floor.Position
-					end
 				else
 					local goalCF = CFrame.new(foundModel.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 					root.CFrame = goalCF
@@ -2225,7 +2240,11 @@ local function ownChair(targetPos: Vector3?)
 	Memory.Seat = seat
 	seat:Sit(hum)
 	seat.HeadsUpDisplay = false
-	wait(.5)
+	wait(.25)
+	hum.Sit = false
+	hum:ChangeState(Enum.HumanoidStateType.Running)
+	wait(.25)
+	Memory.Seat:Sit(hum)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
 	else
@@ -2593,8 +2612,8 @@ local function getItem(bring: boolean)
 			warn("GetItem Error:", msg)
 		end
 
-		toggleNoClip(false)
-		toggleAntiVoid(false)
+		toggleNoClip(Var.localPlayer.noClip)
+		toggleAntiVoid(Var.localPlayer.antiVoid)
 
 		if chair then
 			--setCanCollide(chair, true)
@@ -2941,11 +2960,10 @@ AutoWins.MouseButton1Click:Connect(function()
 			return
 		end
 	end
-	repeat
+	while not Baseplates:FindFirstChild("FinalBasePlate") do
 		root.CFrame = CFrame.new(crankPos)
-		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, crankPos)
-		wait()
-	until Baseplates:FindFirstChild("FinalBasePlate")
+		wait(.1)
+	end
 	local attempts = 0
 	local maxAttempts = 10
 	local prompt : ProximityPrompt = nil 
@@ -3079,14 +3097,18 @@ Fly.MouseButton1Click:Connect(function()
 			ownChair(lastPos)
 		end
 
-		if Memory.Seat.Anchored then
+		if Memory.Seat ~= nil and Memory.Seat.Anchored then
 			Memory.Seat.Anchored = false
 		end
 
 		if not hum.Sit then
+			Memory.Seat.CFrame = root.CFrame
 			Memory.Seat:Sit(hum)
 		end
-		
+		wait()
+		hum.Sit = false
+		wait()
+		Memory.Seat:Sit(hum)
 		setCamZoom("Normal")
 		fly(Var.localPlayer.flySpeed)
 	else
@@ -3122,6 +3144,16 @@ task.spawn(function()
 		local text = string.format("Please wait: %02d:%02d", minutes, seconds)
 		Title_6.Text = text
 		crankTimer = i
+		wait(1)
+	end
+end)
+
+task.spawn(function()
+	while Var.localPlayer.fly do
+		if not hum.Sit and Memory.Seat ~= nil then
+			Memory.Seat.CFrame = root.CFrame
+			Memory.Seat:Sit(hum)
+		end
 		wait(1)
 	end
 end)
