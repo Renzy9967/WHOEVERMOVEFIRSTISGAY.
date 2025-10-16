@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.214"
+local ScVer = "v1.22"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1407,8 +1407,14 @@ local Items = {
 	"Spear",
 	"Sword",
 	"Landmine",
+	"Holy Hand Grenade",
+	"HorseCart",
+	"Saddle",
+	"Crossbow",
+	"Blunderbuss",
+	"Teapot",
 }
-local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km"}
+local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km", "EvilChurch", "OutlawCamp", "StillwaterPrison", "AbandonedMine"}
 local rareItems = {
 	"Model_Unicorn",
 	"Model_Tesla"
@@ -1758,6 +1764,8 @@ local function updateEspUI()
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " m | " .. model.BankCombo.SurfaceGui.TextLabel.Text
 				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
 				overrideColor = true
+			elseif string.lower(model.Name):match("bank") then
+				info.ui.TextLabel.Text = model.Name .. " | " .. "Combo: " .. tostring(model.Vault.Combination.Value)
 			elseif table.find(rareItems, model.Name) then
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
 				info.ui.TextLabel.TextColor3 = EspColor.RareItem
@@ -1792,11 +1800,16 @@ end
 local function createEsp(model: Model)
 	if EspInstances[model] ~= nil then return end
 	if not model:IsDescendantOf(workspace) then return end
+	if (model:HasTag("NotDestroyedBuilding") or model:HasTag("DestroyedBuilding")) and not string.lower(model.Name):match("bank") then return end
 
 	local hightlight = Instance.new("Highlight")
 	hightlight.Parent = espFol
 	hightlight.Name = model.Name
 	hightlight.Adornee = model
+	if string.lower(model.Name):match("bank") then
+		hightlight.FillTransparency = 0.15
+		hightlight.OutlineTransparency = 0.15
+	end
 	local espUI = BillboardUI:Clone()
 	espUI.Parent = espFol
 	espUI.Name = model.Name
@@ -2024,19 +2037,20 @@ local function teleportToTrain()
 	end
 end
 
-local function teleportDestination(Destination)
-	assert(typeof(Destination) == "string", "Destination must be string!")
-	local selected = Destination ~= nil and Destination or Var.teleportVar.selectedDestination
+local function teleportDestination(Destinationarg)
+	if Destinationarg ~= nil then assert(typeof(Destination) == "string", "Destination must be string!") end
+		local selected = Destinationarg ~= nil and Destinationarg or Var.teleportVar.selectedDestination
 	if not table.find(Destinations, selected) or
 		teleportDb then
 		return
 	end
 	teleportDb = true
 	local chair = nil
+	local randomBuildings = {["OutlawCamp"] = true, ["Farm"] = true, ["EvilChurch"] = true, ["AbandonedMine"] = true}
 	local thread = coroutine.create(function()
 		lastPos = root.Position
 		local selectedDestination = selected
-		local path = (selectedDestination == "Farm") and workspace.RandomBuildings or workspace
+		local path = (randomBuildings[selectedDestination]) and workspace.RandomBuildings or workspace
 
 		local success, msg = pcall(function()
 			if selectedDestination == "Train" then
@@ -2101,8 +2115,9 @@ local function teleportDestination(Destination)
 				end
 				return
 			end
-
-			searchItem(selectedDestination, path, start, 150)
+			
+			local rootPos = root.Position
+			searchItem(selectedDestination, path, Vector3.new(rootPos.X, start.Y, rootPos.Z), 150, 2)
 			local foundModel = getNearestItem(selectedDestination, path)
 
 			if foundModel then
@@ -2120,11 +2135,35 @@ local function teleportDestination(Destination)
 					if not Memory.VampireCastle then
 						Memory.VampireCastle = floor.Position
 					end
+				elseif selectedDestination == "EvilChurch" then
+					local floor = foundModel:FindFirstChild("Floor")
+					root.CFrame = floor.CFrame * CFrame.new(60, 0, 0)
+					if not Memory.EvilChurch then
+						Memory.EvilChurch = floor.Position
+					end
+				elseif selectedDestination == "OutlawCamp" then
+					local floor = foundModel:FindFirstChild("Floor")
+					root.CFrame = floor.CFrame * CFrame.new(90, 0, -90)
+					if not Memory.OutlawCamp then
+						Memory.OutlawCamp = floor.Position
+					end
+				elseif selectedDestination == "StillwaterPrison" then
+					local floor = foundModel:FindFirstChild("OutsideSpawnNode")
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, 500)
+					if not Memory.StillwaterPrison then
+						Memory.StillwaterPrison = floor.Position
+					end
+				elseif selectedDestination == "AbandonedMine" then
+					local floor = foundModel:FindFirstChild("PorchFloor")
+					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
+					if not Memory.AbandonedMine then
+						Memory.AbandonedMine = floor.Position
+					end
 				else
 					local goalCF = CFrame.new(foundModel.PrimaryPart.Position) * CFrame.new(0, 3, 0)
 					root.CFrame = goalCF
-					if not Memory.Farm then
-						Memory.Farm = goalCF.Position
+					if not Memory[selectedDestination] then
+						Memory[selectedDestination] = goalCF.Position
 					end
 				end
 			end
@@ -2145,36 +2184,6 @@ local function teleportDestination(Destination)
 	coroutine.resume(thread)
 end
 
-local function ownChair(targetPos: Vector3?)
-	if Memory.Seat ~= nil then if Memory.Seat.Anchored then Memory.Seat.Anchored = false end Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
-	unfly()
-	hum.Sit = false
-	hum:ChangeState(Enum.HumanoidStateType.Running)
-	if not Memory.Sterling then
-		teleportDestination("Sterling")
-	else
-		root.CFrame = CFrame.new(Memory.Sterling)
-	end
-	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 5)
-	if MaximGun == nil then
-		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
-	end
-	local seat = MaximGun.VehicleSeat
-	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
-	if weldConstraint then
-		weldConstraint:Destroy()
-	end
-	seat:Sit(hum)
-	fly(Var.localPlayer.flySpeed)
-	Memory.Seat = seat
-	if targetPos then
-		root.CFrame = CFrame.new(targetPos)
-	else
-		root.CFrame = CFrame.new(lastPos)
-	end
-	return true
-end
-
 local function setCamZoom(mode: "Normal" | "Lock")
 	if mode == "Normal" then
 		plr.CameraMaxZoomDistance = 128
@@ -2186,6 +2195,34 @@ local function setCamZoom(mode: "Normal" | "Lock")
 		plr.CameraMinZoomDistance = 5
 		plr.CameraMode = Enum.CameraMode.Classic
 	end
+end
+
+local function ownChair(targetPos: Vector3?)
+	if Memory.Seat ~= nil then if Memory.Seat.Anchored then Memory.Seat.Anchored = false end Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
+	unfly()
+	hum.Sit = false
+	hum:ChangeState(Enum.HumanoidStateType.Running)
+	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 1)
+	if MaximGun == nil then
+		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
+	end
+	local seat = MaximGun.VehicleSeat
+	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
+	if weldConstraint then
+		weldConstraint:Destroy()
+	end
+	Memory.Seat = seat
+	seat:Sit(hum)
+	wait(1)
+	fly(Var.localPlayer.flySpeed)
+	setCamZoom("Normal")
+	seat.HeadsUpDisplay = false
+	if targetPos then
+		root.CFrame = CFrame.new(targetPos)
+	else
+		root.CFrame = CFrame.new(lastPos)
+	end
+	return true
 end
 
 local function handleUnicorn(path)
@@ -2268,7 +2305,7 @@ local function findNearestEnemy(pos: Vector3, radius: number): Model
 	local nearestEnemy = nil
 	local nearestDistance = radius
 	for _, enemy in pairs(CS:GetTagged("Enemy")) do
-		if not enemy:IsDescendantOf(workspace) then continue end
+		if not enemy:IsDescendantOf(workspace) or enemy:HasTag("Animal") then continue end
 		if enemy and enemy.PrimaryPart and enemy.Name ~= plr.Name then
 			local enemyHum = enemy:FindFirstChildWhichIsA("Humanoid")
 			local distance = (enemy:GetPivot().Position - pos).Magnitude
@@ -2294,10 +2331,9 @@ local function aimbot(toggle: boolean)
 			if enemyModel then
 				local head = enemyModel:FindFirstChild("Head")
 				if not head then 
-					enemyModel.PrimaryPart = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart") 
-					head = enemyModel.PrimaryPart 
+					head = enemyModel.PrimaryPart or enemyModel.Head or enemyModel:FindFirstChildWichIsA("BasePart")
 				end
-				Var.localPlayer.aimbotTarget = enemyModel.PrimaryPart
+				Var.localPlayer.aimbotTarget = head
 				camera.CameraSubject = Var.localPlayer.aimbotTarget
 				setCamZoom("Lock")
 			else
@@ -2490,7 +2526,7 @@ local function getItem(bring: boolean)
 				end
 
 				-- Reset position and chair
-				setCanCollide(chair, true)
+				--setCanCollide(chair, true)
 				dropAllItems()
 			else
 				print("Getting ", selectedItem)
@@ -2552,7 +2588,7 @@ local function getItem(bring: boolean)
 		toggleAntiVoid(false)
 
 		if chair then
-			setCanCollide(chair, true)
+			--setCanCollide(chair, true)
 		end
 
 		root.CFrame = lastCF
@@ -2902,35 +2938,36 @@ AutoWins.MouseButton1Click:Connect(function()
 		wait()
 	until Baseplates:FindFirstChild("FinalBasePlate")
 	local attempts = 0
-	local maxAttempts = 3
-	local function fireCrank()
-		for _, prompt: ProximityPrompt in pairs(Baseplates.FinalBasePlate:GetDescendants()) do
-			if prompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
-				prompt.RequiresLineOfSight = false
-				prompt.HoldDuration = 0
-				prompt.MaxActivationDistance = math.huge
-
-				prompt.PromptButtonHoldBegan:Once(function()
-					if fireproximityprompt then
-						fireproximityprompt(prompt)
-					else
-						prompt:InputHoldBegin()
-						wait(.1)
-						prompt:InputHoldEnd()
-					end
-				end)
-
-				prompt:InputHoldBegin()
-				break
-			else
-				if attempts >= maxAttempts then
-					break
-				end
-				attempts += 1
-				fireCrank()
-			end
+	local maxAttempts = 10
+	local prompt : ProximityPrompt = nil 
+	
+	for _, endprompt: ProximityPrompt in pairs(Baseplates.FinalBasePlate:GetDescendants()) do
+		if endprompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
+			prompt = endprompt
 		end
 	end
+	
+	prompt.Triggered:Once(function()
+		attempts = maxAttempts
+	end)
+	
+	while attempts < maxAttempts do
+		attempts += 1
+		prompt.RequiresLineOfSight = false
+		prompt.HoldDuration = 0
+		prompt.MaxActivationDistance = math.huge
+		prompt.Enabled = true
+
+		if fireproximityprompt then
+			fireproximityprompt(prompt)
+		else
+			prompt:InputHoldBegin()
+			wait(.1)
+			prompt:InputHoldEnd()
+		end
+		wait(.1)
+	end
+	
 	root.CFrame = CFrame.new(lastPos)
 	root.Velocity = Vector3.new(0,0,0)
 	root.AssemblyLinearVelocity = Vector3.new(0,0,0)
@@ -3012,8 +3049,6 @@ Antiafk.MouseButton1Click:Connect(function()
 	antiAfk()
 end)
 Flyspeed.FocusLost:Connect(function(enterPressed)
-	if not enterPressed then return end
-
 	local clean = Flyspeed.Text:gsub('%D+', '')
 	local num = tonumber(clean)
 	if num and num > 0 then
@@ -3032,11 +3067,11 @@ Fly.MouseButton1Click:Connect(function()
 		if not Memory.Seat and not teleportDb then 
 			ownChair()
 		end
-		
+
 		if Memory.Seat.Anchored then
 			Memory.Seat.Anchored = false
 		end
-		
+
 		if not hum.Sit then
 			Memory.Seat:Sit(hum)
 		end
@@ -3081,4 +3116,6 @@ end)
 
 handleEsp("DraggableObject")
 handleEsp("Enemy")
+handleEsp("NotDestroyedBuilding")
+handleEsp("DestroyedBuilding")
 RunService.RenderStepped:Connect(updateEspUI)
