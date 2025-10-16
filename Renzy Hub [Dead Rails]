@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.222"
+local ScVer = "v1.23"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1413,6 +1413,7 @@ local Items = {
 	"Crossbow",
 	"Blunderbuss",
 	"Teapot",
+	"LonginusSpear",
 }
 local Destinations = {	"Train",		"FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",		"79km", "EvilChurch", "OutlawCamp", "StillwaterPrison", "AbandonedMine"}
 local rareItems = {
@@ -1420,7 +1421,7 @@ local rareItems = {
 	"Model_Tesla"
 }
 local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip"}
-local Trains = {		"armor",	"cattle",	"default",	"golden"}
+local Trains = {		"armor",	"cattle",	"default",	"golden", "ghost", "passenger", "presidential", "wooden",}
 local EspColor = {
 	["Corpse"] = Color3.fromRGB(0, 170, 255),
 	["Item"] = Color3.fromRGB(255, 255, 255),
@@ -1768,7 +1769,6 @@ local function updateEspUI()
 				info.ui.TextLabel.Text = model.Name .. " | " .. "Combo: " .. tostring(model.Vault.Combination.Value)
 				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
 				overrideColor = true
-				info.ui.Enabled = true
 			elseif table.find(rareItems, model.Name) then
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
 				info.ui.TextLabel.TextColor3 = EspColor.RareItem
@@ -1793,8 +1793,13 @@ local function updateEspUI()
 				end
 				info.ui.Enabled = Var.espVar.mobsEsp
 			else
-				info.ui.TextLabel.TextColor3 = EspColor.Item
-				info.ui.Enabled = Var.espVar.itemsEsp
+				if model.Name == "Bank" or model.Name == "BankDestroyed" then
+					info.ui.TextLabel.TextColor3 = EspColor.BankCombo
+					info.ui.Enabled = true
+				else
+					info.ui.TextLabel.TextColor3 = EspColor.Item
+					info.ui.Enabled = Var.espVar.itemsEsp
+				end
 			end
 		end)
 	end
@@ -1809,17 +1814,19 @@ local function createEsp(model: Model)
 	hightlight.Parent = espFol
 	hightlight.Name = model.Name
 	hightlight.Adornee = model
-	if model.Name == "Bank" or model.Name == "BankDestroyed" then
-		hightlight.FillTransparency = 0.9
-		hightlight.OutlineTransparency = 0.9
-		hightlight.FillColor = EspColor.BankCombo
-	end
 	local espUI = BillboardUI:Clone()
 	espUI.Parent = espFol
 	espUI.Name = model.Name
 	espUI.Adornee = model
 	local dist = (model:GetPivot().Position - root.Position).Magnitude
 	espUI.TextLabel.Text = model.Name .. " | " .. tostring(dist)
+	if model.Name == "Bank" or model.Name == "BankDestroyed" then
+		hightlight.FillTransparency = 0.9
+		hightlight.OutlineTransparency = 0.9
+		hightlight.FillColor = EspColor.BankCombo
+		espUI.Size = UDim2.new(0, 100, 0, 50)
+		espUI.StudsOffset = Vector3.new(0, 10, 0)
+	end
 
 	EspInstances[model] = {highlight = hightlight, ui = espUI}
 end
@@ -2206,7 +2213,7 @@ local function ownChair(targetPos: Vector3?)
 	unfly()
 	hum.Sit = false
 	hum:ChangeState(Enum.HumanoidStateType.Running)
-	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 1)
+	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 0.5)
 	if MaximGun == nil then
 		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
 	end
@@ -2217,9 +2224,8 @@ local function ownChair(targetPos: Vector3?)
 	end
 	Memory.Seat = seat
 	seat:Sit(hum)
-	wait(1)
-	setCamZoom("Normal")
 	seat.HeadsUpDisplay = false
+	wait(.5)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
 	else
@@ -3067,8 +3073,10 @@ end)
 Fly.MouseButton1Click:Connect(function()
 	Var.localPlayer.fly = not Var.localPlayer.fly
 	if Var.localPlayer.fly then
+		
 		if not Memory.Seat and not teleportDb then 
-			ownChair()
+			lastPos = root.Position
+			ownChair(lastPos)
 		end
 
 		if Memory.Seat.Anchored then
@@ -3078,7 +3086,8 @@ Fly.MouseButton1Click:Connect(function()
 		if not hum.Sit then
 			Memory.Seat:Sit(hum)
 		end
-
+		
+		setCamZoom("Normal")
 		fly(Var.localPlayer.flySpeed)
 	else
 		unfly()
