@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.22"
+local ScVer = "v1.221"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -1764,8 +1764,10 @@ local function updateEspUI()
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist) .. " m | " .. model.BankCombo.SurfaceGui.TextLabel.Text
 				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
 				overrideColor = true
-			elseif string.lower(model.Name):match("bank") then
+			elseif model.Name == "Bank" or model.Name == "BankDestroyed" then
 				info.ui.TextLabel.Text = model.Name .. " | " .. "Combo: " .. tostring(model.Vault.Combination.Value)
+				info.ui.TextLabel.TextColor3 = EspColor.BankCombo
+				overrideColor = true
 			elseif table.find(rareItems, model.Name) then
 				info.ui.TextLabel.Text = model.Name .. " | " .. tostring(dist)
 				info.ui.TextLabel.TextColor3 = EspColor.RareItem
@@ -1806,7 +1808,7 @@ local function createEsp(model: Model)
 	hightlight.Parent = espFol
 	hightlight.Name = model.Name
 	hightlight.Adornee = model
-	if string.lower(model.Name):match("bank") then
+	if model.Name == "Bank" or model.Name == "BankDestroyed" then
 		hightlight.FillTransparency = 0.15
 		hightlight.OutlineTransparency = 0.15
 	end
@@ -2214,9 +2216,9 @@ local function ownChair(targetPos: Vector3?)
 	Memory.Seat = seat
 	seat:Sit(hum)
 	wait(1)
-	fly(Var.localPlayer.flySpeed)
 	setCamZoom("Normal")
 	seat.HeadsUpDisplay = false
+	fly(Var.localPlayer.flySpeed)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
 	else
@@ -2920,7 +2922,7 @@ AutoBonds.MouseButton1Click:Connect(function()
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/Renzy9967/WHOEVERMOVEFIRSTISGAY./refs/heads/main/Auto-Bonds'))()
 end)
 AutoWins.MouseButton1Click:Connect(function()
-	if crankTimer > 0 and crankDB then return end
+	--if crankTimer > 0 and crankDB then return end
 	if teleportDb then return end
 	crankDB = true
 	teleportDb = true
@@ -3107,7 +3109,7 @@ task.spawn(function()
 	for i = crankTimer, 0, -1 do
 		local minutes = math.floor(i / 60)
 		local seconds = i % 60
-		local text = string.format("%02d:%02d", minutes, seconds)
+		local text = string.format("Please wait: %02d:%02d", minutes, seconds)
 		Title_6.Text = text
 		crankTimer = i
 		wait(1)
