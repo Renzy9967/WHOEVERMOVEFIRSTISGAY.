@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.241"
+local ScVer = "v1.245"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2159,8 +2159,10 @@ local function teleportDestination(Destinationarg)
 			local foundModel = getNearestItem(selectedDestination, path)
 
 			if foundModel then
+root.Anchored = true
+wait(.25)
 				root.CFrame = foundModel:GetPivot()
-				wait(.1)
+wait(.1)
 				if selectedDestination == "Farm" then
 					local floor = foundModel:FindFirstChild("Floor")
 					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
@@ -2231,20 +2233,23 @@ local function ownChair(targetPos: Vector3?)
 	if MaximGun == nil then
 		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
 	end
+root.Anchored = true
+wait(.1)
 	root.CFrame = MaximGun:GetPivot()
-	wait()
+hum:ChangeState(Enum.HumanoidStateType.Running)
+	wait(.25)
 	local seat = MaximGun.VehicleSeat
 	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
 	if weldConstraint then
 		weldConstraint:Destroy()
 	end
+root.Anchored = false
 	Memory.Seat = seat
 	seat:Sit(hum)
 	seat.HeadsUpDisplay = false
-	hum.Sit = false
-	hum:ChangeState(Enum.HumanoidStateType.Running)
+	--[[hum.Sit = false
 	wait(.1)
-	Memory.Seat:Sit(hum)
+	Memory.Seat:Sit(hum)]]
 	wait()
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
@@ -2496,15 +2501,17 @@ local function getItem(bring: boolean)
 			local count = 0
 
 			local function dropAllItems()
+root.Anchored = true
 				root.CFrame = lastCF
 				root.Velocity = Vector3.new(0, 0, 0)
 				root.AssemblyLinearVelocity = Vector3.new(0,0,0)
 				wait(1)
-				for _ = 1, 10 do
+				for _ = 1, 15 do
 					root.CFrame = lastCF
 					root.Velocity = Vector3.new(0,0,0)
 					root.AssemblyLinearVelocity = Vector3.new(0,0,0)
 					dropItemNetwork:FireServer()
+task.wait()
 				end
 			end
 
@@ -2961,19 +2968,24 @@ AutoWins.MouseButton1Click:Connect(function()
 			return
 		end
 	end
-	while not Baseplates:FindFirstChild("Baseplate39") do
-		root.CFrame = CFrame.new(crankPos)
-		wait(.1)
-	end
+	
 	local attempts = 0
 	local maxAttempts = 10
 	local prompt : ProximityPrompt = nil 
-	
-	for _, endprompt: ProximityPrompt in pairs(Baseplates.Baseplate39:GetDescendants()) do
+local foundPrompt = false
+
+while not foundPrompt do
+		root.CFrame = CFrame.new(crankPos)
+		
+for _, endprompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
 		if endprompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
 			prompt = endprompt
+foundPrompt = true
+break
 		end
 	end
+wait(1)
+end
 	
 	prompt.Triggered:Once(function()
 		attempts = maxAttempts
@@ -2987,6 +2999,7 @@ AutoWins.MouseButton1Click:Connect(function()
 		prompt.Enabled = true
 
 		if fireproximityprompt then
+prompt:InputHoldBegin()
 			fireproximityprompt(prompt)
 		else
 			prompt:InputHoldBegin()
@@ -3092,7 +3105,7 @@ end)
 Fly.MouseButton1Click:Connect(function()
 	Var.localPlayer.fly = not Var.localPlayer.fly
 	if Var.localPlayer.fly then
-		fly(Var.localPlayer.flySpeed)
+if not Memory.Seat and teleportDb then return end
 		if not Memory.Seat and not teleportDb then 
 			lastPos = root.Position
 			ownChair(lastPos)
@@ -3106,7 +3119,9 @@ Fly.MouseButton1Click:Connect(function()
 			Memory.Seat.CFrame = root.CFrame
 			Memory.Seat:Sit(hum)
 		end
-		wait()
+wait()
+fly(Var.localPlayer.flySpeed)
+		wait(1)
 		setCamZoom("Normal")
 	else
 		unfly()
