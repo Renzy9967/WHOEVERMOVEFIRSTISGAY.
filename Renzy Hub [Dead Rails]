@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.247"
+local ScVer = "v1.25"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2231,7 +2231,8 @@ local function ownChair(targetPos: Vector3?)
 	--hum:ChangeState(Enum.HumanoidStateType.Running)
 	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 0.5)
 	if MaximGun == nil then
-		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
+		searchItem("MaximGun", workspace.RuntimeItems, start, 250)
+		MaximGun = workspace.RuntimeItems:FindFirstChild("MaximGun")
 	end
 	root.CFrame = MaximGun:GetPivot()
 	wait()
