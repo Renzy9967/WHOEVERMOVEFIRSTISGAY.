@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.245"
+local ScVer = "v1.246"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2233,23 +2233,20 @@ local function ownChair(targetPos: Vector3?)
 	if MaximGun == nil then
 		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
 	end
-root.Anchored = true
-wait(.1)
 	root.CFrame = MaximGun:GetPivot()
-hum:ChangeState(Enum.HumanoidStateType.Running)
-	wait(.25)
+wait()
 	local seat = MaximGun.VehicleSeat
 	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
 	if weldConstraint then
 		weldConstraint:Destroy()
 	end
-root.Anchored = false
 	Memory.Seat = seat
 	seat:Sit(hum)
 	seat.HeadsUpDisplay = false
-	--[[hum.Sit = false
-	wait(.1)
-	Memory.Seat:Sit(hum)]]
+wait(.25
+	hum.Sit = false
+	wait(.25)
+	seat:Sit(hum)
 	wait()
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
