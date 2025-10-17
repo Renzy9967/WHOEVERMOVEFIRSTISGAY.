@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.26"
+local ScVer = "v1.27"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2243,12 +2243,12 @@ local function ownChair(targetPos: Vector3?)
 	end
 	Memory.Seat = seat
 	seat:Sit(hum)
-	seat.HeadsUpDisplay = false
 	wait(1)
 	hum.Sit = false
-	wait(.3)
+	seat.HeadsUpDisplay = false
+	wait(.5)
 	seat:Sit(hum)
-	wait(.3)
+	wait(.5)
 	if targetPos then
 		root.CFrame = CFrame.new(targetPos)
 	else
@@ -2504,7 +2504,7 @@ local function getItem(bring: boolean)
 				root.Velocity = Vector3.new(0, 0, 0)
 				root.AssemblyLinearVelocity = Vector3.new(0,0,0)
 				wait(1)
-				for _ = 1, 15 do
+				for _ = 1, 10 do
 					root.CFrame = lastCF
 					root.Velocity = Vector3.new(0,0,0)
 					root.AssemblyLinearVelocity = Vector3.new(0,0,0)
@@ -2518,7 +2518,7 @@ local function getItem(bring: boolean)
 				print("bringing ", selectedItem)
 				for i = 1, #scannedItems do
 					if Var.getItemVar.cancelGetItem then break end
-					root.CFrame = scannedItems[i]:GetPivot()
+					root.CFrame = scannedItems[i]:GetPivot() * CFrame.new(0, -4, 0)
 
 					local foundItem = scannedItems[i]
 					if foundItem and not collectedItems[foundItem] then
@@ -2577,7 +2577,7 @@ local function getItem(bring: boolean)
 
 					if foundItem then
 						foundItem.PrimaryPart = foundItem.PrimaryPart or foundItem:FindFirstChildWhichIsA("BasePart")
-						root.CFrame = CFrame.new(foundItem.PrimaryPart.Position) * CFrame.new(0, -6, 0)
+						root.CFrame = foundItem:GetPivot() * CFrame.new(0, -4, 0)
 						local tik = 0
 
 						if selectedMode == "Store" then
