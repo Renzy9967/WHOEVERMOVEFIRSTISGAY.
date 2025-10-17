@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.246"
+local ScVer = "v1.247"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2059,7 +2059,7 @@ end
 
 local function teleportDestination(Destinationarg)
 	--if Destinationarg ~= nil then assert(typeof(Destination) == "string", "Destination must be string!") end
-		local selected = Destinationarg ~= nil and Destinationarg or Var.teleportVar.selectedDestination
+	local selected = Destinationarg ~= nil and Destinationarg or Var.teleportVar.selectedDestination
 	if not table.find(Destinations, selected) or
 		teleportDb then
 		return
@@ -2153,16 +2153,16 @@ local function teleportDestination(Destinationarg)
 				end
 				return
 			end
-			
+
 			local rootPos = root.Position
 			searchItem(selectedDestination, path, Vector3.new(rootPos.X, start.Y, rootPos.Z), 150, 2)
 			local foundModel = getNearestItem(selectedDestination, path)
 
 			if foundModel then
-root.Anchored = true
-wait(.25)
+				root.Anchored = true
+				wait(.25)
 				root.CFrame = foundModel:GetPivot()
-wait(.1)
+				wait(.1)
 				if selectedDestination == "Farm" then
 					local floor = foundModel:FindFirstChild("Floor")
 					root.CFrame = floor.CFrame * CFrame.new(0, 0, -30)
@@ -2234,7 +2234,7 @@ local function ownChair(targetPos: Vector3?)
 		MaximGun = searchItem("MaximGun", workspace.RuntimeItems, start, 250)
 	end
 	root.CFrame = MaximGun:GetPivot()
-wait()
+	wait()
 	local seat = MaximGun.VehicleSeat
 	local weldConstraint = seat:FindFirstChildWhichIsA("WeldConstraint")
 	if weldConstraint then
@@ -2243,17 +2243,17 @@ wait()
 	Memory.Seat = seat
 	seat:Sit(hum)
 	seat.HeadsUpDisplay = false
-wait(.25
-	hum.Sit = false
 	wait(.25)
-	seat:Sit(hum)
-	wait()
-	if targetPos then
-		root.CFrame = CFrame.new(targetPos)
-	else
-		root.CFrame = CFrame.new(lastPos)
-	end
-	return true
+		hum.Sit = false
+		wait(.25)
+		seat:Sit(hum)
+		wait()
+		if targetPos then
+			root.CFrame = CFrame.new(targetPos)
+		else
+			root.CFrame = CFrame.new(lastPos)
+		end
+		return true
 end
 
 local function handleUnicorn(path)
@@ -2498,7 +2498,7 @@ local function getItem(bring: boolean)
 			local count = 0
 
 			local function dropAllItems()
-root.Anchored = true
+				root.Anchored = true
 				root.CFrame = lastCF
 				root.Velocity = Vector3.new(0, 0, 0)
 				root.AssemblyLinearVelocity = Vector3.new(0,0,0)
@@ -2508,7 +2508,7 @@ root.Anchored = true
 					root.Velocity = Vector3.new(0,0,0)
 					root.AssemblyLinearVelocity = Vector3.new(0,0,0)
 					dropItemNetwork:FireServer()
-task.wait()
+					task.wait()
 				end
 			end
 
@@ -2965,29 +2965,29 @@ AutoWins.MouseButton1Click:Connect(function()
 			return
 		end
 	end
-	
+
 	local attempts = 0
 	local maxAttempts = 10
 	local prompt : ProximityPrompt = nil 
-local foundPrompt = false
+	local foundPrompt = false
 
-while not foundPrompt do
+	while not foundPrompt do
 		root.CFrame = CFrame.new(crankPos)
-		
-for _, endprompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
-		if endprompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
-			prompt = endprompt
-foundPrompt = true
-break
+
+		for _, endprompt: ProximityPrompt in pairs(Baseplates:GetDescendants()) do
+			if endprompt:IsA("ProximityPrompt") and prompt.Name == "EndGame" then
+				prompt = endprompt
+				foundPrompt = true
+				break
+			end
 		end
+		wait(1)
 	end
-wait(1)
-end
-	
+
 	prompt.Triggered:Once(function()
 		attempts = maxAttempts
 	end)
-	
+
 	while attempts < maxAttempts do
 		attempts += 1
 		prompt.RequiresLineOfSight = false
@@ -2996,7 +2996,7 @@ end
 		prompt.Enabled = true
 
 		if fireproximityprompt then
-prompt:InputHoldBegin()
+			prompt:InputHoldBegin()
 			fireproximityprompt(prompt)
 		else
 			prompt:InputHoldBegin()
@@ -3005,7 +3005,7 @@ prompt:InputHoldBegin()
 		end
 		wait(.1)
 	end
-	
+
 	root.CFrame = CFrame.new(lastPos)
 	root.Velocity = Vector3.new(0,0,0)
 	root.AssemblyLinearVelocity = Vector3.new(0,0,0)
@@ -3102,7 +3102,7 @@ end)
 Fly.MouseButton1Click:Connect(function()
 	Var.localPlayer.fly = not Var.localPlayer.fly
 	if Var.localPlayer.fly then
-if not Memory.Seat and teleportDb then return end
+		if not Memory.Seat and teleportDb then return end
 		if not Memory.Seat and not teleportDb then 
 			lastPos = root.Position
 			ownChair(lastPos)
@@ -3116,8 +3116,8 @@ if not Memory.Seat and teleportDb then return end
 			Memory.Seat.CFrame = root.CFrame
 			Memory.Seat:Sit(hum)
 		end
-wait()
-fly(Var.localPlayer.flySpeed)
+		wait()
+		fly(Var.localPlayer.flySpeed)
 		wait(1)
 		setCamZoom("Normal")
 	else
