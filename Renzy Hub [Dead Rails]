@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.27"
+local ScVer = "v1.3"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2194,6 +2194,7 @@ local function teleportDestination(Destinationarg)
 						Memory[selectedDestination] = goalCF.Position
 					end
 				end
+				root.Anchored = false
 			end
 		end)
 
@@ -2499,7 +2500,6 @@ local function getItem(bring: boolean)
 			local count = 0
 
 			local function dropAllItems()
-				root.Anchored = true
 				root.CFrame = lastCF
 				root.Velocity = Vector3.new(0, 0, 0)
 				root.AssemblyLinearVelocity = Vector3.new(0,0,0)
@@ -2982,6 +2982,7 @@ AutoWins.MouseButton1Click:Connect(function()
 				break
 			end
 		end
+		
 		wait(1)
 	end
 
