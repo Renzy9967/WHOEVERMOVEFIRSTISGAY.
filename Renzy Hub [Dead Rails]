@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.25"
+local ScVer = "v1.26"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2244,17 +2244,17 @@ local function ownChair(targetPos: Vector3?)
 	Memory.Seat = seat
 	seat:Sit(hum)
 	seat.HeadsUpDisplay = false
-	wait(.25)
-		hum.Sit = false
-		wait(.25)
-		seat:Sit(hum)
-		wait()
-		if targetPos then
-			root.CFrame = CFrame.new(targetPos)
-		else
-			root.CFrame = CFrame.new(lastPos)
-		end
-		return true
+	wait(1)
+	hum.Sit = false
+	wait(.3)
+	seat:Sit(hum)
+	wait(.3)
+	if targetPos then
+		root.CFrame = CFrame.new(targetPos)
+	else
+		root.CFrame = CFrame.new(lastPos)
+	end
+	return true
 end
 
 local function handleUnicorn(path)
