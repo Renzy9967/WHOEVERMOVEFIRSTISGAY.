@@ -1367,7 +1367,6 @@ local Items = {
 	"Bandage",
 	"Sheet Metal",
 	"LightningRod",
-	"Barbed Wire",
 	"Tumbleweed",
 	"GoldPocketWatch",
 	"GoldStatue",
@@ -1377,8 +1376,7 @@ local Items = {
 	"GoldCup",
 	"GoldBar",
 	"SilverBar",
-	"WoodenPainting",
-	"StoneStatue",
+	"Painting",
 	"Banjo",
 	"Torso_Armor",
 	"Right Arm_Armor",
@@ -1390,7 +1388,6 @@ local Items = {
 	"JadeTablet4",
 	"RifleAmmo",
 	"RevolverAmmo",
-	"ShotgunAmmo",
 	"JadeTablet3",
 	"JadeTablet4",
 	"OpenableCrate",
@@ -1413,15 +1410,42 @@ local Items = {
 	"Crossbow",
 	"Blunderbuss",
 	"Teapot",
-	"LonginusSpear",
+ "ArrowAmmo", 
+ "Ballista", 
+ "Elephant Rifle", 
+ "FireworkAmmo", 
+ "Springfield", 
+ "ShotgunShells", 
+ "Landmine", 
+ "Flintlock", 
+ "Model_Horse", 
+ "GlassBottle", 
+ "AcidMine", 
+ "Barrel", 
+ "Revolver Rifle", 
+ "Statue", 
+ "VaseTwo", 
+ "Model_Wolf",
+ "AcidBarrel", 
+ "BarbedWire", 
+ "BallistaBolts", 
+ "BottleRocketLauncher", 
+ "LeftWerewolfLeg", 
+ "RightWerewolfLeg", 
+ "LeftWerewolfArm",
+ "RightWerewolfArm", 
+ "WerewolfTorso", 
+ "CannonBalls", 
+ "LincolnsTopHat",
+ "ChallengePumpkin",
 }
-local Destinations = {	"Train", "0km",	 "79km", "FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",	 "EvilChurch", "OutlawCamp", "StillwaterPrison", "AbandonedMine"}
+local Destinations = {	"Train", "0km",	 "79km", "FortConstitution",	"Sterling",	"VampireCastle",		"TeslaLab",	"Farm",		"StrangePyramid",	 "EvilChurch", "OutlawCamp", "StillwaterPrison", "AbandonedMine", "LincolnsTrainPOI"}
 local rareItems = {
 	"Model_Unicorn",
 	"Model_Tesla"
 }
-local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip"}
-local Trains = {		"armor",	"cattle",	"default",	"golden", "ghost", "passenger", "presidential", "wooden",}
+local ItemModes = {	"Collect",	"Store",	"PickUp", "Equip", "Teleport"}
+local Trains = {		"armor",	"cattle",	"default",	"golden", "ghost", "passenger", "presidential", "wooden", "dracula",}
 local EspColor = {
 	["Corpse"] = Color3.fromRGB(0, 170, 255),
 	["Item"] = Color3.fromRGB(255, 255, 255),
@@ -2023,20 +2047,13 @@ local function equipSack()
 end
 
 local function teleportToTrain()
-	if not workspace:FindFirstChild(train.Name) then
-		root.CFrame = train:GetPivot() * CFrame.new(0,20,0)
-	end
-	if trainSeat.Occupant == nil then
+	if not train and not trainSeat then return end
+		
+	if trainSeat and trainSeat.Occupant == nil then
 		if Var.localPlayer.fly and Memory.Seat then
-			Var.localPlayer.fly = false
-			Memory.Seat.Anchored = true
-			if hum.Sit then
-				hum.Sit = false
-				wait(.2)
-			end
-			unfly()
+			root.CFrame = train:GetPivot() * CFrame.new(0,20,0)
 		end
-		trainSeat:Sit(hum)
+		--trainSeat:Sit(hum)
 		return true
 	else
 		if not Var.localPlayer.fly then
@@ -2227,9 +2244,9 @@ local function setCamZoom(mode: "Normal" | "Lock")
 end
 
 local function ownChair(targetPos: Vector3?)
-	if Memory.Seat ~= nil then if Memory.Seat.Anchored then Memory.Seat.Anchored = false end Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
+	if Memory.Seat ~= nil then if Memory.Seat.Parent ~= nil and Memory.Seat.Anchored then Memory.Seat.Anchored = false end Memory.Seat:Sit(hum) if not flying then fly(Var.localPlayer.flySpeed) end return end
 	hum.Sit = false
-	--hum:ChangeState(Enum.HumanoidStateType.Running)
+	hum:ChangeState(Enum.HumanoidStateType.Running)
 	local MaximGun = workspace.RuntimeItems:WaitForChild("MaximGun", 0.5)
 	if MaximGun == nil then
 		searchItem("MaximGun", workspace.RuntimeItems, start, 250)
@@ -2496,6 +2513,10 @@ local function getItem(bring: boolean)
 				end
 			end
 
+ if not hum.Sit then
+  ownChair()
+ end
+
 			chair = Memory.Seat
 			local count = 0
 
@@ -2589,6 +2610,8 @@ local function getItem(bring: boolean)
 							pickUpNetwork:FireServer(foundItem)
 						elseif selectedMode == "Equip" then
 							equipArmorNetwork:FireServer(foundItem)
+   elseif selectedMode == "Teleport" then
+							root.CFrame = foundItem:GetPivot() * CFrame.new(0, -4, 0)
 						end
 
 						while foundItem.Parent and tik < 5 do
@@ -2604,6 +2627,9 @@ local function getItem(bring: boolean)
 								pickUpNetwork:FireServer(foundItem)
 							elseif selectedMode == "Equip" then
 								equipArmorNetwork:FireServer(foundItem)
+   elseif selectedMode == "Teleport" then
+							root.CFrame = foundItem:GetPivot() * CFrame.new(0, -4, 0)
+   break
 							end
 							tik += 0.1
 							wait(0.01)
@@ -2868,7 +2894,7 @@ end
 
 for _, v in pairs(Trains) do
 	if workspace:FindFirstChild(v) then
-		train = workspace:FindFirstChild(v)
+		train = workspace.v
 		trainSeat = train.RequiredComponents.Controls.ConductorSeat:FindFirstChildWhichIsA("VehicleSeat")
 		break
 	end
