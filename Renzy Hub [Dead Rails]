@@ -1,6 +1,6 @@
 local PlaceId = 116495829188952
 local GameId = 70876832253163
-local ScVer = "v1.5"
+local ScVer = "v1.52"
 local Players = game:GetService("Players")
 local CP = game:GetService("ContentProvider")
 local CS = game:GetService("CollectionService")
@@ -2893,8 +2893,9 @@ for _, box in ipairs(allTextBoxes) do
 end
 
 for _, v in pairs(Trains) do
-	if workspace:FindFirstChild(v) then
-		train = workspace.v
+   local foundTrain = workspace:FindFirstChild(v)
+	if foundTrain then
+		train = foundTrain
 		trainSeat = train.RequiredComponents.Controls.ConductorSeat:FindFirstChildWhichIsA("VehicleSeat")
 		break
 	end
